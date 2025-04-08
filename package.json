@@ -16,7 +16,6 @@
     "drizzle-orm": "^0.41.0",
     "ethers": "^6.13.5",
     "groq-sdk": "^0.19.0",
-    "kbar": "^0.1.0-beta.45",
     "next": "15.2.4",
     "next-auth": "^5.0.0-beta.25",
     "octokit": "^4.1.2",
