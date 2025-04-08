@@ -1,0 +1,55 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1743606594758,
+      "tag": "0000_conscious_rachel_grey",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1743784406454,
+      "tag": "0001_rapid_ben_parker",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1743958289322,
+      "tag": "0002_cheerful_speed",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1743958415494,
+      "tag": "0003_kind_wong",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1743974506191,
+      "tag": "0004_opposite_hedge_knight",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1744025693216,
+      "tag": "0005_fantastic_harry_osborn",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1744025830099,
+      "tag": "0006_green_tyger_tiger",
+      "breakpoints": true
+    }
+  ]
+}

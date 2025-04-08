@@ -1,0 +1,1 @@
+ALTER TABLE "assignIssues" ADD COLUMN "rewardAmount" varchar(256);
