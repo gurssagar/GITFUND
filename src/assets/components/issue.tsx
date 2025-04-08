@@ -4,7 +4,7 @@
 export default function Issue({image, Project, Fork, Stars, Contributors, shortDescription}: {image: string, Project: string, Fork: number, Stars: number, Contributors: number, shortDescription: string}){
     return(
         <>
-        <div className="p-4 rounded border-1 border-gray-800">
+        <div className="p-4 rounded-xl border-1 border-gray-400 dark:border-gray-800">
             <div className="flex">
                 <div className="mr-4">
                     <img src={image} className="rounded" width={48} height={48} alt="avatar" />

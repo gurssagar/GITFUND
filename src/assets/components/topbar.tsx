@@ -1,7 +1,8 @@
 'use client'
 import { useSession } from 'next-auth/react';
 import { useState,useEffect } from 'react'
-import { signOut } from "../../../auth"
+
+import { signOut } from "next-auth/react"
 import Image from "next/image";
 import Link from 'next/link';
 import { useWeb3 } from "./web3Context";
@@ -17,7 +18,7 @@ export default function Topbar(  ) {
   },[session?.data?.user?.image])
   return(
     <>
-    <div className='bg-[#0a0a0a] fixed top-0 px-5 py-4 border-b-[1px] border-gray-600 w-[calc(100%_-_16rem)]'>
+    <div className=' dark:bg-[#0a0a0a] bg-white fixed top-0 px-5 py-4 border-b-[1px] border-gray-600 w-[calc(100%_-_16rem)]'>
                     <div className='flex justify-between'>
                         <div className='flex'>
                         <div className='pr-2 border-r-1 border-gray-800'>
@@ -29,24 +30,35 @@ export default function Topbar(  ) {
                             {account ? (
                                 <p>Connected: {account}</p>
                             ) : (
-                                <button onClick={connectWallet} className="px-4 py-2 bg-blue-600 text-white rounded">
+                                <button onClick={connectWallet} className="px-4 py-2 bg-gray-900 text-white rounded">
                                 Connect Wallet
                                 </button>
                             )}
+                            {
+                                session?.data?.user?.image?
+                                <>
+                                        <Image onClick={() =>{
+                                        setVisible(!visible)
+                                    }} src={image} alt="" width={26} height={26} className='rounded'></Image>
+                                </>:
+                                <>
+                                <Link href={`/Login`}>
+                                <button  className='px-4 py-1 text-[12px] rounded-lg text-black bg-white'>Login</button>
 
-                            <Image onClick={() =>{
-                                setVisible(!visible)
-                            }} src={image} alt="" width={26} height={26} className='rounded'></Image>
+                                </Link>
+                                </>
+                            }
+                            
                         </div>
                         {
                             visible ? 
                             <>
-                            <div className='fixed top-16 right-5 bg-black border-[1px] pl-4 pr-20 py-2 rounded-[10px] border-gray-700 text-bold'>
+                            <div className='fixed top-16 right-5 bg-white dark:bg-black border-[1px] pl-4 pr-20 py-2 rounded-[10px] dark:border-gray-700 text-bold'>
                                 <div><Link href={``} className='pb-1 text-[14px] pt-1'>Settings</Link></div>
                                 <div><Link  href={``} className='pb-1  text-[14px] pt-1'>Support</Link></div>
                                 <button 
-                                    className='pb-1 text-[14px] pt-1' 
-                                    onClick={() => signOut}
+                                    className='pb-1 text-[14px] pt-1 bg-black text-white dark:bg-white dark:text-black w-full rounded px-3 py-2 mt-2' 
+                                    onClick={() => signOut()}
                                 >
                                     Sign out
                                 </button>

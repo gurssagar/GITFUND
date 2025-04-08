@@ -107,7 +107,7 @@ const id = (session?.data?.user as SessionUser)?.username;
                         <Link 
                         type="submit"
                         href="/homepage"
-                        className="w-full flex text-black justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium bg-white hover:bg-white disabled:opacity-50"
+                        className="w-full flex text-white bg-black dark:text-black justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium dark:bg-white hover:bg-white disabled:opacity-50"
                     >
                         {isLoading ? 'Processing...' : 'Continue'}
                     </Link>
@@ -142,7 +142,7 @@ const id = (session?.data?.user as SessionUser)?.username;
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full flex text-black justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium bg-white hover:bg-white disabled:opacity-50"
+                        className="w-full flex text-white bg-black dark:text-black justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium dark:bg-white hover:bg-white disabled:opacity-50"
                         onClick={async (e) => {
                             await handleSignUp(e);
                             if (!isLoading) {
