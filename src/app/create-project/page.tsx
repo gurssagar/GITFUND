@@ -276,7 +276,7 @@ export default function Project() {
             <div className='flex'>
                 <Sidebar/>
                 <div className='w-[calc(100%_-_16rem)]'>
-                    <Topbar nav="create-project" />
+                    <Topbar />
                     <div className="mt-20 mx-auto justify-center">
                         <form onSubmit={addProject} className="max-w-[600px] border-1 border-gray-800 rounded-xl p-10 mx-auto space-y-4">
                             <div className="text-3xl mb-6">

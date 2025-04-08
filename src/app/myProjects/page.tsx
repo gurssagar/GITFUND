@@ -48,7 +48,7 @@ export default function MyProject() {  // Changed from myProject to MyProject
         <div className='flex'>
             <Sidebar/>
             <div className='w-[85%] mt-24'>
-                <Topbar nav={Issue}/>
+                <Topbar/>
                 <div className='grid grid-cols-3 gap-6 mx-10'>
                     {repoData.map((repo:any) => {
                         if (!repo.image_url?.trim()) return null;

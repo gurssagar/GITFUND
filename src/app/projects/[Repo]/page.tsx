@@ -301,7 +301,7 @@ export default function Project() {
             <div className='flex'>
             <Sidebar/>
             <div className='w-[85%]'>
-                <Topbar nav="projects"/>
+                <Topbar/>
                 <div className="px-4 py-8 flex pt-20">
                     <div className="w-[300px]">
                         <div>

@@ -67,7 +67,7 @@ export default function AssignIssues() {
         <div className='flex'>
             <Sidebar/>
             <div className='w-[85%] mt-24'>
-                <Topbar nav={Issue}/>
+                <Topbar />
                 <div className='grid grid-cols-3 gap-6 mx-10'>
                     {assignments.map((assignment: any) => (
                        // ... existing code ...

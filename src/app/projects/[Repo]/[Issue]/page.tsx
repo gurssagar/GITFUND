@@ -79,7 +79,7 @@ const IssueCommentForm = () => {
         <div className='flex'>
             <Sidebar/>
             <div className='w-[85%]'>
-                <Topbar nav={Issue}/>
+                <Topbar/>
                 <div className='flex'>
                 <div className='w-[85%]'>
                 <div className="mt-20 mx-auto w-[calc(100%_-_16rem)] justify-center">

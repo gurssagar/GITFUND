@@ -5,7 +5,7 @@ import { signOut } from "../../../auth"
 import Image from "next/image";
 import Link from 'next/link';
 import { useWeb3 } from "./web3Context";
-export default function Topbar( nav:any ) {
+export default function Topbar(  ) {
   const { account, connectWallet } = useWeb3();
   const session = useSession()
   const [visible, setVisible] = useState(false)
@@ -23,7 +23,7 @@ export default function Topbar( nav:any ) {
                         <div className='pr-2 border-r-1 border-gray-800'>
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path></svg>
                         </div>
-                        <p className='pl-4'> {nav}</p>
+                        <p className='pl-4'> </p>
                         </div>
                         <div className="flex space-x-4 ">
                             {account ? (
