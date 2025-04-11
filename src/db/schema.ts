@@ -19,7 +19,8 @@ export const projects = pgTable('projects', {
   project_issues:varchar('issues', { length: 256 }),
   contributors:json('maintainers'),
   rewardAmount: varchar('rewardAmount', { length: 256 }),
-
+  Difficulty: varchar('Difficulty', { length: 256 }),
+  priority: varchar('priority', { length: 256 }),
 });
 
 export const assignIssues = pgTable('assignIssues', {

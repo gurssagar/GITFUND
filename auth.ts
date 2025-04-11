@@ -9,7 +9,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     clientSecret: process.env.AUTH_GITHUB_SECRET,
     authorization: {
       params: {
-        scope: "read:user repo admin:repo_hook write:issues write:pull_requests read:pull_requests"  // 👈 important
+        scope: "read:user user:email repo admin:repo_hook write:issues write:pull_requests read:pull_requests"
       }
     }
   })],
@@ -17,12 +17,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       (session as any).accessToken = token.accessToken;
       (session.user as any).username = token.username;
+      (session.user as any).email = token.email || profile?.email;
       return session;
     },
     async jwt({ token, account, profile }) {
       if (account?.provider === "github") {
         token.accessToken = account.access_token;
         token.username = profile?.login;
+        token.email = profile?.email;
       }
       return token;
     },

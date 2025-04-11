@@ -228,7 +228,10 @@ export default function Project() {
                     image_url: imageUrl,
                     project_repository: selectedRepo,
                     project_issues: formData.get('projectIssue'),
-                    rewardAmount: rewardAmount
+                    difficulty:formData.get('difficulty'),
+                    priority:formData.get('priority'),
+                    rewardAmount: rewardAmount,
+                    email:(session.data as any)?.user?.email,
                 }),
             });
         } catch (error) {
@@ -303,6 +306,34 @@ export default function Project() {
                                 <input id="reward" name="reward" type="text" className="w-full p-2 border-1 border-gray-800 rounded-md"/>
                             </div>
                             <div className="space-y-2">
+                                <label className="text-[14px]" htmlFor="difficulty">Difficulty</label>
+                                <select 
+                                    id="difficulty" 
+                                    name="difficulty" 
+                                    className="bg-[#0a0a0a] w-full p-2 border-1 border-gray-800 rounded-md"
+                                    
+                                >
+                                    <option value="">Select difficulty</option>
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="hard">Hard</option>
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[14px]" htmlFor="priority">Priority</label>
+                                <select 
+                                    id="priority" 
+                                    name="priority" 
+                                    className="bg-[#0a0a0a] w-full p-2 border-1 border-gray-800 rounded-md"
+                                    
+                                >
+                                    <option value="">Select The Priority</option>
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="hard">Hard</option>
+                                </select>
+                            </div>
+                            <div className="space-y-2">
                                 <label className="text-[14px]" htmlFor="projectRepo">Project Repository</label>
                                 <select 
                                     id="projectRepo" 
@@ -314,6 +345,9 @@ export default function Project() {
                                     <option value="">Select a repository</option>
                                     {data?.map((repo: any) => (
                                         <option value={repo.name} key={repo.id}>
+                                        
+                                        
+                                        
                                             {repo.name}
                                         </option>
                                     ))}

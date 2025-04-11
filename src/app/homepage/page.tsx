@@ -101,7 +101,7 @@ export default function Home(){
                         <div>
                             <h1 className='pt-3 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r from-white to-gray-500 text-3xl font-bold'>Projects in your favorite languages </h1>
                             <p className='pt-2 dark:text-gray-400 text-[15px]'>Discover projects that match the languages you love to code in.</p>
-                            <div className=' py-5 grid grid-cols-3 space-x-6'>
+                            <div className=' py-5 grid grid-cols-3 gap-4'>
                             {
                                 isLoading?
                                 <>
