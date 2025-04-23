@@ -35,12 +35,15 @@ export default function Project() {
     const [projects, setProjects] = useState<any>([]);
     const [issues, setIssues] = useState<any>([]);
     const [repoValue,setRepoValue]=useState<any>([]);
-    
+    const [contributors, setContributors] = useState<any>([]);
     const octokit = new Octokit({
         auth: (session?.data as any)?.accessToken,
     });
     console.log(octokit)
     const [width, setWidth] = useState('300px');
+    
+
+
     
 
     const fetchWithRetry = async (fn: () => Promise<any>, retries = 3, delay = 1000) => {
@@ -128,6 +131,29 @@ export default function Project() {
 
 
     useEffect(() => {
+
+        const fetchContributors = async () => {
+            if (!projectData) return;
+            try {
+                const response = await octokit.request(`GET /repos/${projectData.projectOwner}/${projectData.project_repository}/contributors`,
+                        {
+                            owner:projectData.projectOwner,
+                            repo:projectData.project_repository,
+                            headers: {
+                                'X-GitHub-Api-Version': '2022-11-28'
+                            }
+                        } ).then(response => response.data).then(res => {
+                    console.log(res,'contributors')
+                    setContributors(res)
+                })
+                
+            } 
+            catch (error) {
+                console.error('Error fetching contributors:', error);
+                
+            }
+        }
+        fetchContributors();
         const fetchProjectData = async () => {
             if (!projectData) return;
 
@@ -300,7 +326,7 @@ export default function Project() {
             )}
             <div className='flex'>
             <Sidebar/>
-            <div className='w-[85%]'>
+            <div className='ml-[12em] w-[calc(100%_-_12em)]'>
                 <Topbar/>
                 <div className="px-4 py-8 flex pt-20">
                     <div className="w-[300px]">
@@ -337,7 +363,7 @@ export default function Project() {
                                 <h2 className="text-xl font-bold pt-4">Contributors</h2>
                                 <div className=" pt-2 space-x-2">
                                     <div className="flex space-x-2">
-                                    {projects[0]?.contributors?.collabs?.map((collab: any) => (
+                                    {contributors.map((collab: any) => (
                                         <div key={collab.id} className="flex items-center">
                                             <img 
                                                 src={collab.avatar_url} 
@@ -382,8 +408,24 @@ export default function Project() {
                                                 <div className="mt-2 p-4 border-gray-800 border-1 rounded-xl">
                                                 <div className="flex justify-between"> 
                                                     <div>
-                                                        <div className="flex justify-between">
+                                                        <div className="flex justify-between gap-2">
                                                         <h1 className="text-[18px] font-bold">{issue.title}</h1>
+                                                        
+                                                            
+                                                                <div className="flex gap-2">
+                                                                    
+                                                                    {projects[0].priority && (
+                                                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                                                            projects[0].priority.toLowerCase() === 'high' ? 'bg-red-100 text-red-800' :
+                                                                            projects[0].priority.toLowerCase() === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                                                                            'bg-green-100 text-green-800'
+                                                                        }`}>
+                                                                            {projects[0].priority}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            
+
                                                         <div className="flex ">
                                                        
                                                         </div>

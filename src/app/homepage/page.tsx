@@ -56,8 +56,8 @@ export default function Home(){
         <>
         
         <div className='flex'>
-            <Sidebar />
-            <div >
+            <Sidebar/>
+            <div className='ml-[12em] w-[calc(100%_-_12em)]'>
                 <Topbar/>
                 
                 <div className='flex pt-16'>

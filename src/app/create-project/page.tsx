@@ -42,6 +42,7 @@ export default function Project() {
                     }
                 });
                 setData(response.data);
+                console.log(response.data,"repois")
             } catch (error) {
                 console.error('Error fetching repositories:', error);
             }
@@ -268,6 +269,8 @@ export default function Project() {
     }
     fetchProjectData();
     },[session, user, selectedRepo, token]);
+
+    
     console.log(collabs,'collabs')
 
 
@@ -277,8 +280,8 @@ export default function Project() {
     return (
         <>
             <div className='flex'>
-                <Sidebar/>
-                <div className='w-[calc(100%_-_16rem)]'>
+            <Sidebar/>
+            <div className='ml-[12em] w-[calc(100%_-_12em)]'>
                     <Topbar />
                     <div className="mt-20 mx-auto justify-center">
                         <form onSubmit={addProject} className="max-w-[600px] border-1 border-gray-800 rounded-xl p-10 mx-auto space-y-4">

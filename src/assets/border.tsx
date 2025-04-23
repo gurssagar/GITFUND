@@ -1,11 +1,14 @@
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 const ShootingStarBorder = ({
   children,
   href,
+  onClick,
 }: {
   children: React.ReactNode;
   href: string;
+  onClick?: () => void;
 }) => {
   return (
     <Link
@@ -18,7 +21,15 @@ const ShootingStarBorder = ({
         </span>
       </span>
       <span className="backdrop absolute inset-[1px] rounded-full bg-[#1A1A1A] transition-colors duration-300 group-hover:bg-[#141414]" />
-      <span className="relative z-10 text-sm text-purple-300">{children}</span>
+      <motion.button 
+        className="relative z-10 w-full h-full flex items-center justify-center"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+        onClick={onClick}
+      >
+        <span className="text-sm text-purple-300">{children}</span>
+      </motion.button>
     </Link>
   );
 };

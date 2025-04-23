@@ -159,8 +159,8 @@ const handleWithdraw = async (rewardAmount: string) => {
     return(
         <>
         <div className='flex'>
-                <Sidebar/>
-                <div className='w-[85%]'>
+            <Sidebar/>
+            <div className='ml-[12em] w-[calc(100%_-_12em)]'>
                     <Topbar/>
                     <div className="px-4 py-8 pt-20">
                         <h1 className="text-2xl font-bold mb-6">Pull Requests for {repo}</h1>

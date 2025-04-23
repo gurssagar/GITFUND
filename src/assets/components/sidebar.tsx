@@ -5,8 +5,8 @@ import Link from 'next/link'
 
 export default function Sidebar() {
     return (
-        <>
-        <div className=' w-[16rem] h-screen border-r-[1px] border-gray-800 px-4 py-4'>
+        <div className='w-16'>
+        <div className=' w-[16rem] top-0 z-20  fixed h-screen border-r-[1px] border-gray-800 px-4 py-4'>
                 <Image className='dark:block hidden' src="/gitfund-white.webp" alt="Gitfund logo" width={100} height={100}></Image>
                 <Image className='dark:hidden block' src="/gitfund.webp" alt="Gitfund logo" width={100} height={100}></Image>
 
@@ -49,6 +49,6 @@ export default function Sidebar() {
                 </div>
                 </div>
             </div>
-        </>
+        </div>
     )
 }

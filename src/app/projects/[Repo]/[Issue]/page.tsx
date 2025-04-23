@@ -78,7 +78,7 @@ const IssueCommentForm = () => {
         
         <div className='flex'>
             <Sidebar/>
-            <div className='w-[85%]'>
+            <div className='ml-[12em] w-[calc(100%_-_12em)]'>
                 <Topbar/>
                 <div className='flex'>
                 <div className='w-[85%]'>

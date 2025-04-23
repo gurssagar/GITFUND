@@ -1,5 +1,9 @@
 "use client";
 
+
+import { useRef } from 'react';
+import { motion } from "motion/react"
+import GitHubIssueList from "../components/issue";
 import Image from "next/image";
 import Link from "next/link";
 import { useWeb3 } from "@/assets/components/web3Context";
@@ -67,6 +71,7 @@ export default function LandingPage() {
             </nav>
             <div className="flex items-center space-x-4">
               <MetaMaskButton />
+              
               <ShootingStarBorder href="/Login">Sign In</ShootingStarBorder>
             </div>
           </div>
@@ -78,65 +83,119 @@ export default function LandingPage() {
         {/* Background Image */}
         <div
           className="absolute inset-0 z-0"
-          style={{
-            backgroundImage:
-              'url("https://i.pinimg.com/474x/27/0e/3a/270e3aa5566b17aeb5be998c26bce222.jpg")',
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            opacity: 0.7,
-            mixBlendMode: "color-dodge",
-            filter: "brightness(0.8) contrast(1.2)",
-          }}
         />
 
-        <div className="relative z-10 max-w-6xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 text-center">
-            <span className="block">Open Source is tough, but it</span>
-            <span className="block">doesn't have to be.</span>
-          </h1>
-          <p className="text-lg md:text-xl text-gray-300 text-center max-w-3xl mx-auto mb-10">
-            Maintainers focus on code, contributors get rewarded, and projects
-            thrive. We're here to fix it.
-          </p>
-          <div className="flex justify-center">
-            <Link
-              href="/Login"
-              className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full text-lg font-medium hover:from-purple-700 hover:to-blue-600 transition-all"
-            >
-              Fund a Project
-            </Link>
+        <div className="flex  z-10 max-w-[90em] mx-auto">
+          <div className=''>
+          <div className='grid bg-black/05 backdrop-blur-xs rounded-xl p-4 grid-cols-4 gap-3 opacity-50'>
+            {Array.from({ length: 20 }).map((_, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 0.5, y: 0 }}
+                transition={{ 
+                  delay: Math.random() * 5, // Random delay between 0-2 seconds
+                  duration: 0.8, 
+                  ease: "easeOut" 
+                }}
+              >
+                <GitHubIssueList />
+              </motion.div>
+            ))}
+          </div>
+          <div className="absolute top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 text-4xl md:text-8xl font-bold mb-6 text-center w-full max-w-[35em]">
+            <motion.div initial={{scale:0.5,opacity:0}} animate={{scale:1,opacity:1}} transition={{ease:"easeOut",duration:2}}>
+              <h1>Stuck with</h1>
+              <h1>Github Issues</h1>
+            </motion.div>
+            <div className="flex justify-center gap-4 pt-10">
+              <motion.div
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay:3, ease: "easeOut", duration: 1 }}>
+                  <Link
+                  href="/Login"
+                  className="px-8 py-3 border bg-[#0a0a0a] border-1 border-white hover:bg-white hover:text-black rounded-full text-lg font-medium hover:from-purple-700 hover:to-blue-600 transition-all"
+                  >
+                    Lets Contribute
+                    </Link>
+                </motion.div>
+                <motion.div
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay:3, ease: "easeOut", duration: 1 }}>
+                  <Link
+                  href="/Login"
+                  className="px-8 py-3 border bg-[#0a0a0a] hover:opacity-100  backdrop-blur-xl border-white hover:bg-white hover:text-black rounded-full text-lg font-medium hover:from-purple-700 hover:to-blue-600 transition-all"
+                  >
+                    List Bounties
+                    </Link>
+                </motion.div>
+            
+          </div>
+          </div>
           </div>
 
           {/* Circular flow diagram */}
-          <div className="relative mt-20 max-w-4xl mx-auto">
-            <div className="absolute inset-0 bg-gradient-to-b from-purple-900/20 to-blue-900/20 rounded-full blur-3xl"></div>
-            <div className="relative flex justify-between items-center">
-              <div className="bg-gray-900/80 backdrop-blur-sm p-6 rounded-xl border border-gray-800">
-                <h3 className="text-xl font-semibold mb-2">Contributors</h3>
-                <p className="text-gray-400">Get rewarded for your work</p>
-              </div>
-              <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-purple-600/30 backdrop-blur-md p-4 rounded-full">
-                <Image
-                  src="/gitfund-white.webp"
-                  alt="GitFund"
-                  width={60}
-                  height={60}
-                  className="rounded-full"
-                />
-              </div>
-              <div className="bg-gray-900/80 backdrop-blur-sm p-6 rounded-xl border border-gray-800">
-                <h3 className="text-xl font-semibold mb-2">Maintainers</h3>
-                <p className="text-gray-400">
-                  Focus on building great software
-                </p>
-              </div>
-            </div>
-            <p className="text-center text-sm text-gray-500 mt-8">
-              A single platform for open-source collaboration
-            </p>
-          </div>
+
         </div>
       </section>
+
+      <motion.div
+        className='mx-[auto] text-center mt-20'
+        initial={{ scale: 0.5, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 5, ease: "easeOut", duration: 1 }}
+        >
+          <div className='text-3xl lg:text-6xl px-20 text-center font-bold'>How It Works</div>
+      </motion.div>
+      <div className='flex mx-[8em] mt-10'>
+        <div className='w-1/2'>
+          <div className='font-bold lg:text-5xl'>
+          Maintainers
+          </div>
+          <div className='font-bold lg:text-5xl'>
+          List Repositories
+          </div>
+          <div className='mt-6'>
+            <ul className="space-y-4 text-gray-300 list-disc pl-6 marker:text-white">
+              <li className="pl-2">
+                Maintainers sign in with GitHub and connect their crypto wallet (Tezos or Etherlink-based).
+              </li>
+              <li className="pl-2">
+                They select repositories they maintain and highlight issues they want to get fixed.
+              </li>
+              <li className="pl-2">
+                For each issue, they:
+                <ul className="ml-6 mt-2 space-y-2 list-disc pl-4 marker:text-purple-400">
+                  <li className="pl-2">Set a bounty amount in crypto</li>
+                  <li className="pl-2">Define clear acceptance criteria</li>
+                  <li className="pl-2">Specify the deadline for completion</li>
+                  <li className="pl-2">Optionally add additional context or resources</li>
+                </ul>
+              </li>
+              <li className="pl-2">
+                Once submitted, the issue appears publicly on the GitFund board.
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div className='w-1/2'>
+                    <video
+            className="w-full rounded-xl object-cover"
+            src="/listbounty.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            aria-label="Demo video showing how to list bounties"
+          >
+            <track kind="captions" srcLang="en" label="English captions" />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+       
+      </div>
 
       {/* Growth Section */}
       <section className="py-20 px-4 md:px-8 lg:px-16 bg-gradient-to-b from-[#0a0a0a] to-[#0f0f1a]">
@@ -168,7 +227,7 @@ export default function LandingPage() {
                     type="monotone"
                     dataKey="value"
                     stroke="#9333EA"
-                    strokeWidth={2}
+                    width={2}
                     dot={false}
                   />
                 </LineChart>
@@ -225,7 +284,7 @@ export default function LandingPage() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2}
+                    width={2}
                     d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                   />
                 </svg>
@@ -259,7 +318,7 @@ export default function LandingPage() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2}
+                    width={2}
                     d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                   />
                 </svg>
@@ -293,7 +352,7 @@ export default function LandingPage() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2}
+                    width={2}
                     d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                   />
                 </svg>

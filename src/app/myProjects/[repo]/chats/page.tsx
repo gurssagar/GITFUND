@@ -1,57 +1,180 @@
 'use client'
-import { useState, useEffect } from 'react';
-import type { User, Channel as StreamChannel } from 'stream-chat';
-import { useCreateChatClient, Chat, Channel, ChannelHeader, MessageInput, MessageList, Thread, Window } from 'stream-chat-react';
 
-import 'stream-chat-react/dist/css/v2/index.css';
+import { useEffect, useState } from 'react';
+import Peer from 'peerjs';
+import { useSession } from 'next-auth/react';
 
-const apiKey = process.env.NEXT_PUBLIC_STREAM_API_KEY as string;
-const userId = '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';
-const userName = 'love';
-const userToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZ2hvX29EYzkwNlg5ZE0yMEpyaFp6cjJOQjRsMUdrNlJMZzE2YlJYeiJ9.eB3hgwwCxIX5rfZpNWcoDFlnpUWFX4mMxkaJwShTv3k';
-
-const user: User = {
-  id: userId,
-  name: userName,
-  image: `https://getstream.io/random_png/?name=${userName}`,
-  role: 'admin',  // Add admin role
-};
-
-const App = () => {
-  const [channel, setChannel] = useState<StreamChannel>();
-  const client = useCreateChatClient({
-    apiKey,
-    tokenOrProvider: userToken,
-    userData: user,
-  });
+export default function ChatPage() {
+  const session = useSession();
+  const [peer, setPeer] = useState<Peer>();
+  const [peerId, setPeerId] = useState('');
+  const [targetPeerId, setTargetPeerId] = useState('');
+  const [message, setMessage] = useState('');
+  const [messages, setMessages] = useState<string[]>([]);
+  const [connectionStatus, setConnectionStatus] = useState('');
 
   useEffect(() => {
-    if (!client) return;
+    if ((session?.data?.user as any)?.username) {
+      // Create a valid peer ID by removing special characters and using only alphanumeric
+      const sanitizedEmail = (session?.data?.user as any).username.replace(/[^a-zA-Z0-9]/g, '');
+      const uniquePeerId = `${sanitizedEmail}`;
+      
+      const newPeer = new Peer(uniquePeerId, {
+        host: '0.peerjs.com',
+        secure: true,
+        port: 443,
+        debug: 3
+      });
+      
+      newPeer.on('open', (id) => {
+        setPeerId(id);
+        setConnectionStatus('Connected to PeerJS server');
+        console.log('My peer ID is:', id);
+      });
 
-    const channel = client.channel('messaging', 'custom_channel_id', {
-      image: 'https://getstream.io/random_png/?name=react',
-      name: 'My Channel',
-      members: [userId],
-      created_by_id: userId,  // Add creator ID
+      newPeer.on('error', (error) => {
+        console.error('PeerJS error:', error);
+        setConnectionStatus(`Error: ${error.type}`);
+      });
+
+      newPeer.on('connection', (conn) => {
+        handleConnection(conn);
+      });
+
+      setPeer(newPeer);
+
+      return () => {
+        newPeer.destroy();
+      };
+    }
+  }, [session?.data?.user?.email]);
+  console.log(targetPeerId,"yoo")
+  const [contributors, setContributors] = useState<any>([]);
+
+  useEffect(() => {
+    const fetchContributors = async () => {
+      try {
+        const response = await fetch('/api/requestIssue', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        if (data) {
+          console.log(data.assignments); // Log the response data t
+          setContributors(data.assignments);
+        }
+      } catch (error) {
+        console.error('Error fetching contributors:', error);
+      }
+    };
+    fetchContributors();
+  }, []);
+  console.log(contributors,)
+  const handleConnection = (conn: any) => {
+    conn.on('open', () => {
+      conn.on('data', (data: any) => {
+        setMessages(prev => [...prev, `Received: ${data}`]);
+      });
     });
 
-    setChannel(channel);
-  }, [client]);
+    conn.on('error', (error: any) => {
+      console.error('Connection error:', error);
+      setConnectionStatus(`Connection error: ${error}`);
+    });
+  };
 
-  if (!client) return <div>Setting up client & connection...</div>;
+  const connectToPeer = () => {
+    if (peer && targetPeerId) {
+      const conn = peer.connect(targetPeerId);
+      handleConnection(conn);
+      setConnectionStatus('Connecting to peer...');
+    }
+  };
+
+  const sendMessage = () => {
+    if (peer && targetPeerId && message) {
+      const conn = peer.connect(targetPeerId);
+      conn.on('open', () => {
+        conn.send(message);
+        setMessages(prev => [...prev, `Sent: ${message}`]);
+        setMessage('');
+      });
+    }
+  };
 
   return (
-    <Chat client={client}>
-      <Channel channel={channel}>
-        <Window>
-          <ChannelHeader />
-          <MessageList />
-          <MessageInput />
-        </Window>
-        <Thread />
-      </Channel>
-    </Chat>
-  );
-};
+  <div className="flex h-screen">
+    {/* Sidebar with contributors */}
+    <div className="w-1/4 p-4 overflow-y-auto" >
+      <h2 className="text-xl font-bold mb-4">Contributors</h2>
+      <div className="space-y-3">
+        {contributors.map((contributor: any, index: number) => (
+          <div 
+            key={index} 
+            className="flex items-center p-2 hover:bg-gray-900 rounded cursor-pointer"
+            onClick={() => setTargetPeerId(contributor.Contributor_id)}
+          >
+            <img 
+              src={contributor.image_url} 
+              alt={contributor.username}
+              className="w-10 h-10 rounded-full mr-3"
+            />
+            <div>
+              <p className="font-medium">{contributor.name}</p>
+              <p className="text-sm text-gray-600">{contributor.role || 'Contributor'}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
 
-export default App;
+    {/* Main chat area */}
+    <div className="flex-1 p-4">
+      <div className="mb-4">
+        <p>Your Peer ID: {peerId}</p>
+        <p className="text-sm text-gray-600">{connectionStatus}</p>
+      </div>
+
+      <div className="mb-4">
+        <input
+          type="text"
+          value={targetPeerId}
+          onChange={(e) => setTargetPeerId(e.target.value)}
+          placeholder="Enter peer ID to connect"
+          className="border p-2 mr-2"
+        />
+        <button
+          onClick={connectToPeer}
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+        >
+          Connect
+        </button>
+      </div>
+
+      <div className="mb-4">
+        <input
+          type="text"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Type your message"
+          className="border p-2 mr-2"
+        />
+        <button
+          onClick={sendMessage}
+          className="bg-green-500 text-white px-4 py-2 rounded"
+        >
+          Send
+        </button>
+      </div>
+
+      <div className="border p-4 h-64 overflow-y-auto">
+        {messages.map((msg, index) => (
+          <p key={index} className="mb-2">{msg}</p>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+}
