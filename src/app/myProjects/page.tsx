@@ -49,7 +49,7 @@ export default function MyProject() {  // Changed from myProject to MyProject
             <Sidebar/>
             <div className='ml-[12em] w-[calc(100%_-_12em)]'>
                 <Topbar/>
-                <div className='grid grid-cols-3 gap-6 mx-10'>
+                <div className='pt-20 grid grid-cols-3 gap-6 mx-10'>
                     {repoData.map((repo:any) => {
                         if (!repo.image_url?.trim()) return null;
                         

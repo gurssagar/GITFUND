@@ -283,8 +283,8 @@ export default function Project() {
             <Sidebar/>
             <div className='ml-[12em] w-[calc(100%_-_12em)]'>
                     <Topbar />
-                    <div className="mt-20 mx-auto justify-center">
-                        <form onSubmit={addProject} className="max-w-[600px] border-1 border-gray-800 rounded-xl p-10 mx-auto space-y-4">
+                    <div className="mt-20  justify-center">
+                        <form onSubmit={addProject} className=" p-10 mx-auto space-y-4">
                             <div className="text-3xl mb-6">
                                 Project Information
                             </div>
@@ -300,20 +300,21 @@ export default function Project() {
                                 <label className="text-[14px]" htmlFor="longDescription">Long Description</label>
                                 <textarea id="longDescription" name="longDescription" className="w-full p-2 border-1 border-gray-800 rounded-md"/>
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-2 flex gap-4">
+                                <div className="w-1/3">
                                 <label className="text-[14px]" htmlFor="projectImage">Project image</label>
                                 <input id="projectImage" name="projectImage" type="file" className="w-full p-2 border-1 border-gray-800 rounded-md"/>
-                            </div>
-                            <div className="space-y-2">
+                                </div>
+                                <div className="w-1/3">
                                 <label className="text-[14px]" htmlFor="projectImage">Reward Amount in Eth(Educhain)</label>
                                 <input id="reward" name="reward" type="text" className="w-full p-2 border-1 border-gray-800 rounded-md"/>
-                            </div>
-                            <div className="space-y-2">
+                                </div>
+                                <div className="space-y-2 w-1/3">
                                 <label className="text-[14px]" htmlFor="difficulty">Difficulty</label>
                                 <select 
                                     id="difficulty" 
                                     name="difficulty" 
-                                    className="bg-[#0a0a0a] w-full p-2 border-1 border-gray-800 rounded-md"
+                                    className="bg-[#0a0a0a] text-[14px] w-full p-2 border-1 border-gray-800 rounded-md"
                                     
                                 >
                                     <option value="">Select difficulty</option>
@@ -322,7 +323,10 @@ export default function Project() {
                                     <option value="hard">Hard</option>
                                 </select>
                             </div>
-                            <div className="space-y-2">
+                            </div>
+                            
+                            <div className="flex gap-4 ">
+                            <div className="space-y-2 w-1/3">
                                 <label className="text-[14px]" htmlFor="priority">Priority</label>
                                 <select 
                                     id="priority" 
@@ -336,7 +340,7 @@ export default function Project() {
                                     <option value="hard">Hard</option>
                                 </select>
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-2  w-1/3">
                                 <label className="text-[14px]" htmlFor="projectRepo">Project Repository</label>
                                 <select 
                                     id="projectRepo" 
@@ -356,7 +360,7 @@ export default function Project() {
                                     ))}
                                 </select>
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-2  w-1/3">
                                 <label className="text-[14px]" htmlFor="projectIssue">Select Issue</label>
                                 <select 
                                     id="projectIssue" 
@@ -370,6 +374,7 @@ export default function Project() {
                                         </option>
                                     ))}
                                 </select>
+                            </div>
                             </div>
                             <div className="mt-6 flex justify-end">
                                 <button type="submit" className="bg-[#29292c] text-white p-2 rounded-md hover:bg-[#222225] px-4">

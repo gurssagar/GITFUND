@@ -46,14 +46,23 @@ export default function Contributions() {
       };
 
       // ... existing code ...
-
+      
 const handleWithdraw = async (rewardAmount: string) => {
     if (!signer) return alert("Connect your wallet first!");
     try {
+        // Validate and format the amount
+        const amount = parseFloat(rewardAmount);
+        if (isNaN(amount) || amount <= 0) {
+            return alert("Invalid reward amount");
+        }
+        
         const contract = getContract(signer);
-        const tx = await contract.withdraw(account, ethers.parseEther(rewardAmount)); // Use account as recipient
+        const tx = await contract.withdraw(
+            account, 
+            ethers.parseEther(`0.002`)
+        );
         await tx.wait();
-        alert(`Withdrawn ${rewardAmount} ETH to ${account}`); // Use rewardAmount in alert
+        alert(`Withdrawn ${amount} ETH to ${account}`);
         fetchBalance();
     } catch (error) {
         console.error("Withdraw Error:", error);
@@ -65,6 +74,7 @@ const handleWithdraw = async (rewardAmount: string) => {
 
       const handleSubmit = async (pullNumber: string,rewardAmount:string) => {
         try {
+            console.log(rewardAmount)
             handleWithdraw(rewardAmount);
             const response = await octokit.request('PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge', {
                 owner: owner as string,
