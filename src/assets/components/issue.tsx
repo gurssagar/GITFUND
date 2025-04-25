@@ -7,7 +7,7 @@ export default function Issue({image, Project, Fork, Stars, Contributors, shortD
         <div className="p-4 rounded-xl border-1 border-gray-400 dark:border-gray-800">
             <div className="flex">
                 <div className="mr-4">
-                    <img src={image} className="rounded" width={48} height={48} alt="avatar" />
+                    <img src={image} className="rounded h-[48px]" width={48} height={48} alt="avatar" />
                 </div>
                 <div>
                     <h3>

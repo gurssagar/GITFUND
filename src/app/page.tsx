@@ -1,7 +1,8 @@
 "use client";
-
-
-import { useRef } from 'react';
+ 
+import { Check } from "lucide-react";
+import Issue from "@/assets/components/issue";
+import { useRef,useState,useEffect } from 'react';
 import { motion } from "motion/react"
 import GitHubIssueList from "../components/issue";
 import Image from "next/image";
@@ -13,6 +14,68 @@ import heroImage from "@/assets/components/bg-1.jpg";
 import ShootingStarBorder from "@/assets/border";
 export default function LandingPage() {
   const { account, connectWallet } = useWeb3();
+  const [billingCycle, setBillingCycle] = useState("monthly");
+  const [repoData,setRepoData]=useState<any>([])
+  useEffect(()=>{
+    const fetchData=async()=>{
+       await fetch('/api/add-issues',
+        {
+            method:'GET',
+            headers:{
+                'Content-Type':'application/json'
+            },
+        }
+       ).then((res)=>res.json())
+       .then((data)=>{
+            setRepoData(data.projects)
+       })
+       
+    }
+    fetchData();
+    if(repoData.length>0){
+        
+        const getImage=async()=>
+            {
+                await fetch(`/api/s3?fileName={}`,{
+                    
+                }
+            )
+            }
+    }
+},[])
+  const plans = [
+    {
+      name: "Contributor",
+      description: "Start contributing to open-source with ease",
+      price: billingCycle === "monthly" ? 0 : 0,
+      features: [
+        "Access to public repositories",
+        "Submit up to 5 issues/month",
+        "Join contributor leaderboard",
+        "Basic contributor profile",
+        "Community support"
+      ]
+    },
+    {
+      name: "Organization",
+      description: "Best for larger teams or open-source organizations",
+      price: billingCycle === "monthly" ? 99 : 990,
+      features: [
+        "Unlimited repositories & bounties",
+        "Unlimited active bounty slots",
+        "Team management tools",
+        "Advanced insights & reporting",
+        "Priority support",
+        "Custom integrations (GitHub, Slack, etc.)"
+      ],
+      featured: true
+    }
+  ];
+  
+
+
+
+
   {
     /* Stats Section */
   }
@@ -144,10 +207,11 @@ export default function LandingPage() {
       <motion.div
         className='mx-[auto] text-center mt-20'
         initial={{ scale: 0.5, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 5, ease: "easeOut", duration: 1 }}
-        >
-          <div className='text-3xl lg:text-6xl px-20 text-center font-bold'>How It Works</div>
+        whileInView={{ scale: 1, opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ ease: "easeOut", duration: 1 }}
+      >
+          <div className='text-3xl mb-28 lg:text-6xl px-20 text-center font-bold'>How It Works</div>
       </motion.div>
       <div className='flex mx-[8em] mt-10'>
         <div className='w-1/2'>
@@ -196,6 +260,147 @@ export default function LandingPage() {
         </div>
        
       </div>
+
+      
+
+      <div className="flex flex-col items-center w-full min-h-screen pt-40 bg-[#0a0a0a] text-white px-4">
+      <div className="max-w-5xl mx-auto text-center mb-16">
+        <h2 className="text-6xl font-bold mb-4">Simple & Transparent Pricing</h2>
+        <p className="text-gray-400 max-w-xl mx-auto">Choose the plan that works best for you and your team.</p>
+        
+        {/* Billing toggle */}
+        <div className="flex items-center justify-center mt-8 space-x-4">
+          <span className={`${billingCycle === "monthly" ? "text-white" : "text-gray-400"}`}>Monthly</span>
+          <button 
+            className="relative inline-flex h-6 w-12 items-center rounded-full bg-gray-700"
+            onClick={() => setBillingCycle(billingCycle === "monthly" ? "annual" : "monthly")}
+          >
+            <span className="sr-only">Toggle billing cycle</span>
+            <span 
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
+                billingCycle === "annual" ? "translate-x-7" : "translate-x-1"
+              }`} 
+            />
+          </button>
+          <span className={`${billingCycle === "annual" ? "text-white" : "text-gray-400"}`}>
+            Annual <span className="text-emerald-400 text-sm ml-1">Save 17%</span>
+          </span>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl">
+        {plans.map((plan) => (
+          <div 
+            key={plan.name}
+            className={`rounded-xl p-8 ${
+              plan.featured 
+                ? "bg-gradient-to-br from-[#0a0a0a] to-[#181a1f] border border-gray-700 shadow-lg" 
+                : "bg-[#0a0a0a] border border-gray-800"
+            }`}
+          >
+            {plan.featured && (
+              <span className="bg-[#1e1e1e] text-xs font-medium mr-2 px-2.5 py-0.5 rounded text-white mb-4 inline-block">
+                Most Popular
+              </span>
+            )}
+            {!plan.featured && (
+              <span className="bg-[#1e1e1e] text-xs font-medium mr-2 px-2.5 py-0.5 rounded text-white mb-4 inline-block">
+                  Best for Starters
+              </span>  
+            )
+            }
+            <h3 className="text-2xl font-bold">{plan.name}</h3>
+            <p className="text-gray-400 mt-2">{plan.description}</p>
+            <div className="mt-6 mb-8">
+              <span className="text-4xl font-bold">${plan.price}</span>
+              <span className="text-gray-400">/{billingCycle === "monthly" ? "mo" : "yr"}</span>
+            </div>
+            
+            <button 
+              className={`w-full py-3 rounded-lg font-medium transition-colors ${
+                plan.featured 
+                  ? "bg-[#1e1e1e] hover:bg-emerald-700 text-white" 
+                  : "bg-[#1e1e1e] hover:bg-gray-700 text-white"
+              }`}
+            >
+              Get Started
+            </button>
+            
+            <div className="mt-8">
+              <p className="font-medium text-sm text-gray-400 mb-4">What's included:</p>
+              <ul className="space-y-3">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex items-start">
+                    <Check className="h-5 w-5 text-emerald-500 mr-2 flex-shrink-0" />
+                    <span className="text-sm">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+
+    <motion.div
+        className='mx-[auto] text-center mt-20'
+        initial={{ scale: 0.5, opacity: 0 }}
+        whileInView={{ scale: 1, opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ ease: "easeOut", duration: 1 }}
+      >
+          <div className='text-3xl mb-4 lg:text-6xl px-20 text-center font-bold'>Featured Projects</div>
+          <div className='text-lg mb-12 lg:text-lg px-20 text-gray-400 text-center '>Discover projects that match the languages you love to code in.</div>
+
+    </motion.div>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 px-32">
+    {
+                                repoData.length > 0 ?
+                                <>
+                                {repoData.slice(0, 6).map((repo:any) => {
+                        if (!repo.image_url?.trim()) return null;
+                        
+                        return (
+                            <>
+                            <div key={repo.projectName} className="hover:scale-[1.02] transition-transform duration-200">
+                                <a href={`/projects/${repo.project_repository}`}>
+                                    <Issue 
+                                        image={repo.image_url || 'back_2.jpg'}
+                                        Project={repo.projectName}
+                                        Fork={42}
+                                        Stars={128}
+                                        Contributors={8}
+                                        shortDescription={repo.shortdes}
+                                    />
+                                </a>
+                            </div>
+                           
+                            </>
+                        );
+                    })}
+                            
+                                </>:
+                                <></>
+                            }
+                   
+    </div>
+    <div className="mx-auto text-center mt-10">
+      <motion.button 
+        className="text-black bg-white text-center justify-center mx-auto py-2 px-4 rounded-md" // Added rounded-md for better appearance
+        whileHover={{ scale: 1.05 }} // Scale up slightly on hover
+        whileTap={{ scale: 0.95 }}   // Scale down slightly on tap
+        transition={{ type: "spring", stiffness: 400, damping: 17 }} // Add a spring transition
+      >
+        <Link href={`/projects`}>
+          View More Projects
+        </Link>
+      </motion.button>
+    </div>
+    
+
+
+      
 
       {/* Growth Section */}
       <section className="py-20 px-4 md:px-8 lg:px-16 bg-gradient-to-b from-[#0a0a0a] to-[#0f0f1a]">
