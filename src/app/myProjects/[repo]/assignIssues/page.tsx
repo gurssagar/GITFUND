@@ -68,7 +68,7 @@ export default function AssignIssues() {
             <Sidebar/>
             <div className='ml-[12em] w-[calc(100%_-_12em)]'>
                 <Topbar />
-                <div className='grid grid-cols-3 gap-6 mx-10'>
+                <div className='mt-20 grid grid-cols-3 gap-6 mx-10'>
                     {assignments.map((assignment: any) => (
                        // ... existing code ...
                         <div key={assignment.issue} className="border border-gray-800 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">

@@ -47,55 +47,61 @@ export default function Contributions() {
 
       // ... existing code ...
       
-const handleWithdraw = async (rewardAmount: string) => {
-    if (!signer) return alert("Connect your wallet first!");
-    try {
-        // Validate and format the amount
-        const amount = parseFloat(rewardAmount);
-        if (isNaN(amount) || amount <= 0) {
-            return alert("Invalid reward amount");
-        }
-        
-        const contract = getContract(signer);
-        const tx = await contract.withdraw(
-            account, 
-            ethers.parseEther(`0.002`)
-        );
-        await tx.wait();
-        alert(`Withdrawn ${amount} ETH to ${account}`);
-        fetchBalance();
-    } catch (error) {
-        console.error("Withdraw Error:", error);
-        alert("Withdraw failed! " + (error as Error).message);
-    }
-};
+        const handleWithdraw = async (rewardAmount: string) => {
+            if (!signer) return alert("Connect your wallet first!");
+            try {
+                // Validate and format the amount
+                const amount = parseFloat(rewardAmount);
+                if (isNaN(amount) || amount <= 0) {
+                    return alert("Invalid reward amount");
+                }
+                
+                const contract = getContract(signer);
+                const tx = await contract.withdraw(
+                    account, 
+                    ethers.parseEther(`0.002`)
+                );
+                await tx.wait();
+                alert(`Withdrawn ${amount} ETH to ${account}`);
+                fetchBalance();
+            } catch (error) {
+                console.error("Withdraw Error:", error);
+                alert("Withdraw failed! " + (error as Error).message);
+            }
+        };
 
 // ... rest of the code ...
 
-      const handleSubmit = async (pullNumber: string,rewardAmount:string) => {
-        try {
-            console.log(rewardAmount)
-            handleWithdraw(rewardAmount);
-            const response = await octokit.request('PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge', {
-                owner: owner as string,
-                repo: repo as string,
-                pull_number: Number(pullNumber),
-                commit_title: 'Commit Merged successfully',
-                commit_message: 'Commit merged to the main repo',
-                headers: {
-                    'X-GitHub-Api-Version': '2022-11-28'
-                }
-            });
-
-            
-
-            console.log('Merge successful:', response.data);
-            return response.data;
-        } catch (error) {
-            console.error('Merge failed:', error);
-            throw error;
+        const handleSubmit = async (pullNumber: string,rewardAmount:string) => {
+            try {
+                console.log(rewardAmount)
+                handleWithdraw(rewardAmount).then((withdrawSuccess:any) => {
+                    if (withdrawSuccess) {
+                        return octokit.request('PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge', {
+                            owner: owner as string,
+                            repo: repo as string,
+                            pull_number: Number(pullNumber),
+                            commit_title: 'Commit Merged successfully',
+                            commit_message: 'Commit merged to the main repo',
+                            headers: {
+                                'X-GitHub-Api-Version': '2022-11-28'
+                            }
+                        }).then(response => {
+                            console.log('Merge successful:', response.data);
+                            return response.data;
+                        });
+                    } else {
+                        throw new Error('Withdrawal failed');
+                    }
+                }).catch(error => {
+                    console.error('Merge failed:', error);
+                    throw error;
+                });
+            } catch (error) {
+                console.error('Merge failed:', error);
+                throw error;
+            }
         }
-    }
 
     useEffect(() => {
         try{

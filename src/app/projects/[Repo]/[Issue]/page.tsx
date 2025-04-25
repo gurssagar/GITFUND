@@ -37,7 +37,7 @@ const IssueCommentForm = () => {
       });
 
       // Split repo into owner and repo name
-      const owner=parsedContributors[0].login
+      const owner= parsedContributors as string
       const repo=Repo
       console.log(owner,repo,parseInt(Issue))
       await octokit.rest.issues.createComment({

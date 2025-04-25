@@ -30,7 +30,7 @@ export default function Topbar(  ) {
                             {account ? (
                                 <p>Connected: {account}</p>
                             ) : (
-                                <button onClick={connectWallet} className="px-4 py-2 bg-gray-900 text-white rounded">
+                                <button onClick={connectWallet} className="px-4 text-[14px] py-1 bg-gray-900 text-white rounded">
                                 Connect Wallet
                                 </button>
                             )}

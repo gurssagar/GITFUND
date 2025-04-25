@@ -266,7 +266,7 @@ export default function Project() {
     },[projectData]); // Changed from [collabs] to [projectData]
 
     // ... existing code ...
-    console.log(projects,)
+    console.log(projects,"heyoo")
     useEffect(() => {
     const fetchRepoDetails = async () => {
         if (!projectData) return;
@@ -473,9 +473,7 @@ export default function Project() {
                                                                 href={{
                                                                     pathname: `/projects/${projects[0]?.project_repository}/${issue.number}`,
                                                                     query: {
-                                                                        collabs: JSON.stringify(projects[0]?.contributors?.collabs?.map((c: any) => ({
-                                                                            login: c.login,
-                                                                        })))
+                                                                        collabs: JSON.stringify(projects[0]?.projectOwner)
                                                                     }
                                                                 }}
                                                             >
