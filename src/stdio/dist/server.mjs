@@ -11,6 +11,7 @@ import {
 import { z } from 'zod'
 import { Octokit } from '@octokit/rest'
 
+
 async function getPRDiff(owner, repo, pullNumber, token) {
     const octokit = new Octokit({
         auth: token,
@@ -30,7 +31,7 @@ async function getPRDiff(owner, repo, pullNumber, token) {
 
 class GithubServer {
     constructor() {
-        const token = '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'
+        const token = process.env.GITHUB_TOKEN ;
         if (!token) {
             throw new Error('GITHUB_TOKEN environment variable is required')
         }

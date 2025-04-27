@@ -6,30 +6,38 @@ export async function POST(req: Request) {
   const { prompt }: { prompt: string } = await req.json();
   let collectedContent = '';
   let stdioClient: any;
-
+  let clientOne: any;
+  let clientTwo: any;
+  let clientThree: any;
   try {
     // First LLM call with tools
     const transport = new Experimental_StdioMCPTransport({
-      command: 'bun',
-      args: ['src/stdio/dist/server.mjs'],
-    });
+        command: 'node',
+        args: ['src/stdio/dist/server.mjs'],
+      });
+      clientOne = await experimental_createMCPClient({
+        transport,
+      });
     
-    stdioClient = await experimental_createMCPClient({
-      transport,
-    });
-
-    const toolSetOne = await stdioClient.tools();
-    const tools = {
-      ...toolSetOne, 
-    };
+      // Alternatively, you can connect to a Server-Sent Events (SSE) MCP server:
+      clientTwo = await experimental_createMCPClient({
+        transport: {
+          type: 'sse',
+          url: 'https://d682-103-172-72-242.ngrok-free.app/sse',
+        },
+      });
+    
+    
+      const toolSetOne = await clientOne.tools();
+      const toolSetTwo = await clientTwo.tools();
+      const tools = {
+        ...toolSetTwo,// note: this approach causes subsequent tool sets to override tools with the same name
+      };
 
     const response = await streamText({
       model: groq('llama-3.1-8b-instant'),
       prompt,
       tools,
-      onFinish: async () => {
-        await stdioClient.close();
-      },
     });
 
     // Collect the content from first stream
