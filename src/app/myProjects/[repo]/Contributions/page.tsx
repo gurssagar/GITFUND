@@ -3,12 +3,14 @@ import { useSession } from 'next-auth/react';
 import {useEffect, useState} from'react'
 import {useRouter} from 'next/navigation'
 import Image from 'next/image';
+import ReactMarkdown from 'react-markdown';
 import { Octokit } from 'octokit';
 import Link from 'next/link';
 import Sidebar from '@/assets/components/sidebar';
 import Topbar from '@/assets/components/topbar';
 import Issue from '@/assets/components/issue';
 import { useSearchParams } from 'next/navigation';
+import { useCompletion } from '@ai-sdk/react';
 import { ethers } from 'ethers';
 import { useWeb3 } from "../../../../assets/components/web3Context";
 import { getContract } from "../../../../assets/components/contract";
@@ -18,6 +20,11 @@ export default function Contributions() {
     const repo = searchParams.get('repo');
     const issueNumber = searchParams.get('issueNumber');
     const owner=searchParams.get('owner');
+    const { completion, complete } = useCompletion({
+        api: '/api/completion',
+      });
+    const [showReview, setShowReview] = useState(true);
+
     const octokit = new Octokit({
         auth: (session?.data as any)?.accessToken,
     });
@@ -229,25 +236,58 @@ export default function Contributions() {
                                             {pr.comments} comments
                                         </span>
                                         <div>
-    {pr.rewardAmount && (
-        <span className="text-yellow-400">
-            Reward: {pr.rewardAmount} ETH
-        </span>
-    )}
-</div>
+                                            {pr.rewardAmount && (
+                                                <span className="text-yellow-400">
+                                                    Reward: {pr.rewardAmount} ETH
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div>
+                                    <div className="flex gap-4">
+                                        <div >
+                                            <div
+                                                onClick={async () => {
+                                                setShowReview(true)
+                                                await complete(
+                                                    `Analyze the changes made in a pull request https://github.com/${owner}/${repo}/pull/${pr.number}. Focus on a technical review: explain the purpose of the changes, evaluate the code quality, identify any potential issues or improvements, and assess if the modifications align with best coding practices. Assume the reader is familiar with programming concepts.`,
+                                                );
+                                                } }
+                                                 className='text-black bg-white  rounded px-4 py-2 hover:bg-gray-300 hover:scale-[90%]'
+                                            >
+                                                AI Review
+                                            </div>
+                                            </div>
+                                        <div>
                                         <button onClick={() => handleSubmit(pr.number.toString(),pr.rewardAmount)} className='text-black bg-white  rounded px-4 py-2 hover:bg-gray-300 hover:scale-[90%]'>
                                             Merge Pull Request
                                         </button>
+                                        </div>
                                     </div>
+                                    </div>
+                                    <div>
+                                        
+                                        <h2 className="mt-10 text-xl font-bold text-white mb-4 flex items-center gap-2">
+                                            <svg className="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            AI Pull Request Review
+                                        </h2>
+                                        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent prose prose-invert max-w-none bg-transparent">
+                                            <ReactMarkdown>
+                                                {completion || ''}
+                                            </ReactMarkdown>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     </div>
                 </div>
-            </div>
+                <div>
+                    
+                </div>
+        </div>
+        
         </>
     )
 }

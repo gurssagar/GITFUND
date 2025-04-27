@@ -3,6 +3,7 @@
 import { Check } from "lucide-react";
 import Issue from "@/assets/components/issue";
 import { useRef,useState,useEffect } from 'react';
+import ScrollVelocity from "@/blocks/TextAnimations/ScrollVelocity/ScrollVelocity";
 import { motion } from "motion/react"
 import GitHubIssueList from "../components/issue";
 import Image from "next/image";
@@ -16,6 +17,26 @@ export default function LandingPage() {
   const { account, connectWallet } = useWeb3();
   const [billingCycle, setBillingCycle] = useState("monthly");
   const [repoData,setRepoData]=useState<any>([])
+  const [screen,changeScreen]=useState<number>(10)
+
+  useEffect(() => {
+   const updateGridLength = () => {
+     if (window.innerWidth <= 768) {
+       changeScreen(10);
+     } else if (window.innerWidth <= 1024) {
+       changeScreen(16);
+     }
+     else if (window.innerWidth >= 1800) {
+      changeScreen(30);
+     }
+      else {
+       changeScreen(20);
+     }
+    }
+    updateGridLength()
+    window.addEventListener('resize', updateGridLength);
+    return () => window.removeEventListener('resize', updateGridLength);
+  },[]) 
   useEffect(()=>{
     const fetchData=async()=>{
        await fetch('/api/add-issues',
@@ -148,10 +169,10 @@ export default function LandingPage() {
           className="absolute inset-0 z-0"
         />
 
-        <div className="flex  z-10 max-w-[90em] mx-auto">
+        <div className="flex  z-10 mx-auto">
           <div className=''>
-          <div className='grid bg-black/05 backdrop-blur-xs rounded-xl p-4 grid-cols-4 gap-3 opacity-50'>
-            {Array.from({ length: 20 }).map((_, index) => (
+          <div className='grid bg-black/05 backdrop-blur-xs rounded-xl p-4 grid-cols-2 lg:grid-cols-4 gap-3 opacity-50'>
+            {Array.from({ length: screen }).map((_, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
@@ -166,7 +187,7 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </div>
-          <div className="absolute top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 text-4xl md:text-8xl font-bold mb-6 text-center w-full max-w-[35em]">
+          <div className="absolute top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 text-6xl md:text-8xl font-bold mb-6 text-center w-full max-w-[35em]">
             <motion.div initial={{scale:0.5,opacity:0}} animate={{scale:1,opacity:1}} transition={{ease:"easeOut",duration:2}}>
               <h1>Stuck with</h1>
               <h1>Github Issues</h1>
@@ -204,6 +225,15 @@ export default function LandingPage() {
         </div>
       </section>
 
+  
+      <ScrollVelocity
+        texts={['Code Contribute Collect', 'Hack Solve Earn']} 
+        velocity={100} 
+        className="custom-scroll-text"
+      />
+
+        
+
       <motion.div
         className='mx-[auto] text-center mt-20'
         initial={{ scale: 0.5, opacity: 0 }}
@@ -211,18 +241,21 @@ export default function LandingPage() {
         viewport={{ once: true }}
         transition={{ ease: "easeOut", duration: 1 }}
       >
-          <div className='text-3xl mb-28 lg:text-6xl px-20 text-center font-bold'>How It Works</div>
+          <div className='text-5xl mb-10 lg:mb-28 lg:text-6xl lg:px-20 text-center font-bold'>How It Works</div>
       </motion.div>
-      <div className='flex mx-[8em] mt-10'>
-        <div className='w-1/2'>
-          <div className='font-bold lg:text-5xl'>
+      <div className='block lg:hidden text-center text-xl font-bold lg:text-5xl'>
+          Maintainers List Repositories
+      </div>
+      <div className='flex flex-col-reverse lg:flex-row mx-5 lg:mx-[8em] mt-10'>
+        <div className='lg:w-1/2'>
+          <div className='hidden lg:block font-bold lg:text-5xl'>
           Maintainers
           </div>
-          <div className='font-bold lg:text-5xl'>
+          <div className='hidden lg:block font-bold lg:text-5xl'>
           List Repositories
           </div>
           <div className='mt-6'>
-            <ul className="space-y-4 text-gray-300 list-disc pl-6 marker:text-white">
+            <ul className="space-y-4 text-sm lg:text-lg text-gray-300 list-disc pl-6 marker:text-white">
               <li className="pl-2">
                 Maintainers sign in with GitHub and connect their crypto wallet (Tezos or Etherlink-based).
               </li>
@@ -244,7 +277,7 @@ export default function LandingPage() {
             </ul>
           </div>
         </div>
-        <div className='w-1/2'>
+        <div className='lg:w-1/2'>
                     <video
             className="w-full rounded-xl object-cover"
             src="/listbounty.mp4"
@@ -261,6 +294,62 @@ export default function LandingPage() {
        
       </div>
 
+      
+
+      <motion.div
+            className='mx-[auto] text-center mt-20'
+            initial={{ scale: 0.5, opacity: 0 }}
+            whileInView={{ scale: 1, opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ ease: "easeOut", duration: 1 }}
+          >
+              <div className='text-6xl mb-4 lg:text-6xl px-20 text-center font-bold'>Featured Projects</div>
+              <div className='text-sm lg:text-lg mb-12 lg:text-lg px-20 text-gray-400 text-center '>Discover projects that match the languages you love to code in.</div>
+
+        </motion.div>
+        <div className="grid grid-cols-2 h-full px-10 lg:grid-cols-3 gap-4 lg:px-32">
+        {
+                                    repoData.length > 0 ?
+                                    <>
+                                    {repoData.slice(0, 6).map((repo:any) => {
+                            if (!repo.image_url?.trim()) return null;
+                            
+                            return (
+                                <>
+                                <div key={repo.projectName} className="hover:scale-[1.02] h-full transition-transform duration-200">
+                                    <a href={`/projects/${repo.project_repository}` } className={`h-full`}>
+                                        <Issue 
+                                            image={repo.image_url || 'back_2.jpg'}
+                                            Project={repo.projectName}
+                                            Fork={42}
+                                            Stars={128}
+                                            Contributors={8}
+                                            shortDescription={repo.shortdes}
+                                        />
+                                    </a>
+                                </div>
+                              
+                                </>
+                            );
+                        })}
+                                
+                                    </>:
+                                    <></>
+                                }
+                      
+        </div>
+        <div className="mx-auto text-center mt-10">
+          <motion.button 
+            className="text-black bg-white text-center justify-center mx-auto py-2 px-4 rounded-md" // Added rounded-md for better appearance
+            whileHover={{ scale: 1.05 }} // Scale up slightly on hover
+            whileTap={{ scale: 0.95 }}   // Scale down slightly on tap
+            transition={{ type: "spring", stiffness: 400, damping: 17 }} // Add a spring transition
+          >
+            <Link href={`/projects`}>
+              View More Projects
+            </Link>
+          </motion.button>
+        </div>
       
 
       <div className="flex flex-col items-center w-full min-h-screen pt-40 bg-[#0a0a0a] text-white px-4">
@@ -341,246 +430,7 @@ export default function LandingPage() {
         ))}
       </div>
     </div>
-
-
-    <motion.div
-        className='mx-[auto] text-center mt-20'
-        initial={{ scale: 0.5, opacity: 0 }}
-        whileInView={{ scale: 1, opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ ease: "easeOut", duration: 1 }}
-      >
-          <div className='text-3xl mb-4 lg:text-6xl px-20 text-center font-bold'>Featured Projects</div>
-          <div className='text-lg mb-12 lg:text-lg px-20 text-gray-400 text-center '>Discover projects that match the languages you love to code in.</div>
-
-    </motion.div>
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 px-32">
-    {
-                                repoData.length > 0 ?
-                                <>
-                                {repoData.slice(0, 6).map((repo:any) => {
-                        if (!repo.image_url?.trim()) return null;
-                        
-                        return (
-                            <>
-                            <div key={repo.projectName} className="hover:scale-[1.02] transition-transform duration-200">
-                                <a href={`/projects/${repo.project_repository}`}>
-                                    <Issue 
-                                        image={repo.image_url || 'back_2.jpg'}
-                                        Project={repo.projectName}
-                                        Fork={42}
-                                        Stars={128}
-                                        Contributors={8}
-                                        shortDescription={repo.shortdes}
-                                    />
-                                </a>
-                            </div>
-                           
-                            </>
-                        );
-                    })}
-                            
-                                </>:
-                                <></>
-                            }
-                   
-    </div>
-    <div className="mx-auto text-center mt-10">
-      <motion.button 
-        className="text-black bg-white text-center justify-center mx-auto py-2 px-4 rounded-md" // Added rounded-md for better appearance
-        whileHover={{ scale: 1.05 }} // Scale up slightly on hover
-        whileTap={{ scale: 0.95 }}   // Scale down slightly on tap
-        transition={{ type: "spring", stiffness: 400, damping: 17 }} // Add a spring transition
-      >
-        <Link href={`/projects`}>
-          View More Projects
-        </Link>
-      </motion.button>
-    </div>
-    
-
-
       
-
-      {/* Growth Section */}
-      <section className="py-20 px-4 md:px-8 lg:px-16 bg-gradient-to-b from-[#0a0a0a] to-[#0f0f1a]">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-12">
-            <div className="md:w-1/2">
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                <span className="block">Your Functional Growth is</span>
-                <span className="block">Our Mission.</span>
-              </h2>
-              <p className="text-gray-300 mb-8">
-                We're committed to helping open-source projects grow
-                sustainably. Our platform connects contributors with projects
-                that value their skills and rewards their efforts.
-              </p>
-              <Link
-                href="/projects"
-                className="px-6 py-2 bg-white text-black rounded-full hover:bg-gray-200 transition-colors inline-block"
-              >
-                Explore Projects
-              </Link>
-            </div>
-            <div className="md:w-1/2 h-[20rem] bg-gray-900/50 rounded-xl p-6 border border-gray-800">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={growthData}>
-                  <XAxis dataKey="name" stroke="#666" />
-                  <YAxis stroke="#666" />
-                  <Line
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#9333EA"
-                    width={2}
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 px-4 md:px-8 lg:px-16">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-wrap justify-center gap-12 md:gap-24">
-            <div className="text-center">
-              <h3 className="text-4xl md:text-5xl font-bold mb-2">
-                248<span className="text-purple-500">+</span>
-              </h3>
-              <p className="text-gray-400">Projects Funded</p>
-            </div>
-            <div className="text-center">
-              <h3 className="text-4xl md:text-5xl font-bold mb-2">
-                4390<span className="text-purple-500">+</span>
-              </h3>
-              <p className="text-gray-400">Contributors</p>
-            </div>
-            <div className="text-center">
-              <h3 className="text-4xl md:text-5xl font-bold mb-2">
-                5<span className="text-purple-500">+</span>
-              </h3>
-              <p className="text-gray-400">Years Active</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stakeholders Section */}
-      <section className="py-20 px-4 md:px-8 lg:px-16 bg-gradient-to-b from-[#0a0a0a] to-[#0f0f1a]">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
-            One single platform for all
-            <br />
-            open-source stakeholders
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-gray-900/80 backdrop-blur-sm p-8 rounded-xl border border-gray-800 hover:border-purple-500/50 transition-all">
-              <div className="mb-6">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-10 w-10 text-purple-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    width={2}
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-4">
-                For Blockchain Ecosystem
-              </h3>
-              <p className="text-gray-400">
-                Connect your blockchain project with talented developers and
-                grow your ecosystem.
-              </p>
-              <div className="mt-6">
-                <Link
-                  href="/"
-                  className="text-sm text-purple-400 hover:text-purple-300"
-                >
-                  Learn more →
-                </Link>
-              </div>
-            </div>
-
-            <div className="bg-gray-900/80 backdrop-blur-sm p-8 rounded-xl border border-gray-800 hover:border-purple-500/50 transition-all">
-              <div className="mb-6">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-10 w-10 text-purple-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    width={2}
-                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-4">
-                For Open-Source Maintainers
-              </h3>
-              <p className="text-gray-400">
-                Get the funding and support you need to focus on building great
-                software.
-              </p>
-              <div className="mt-6">
-                <Link
-                  href="/"
-                  className="text-sm text-purple-400 hover:text-purple-300"
-                >
-                  Learn more →
-                </Link>
-              </div>
-            </div>
-
-            <div className="bg-gray-900/80 backdrop-blur-sm p-8 rounded-xl border border-gray-800 hover:border-purple-500/50 transition-all">
-              <div className="mb-6">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-10 w-10 text-purple-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    width={2}
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-4">
-                For Open-Source Contributors
-              </h3>
-              <p className="text-gray-400">
-                Get rewarded for your contributions to open-source projects you
-                care about.
-              </p>
-              <div className="mt-6">
-                <Link
-                  href="/"
-                  className="text-sm text-purple-400 hover:text-purple-300"
-                >
-                  Learn more →
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Testimonials Section */}
       <section className="py-20 px-4 md:px-8 lg:px-16">
