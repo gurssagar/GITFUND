@@ -110,7 +110,7 @@ export const ScrollVelocity: React.FC<ScrollVelocityProps> = ({
       { clamp: false },
     );
 
-    const copyRef = useRef<HTMLSpanElement>(null);
+    const copyRef = useRef<any>(null);
     const copyWidth = useElementWidth(copyRef);
 
     function wrap(min: number, max: number, v: number): number {

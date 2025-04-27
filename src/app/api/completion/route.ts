@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       clientTwo = await experimental_createMCPClient({
         transport: {
           type: 'sse',
-          url: 'https://d682-103-172-72-242.ngrok-free.app/sse',
+          url: 'https://139.59.21.116/sse',
         },
       });
     
