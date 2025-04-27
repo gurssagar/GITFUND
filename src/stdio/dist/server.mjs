@@ -10,6 +10,7 @@ import {
 } from '@highlight-ai/mcp-sdk/types.js'
 import { z } from 'zod'
 import { Octokit } from '@octokit/rest'
+import 'dotenv/config'
 
 
 async function getPRDiff(owner, repo, pullNumber, token) {
