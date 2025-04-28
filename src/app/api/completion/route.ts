@@ -10,14 +10,6 @@ export async function POST(req: Request) {
   let clientTwo: any;
   let clientThree: any;
   try {
-    // First LLM call with tools
-    const transport = new Experimental_StdioMCPTransport({
-        command: 'node',
-        args: ['src/stdio/dist/server.mjs'],
-      });
-      clientOne = await experimental_createMCPClient({
-        transport,
-      });
     
       // Alternatively, you can connect to a Server-Sent Events (SSE) MCP server:
       clientTwo = await experimental_createMCPClient({
@@ -28,7 +20,6 @@ export async function POST(req: Request) {
       });
     
     
-      const toolSetOne = await clientOne.tools();
       const toolSetTwo = await clientTwo.tools();
       const tools = {
         ...toolSetTwo,// note: this approach causes subsequent tool sets to override tools with the same name
