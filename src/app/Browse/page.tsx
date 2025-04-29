@@ -20,7 +20,24 @@ export default function Home(){
     const session=useSession();
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredRepos, setFilteredRepos] = useState<any>([]);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [openSearch,setSearchOpen]=useState(false)
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.ctrlKey && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                setIsSearchOpen(prevState => !prevState);
+            } else if (e.key === 'Escape') {
+                setIsSearchOpen(false);
+            }
+        };
 
+        window.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
     //kbar
 
     const actions = [
@@ -99,15 +116,7 @@ export default function Home(){
     return(
         <>
         
-        <KBarProvider actions={actions}>
-      <KBarPortal> 
-        <KBarPositioner> 
-          <KBarAnimator>
-            <KBarSearch /> 
-          </KBarAnimator>
-        </KBarPositioner>
         
-      </KBarPortal>
       
 
         <div className='flex'>
@@ -115,43 +124,7 @@ export default function Home(){
             <div className='ml-[12em] w-[calc(100%_-_12em)]'>
                 <Topbar/>
                 
-                <div className='flex pt-16'>
-                    <div className='w-1/2 px-4' >
-                    <div className='pt-3  text-center dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r from-white to-gray-500 text-3xl font-bold'>
-                        Start Contributing
-                        </div>
-                        <div className='text-center dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r from-white to-gray-500 text-3xl font-bold'>
-                            Begin Earning
-                        </div>
-                        <h4 className="text-center pt-4 dark:text-gray-400 text-[15px]">
-                        Get recommendations based on your profile and past contributions.
-                        </h4>
-                        <h4 className="text-center pt-2 dark:text-gray-400 text-[15px]">
-                        Didn’t find what you’re looking for?
-                        </h4>
-
-                        <div className='flex mt-4 space-x-5'>
-                        <div className='p-4 w-1/2 rounded-xl border-gray-400 dark:border-gray-800 border-1'>
-                            <h3 className='text-[14px] flex'><svg xmlns="http://www.w3.org/2000/svg" className="my-auto mr-3" width="20" height="20" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 6.5h9.75c2.107 0 3.16 0 3.917.506a3 3 0 0 1 .827.827C22 8.59 22 9.393 22 11.5m-10-5l-.633-1.267c-.525-1.05-1.005-2.106-2.168-2.542C8.69 2.5 8.108 2.5 6.944 2.5c-1.816 0-2.724 0-3.406.38A3 3 0 0 0 2.38 4.038C2 4.72 2 5.628 2 7.444V10.5c0 4.714 0 7.071 1.464 8.535C4.822 20.394 6.944 20.493 11 20.5h1m10 1l-2.147-2.147m0 0a3.43 3.43 0 0 0 1.004-2.424a3.429 3.429 0 1 0-1.004 2.424" color="currentColor"></path></svg>Browse</h3>
-                            <p className='text-gray-500 text-[14px] pt-2'>Browse Projects and Dive into world of hidden rewards.</p>
-                        </div>
-                        <div className='p-4 w-1/2 rounded-xl border-gray-400 dark:border-gray-800 border-1'>
-                            <h3 className='text-[14px] flex'><svg xmlns="http://www.w3.org/2000/svg" className="mr-3" width="20" height="20" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2m16 0h2m-7-1v2m-6-2v2"/></g></svg>GitBot</h3>
-                            <p className='text-gray-500 text-[14px] pt-2'>Can't find Interting projects.Try our AI Bot to find porjects that you love.</p>
-                        </div>
-                    </div>
-                    </div>
-                    <div className='w-1/2 rounded-xl px-4 '>
-                        <img 
-                            src='/home_back.jpg' 
-                            alt=""  
-                            className='rounded-2xl h-[20em] object-cover w-full '
-                        />
-                    </div>
-                    
-                    
-                       
-                </div>
+                
                 <div className='mt-10 mx-4'>
                         <div>
                             <h1 className='pt-3 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r from-white to-gray-500 text-3xl font-bold'>Projects in your favorite languages </h1>
@@ -189,25 +162,22 @@ export default function Home(){
                 </div>
             </div>
         </div>
-
-        <div className='mt-10 mx-4 fixed left-[30%] top-[10%] bg-black p-10 rounded-xl'>
-                <div>
-                    <h1 className='pt-3 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r from-white to-gray-500 text-3xl font-bold'>Projects in your favorite languages</h1>
-                    <p className='pt-2 dark:text-gray-400 text-[15px]'>Discover projects that match the languages you love to code in.</p>
-                    
+        {isSearchOpen && (
+            <div className='mt-10 mx-4 fixed left-[30vw] top-[10%] bg-black  rounded-xl max-h-[60vh] overflow-hidden'>
+                <div className="h-full overflow-y-auto">
                     {/* Add search input */}
-                    <div className="mb-4">
+                    <div className="w-[60vw] ">
                         <input
                             type="text"
                             placeholder="Search projects..."
-                            className="p-2 border border-gray-300 rounded w-full max-w-md"
+                            className="p-2 w-[100%] border border-gray-300 rounded  "
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={(e) => {setSearchTerm(e.target.value);setSearchOpen(true)}}
                         />
                     </div>
 
-                    <div className='py-5  gap-4'>
-                        {isLoading ? (
+                    <div className=' space-y-4 max-h-[calc(60vh-12rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent'>
+                        {isLoading && openSearch ? (
                             <>
                                 {filteredRepos.map((repo: any) => {
                                     if (!repo.image_url?.trim()) return null;
@@ -231,7 +201,7 @@ export default function Home(){
                     </div>
                 </div>
             </div>
-        </KBarProvider>
+        )}
         </>
     )
 
