@@ -1,4 +1,4 @@
-import {useState} from React;
+import {useState} from 'react';
 
 export default function Chats(){
     return(
