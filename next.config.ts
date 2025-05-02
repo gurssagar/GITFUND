@@ -4,7 +4,8 @@ const nextConfig: NextConfig = {
   images: {
     domains: [
       'avatars.githubusercontent.com',
-      's3.tebi.io'
+      's3.tebi.io',
+      'gursagar.app.n8n.cloud'
       // Add other domains you need here
     ],
   },};
