@@ -12,6 +12,12 @@ import remarkHtml from 'remark-html';
 import { Groq } from 'groq-sdk';
 import Link from 'next/link'
 
+import {
+    FaJs, FaPython, FaHtml5, FaCss3Alt, FaReact, FaNodeJs, FaJava, FaPhp, FaRust, FaSwift, FaDocker, FaGitAlt, FaSass, FaVuejs, FaAngular, FaDatabase, FaLinux, FaApple, FaWindows, FaAndroid, FaCode, FaTerminal, FaMarkdown
+} from 'react-icons/fa'; // Added Vue, Angular, DB, OS, Code, Terminal, Markdown icons
+import {
+    SiTypescript, SiSolidity, SiCplusplus, SiGo, SiKotlin, SiRuby, SiPerl, SiScala, SiLua, SiDart, SiElixir, SiClojure, SiR, SiAssemblyscript, SiGnubash, SiGraphql, SiKubernetes, SiTerraform, SiSwift // Added many more Si icons
+} from 'react-icons/si'
 
 interface ProjectData {
     projectOwner: string;
@@ -41,10 +47,95 @@ export default function Project() {
     });
     console.log(octokit)
     const [width, setWidth] = useState('300px');
-    
+    const [languages, setLanguages] = useState<any>([]);
 
 
-    
+    const getLanguageIcon = (lang: string) => {
+        const lowerLang = lang.toLowerCase();
+        console.log(lang,"langs")
+        // Prioritize specific languages first
+        switch (lowerLang) {
+            case 'javascript':
+                return <FaJs className="mr-1" size={30} />;
+            case 'typescript':
+                return <SiTypescript className="mr-1" size={30} />;
+            case 'python':
+                return <FaPython className="mr-1" size={30} />;
+            case 'java':
+                 return <FaJava className="mr-1" size={30} />;
+            case 'c++': case 'cpp':
+                 return <SiCplusplus className="mr-1" size={30} />;
+            case 'c': // Often just 'c'
+                 return <SiCplusplus className="mr-1" size={30} />; // Using C++ icon as a fallback
+            case 'php':
+                 return <FaPhp className="mr-1" size={30} />;
+            case 'ruby':
+                 return <SiRuby className="mr-1" size={30} />;
+            case 'go': case 'golang':
+                 return <SiGo className="mr-1" size={30} />;
+            case 'rust':
+                 return <FaRust className="mr-1" size={30} />;
+            case 'swift':
+                 return <SiSwift className="mr-1" size={30} />;
+            case 'kotlin':
+                 return <SiKotlin className="mr-1" size={30} />;
+            case 'scala':
+                 return <SiScala className="mr-1" size={30} />;
+            case 'perl':
+                 return <SiPerl className="mr-1" size={30} />;
+            case 'lua':
+                 return <SiLua className="mr-1" size={30} />;
+            case 'dart':
+                 return <SiDart className="mr-1" size={30} />;
+            case 'r':
+                 return <SiR className="mr-1" size={30} />;
+            case 'solidity':
+                 return <SiSolidity className="mr-1" size={30} />;
+            case 'html': case 'html5':
+                return <FaHtml5 className="mr-1" size={30} />;
+            case 'css': case 'css3':
+                return <FaCss3Alt className="mr-1" size={30} />;
+            case 'sass': case 'scss':
+                 return <FaSass className="mr-1" size={30} />;
+            case 'sql': // Generic SQL
+                 return <FaDatabase className="mr-1" size={30} />;
+            case 'shell': case 'bash': case 'sh':
+                 return <SiGnubash className="mr-1" size={30} />; // Or FaTerminal
+            
+            case 'assembly': case 'asm':
+                 return <SiAssemblyscript className="mr-1" size={30} />; // Using AssemblyScript icon
+            case 'objective-c': // Often 'objective-c'
+                 return <FaApple className="mr-1" size={30} />; // Using Apple icon as fallback
+            case 'elixir':
+                 return <SiElixir className="mr-1" size={30} />;
+            case 'clojure':
+                 return <SiClojure className="mr-1" size={30} />;
+            case 'vue': case 'vue.js':
+                 return <FaVuejs className="mr-1" size={30} />;
+            case 'react': case 'react.js':
+                 return <FaReact className="mr-1" size={30} />;
+            case 'angular': case 'angular.js':
+                 return <FaAngular className="mr-1" size={30} />;
+            case 'node.js': case 'node':
+                 return <FaNodeJs className="mr-1" size={30} />;
+            case 'dockerfile':
+                 return <FaDocker className="mr-1" size={30} />;
+            case 'graphql':
+                 return <SiGraphql className="mr-1" size={30} />;
+            case 'kubernetes': case 'k8s':
+                 return <SiKubernetes className="mr-1" size={30} />;
+            case 'terraform':
+                 return <SiTerraform className="mr-1" size={30} />;
+             case 'markdown': case 'md':
+                 return <FaMarkdown className="mr-1" size={30} />;
+            // Add more specific cases above as needed
+
+            // Default fallback icon
+            default:
+                console.warn(`No specific icon found for language: ${lang}`);
+                return <FaCode className="mr-1" size={30} />; // Generic code icon
+        }
+    };
 
     const fetchWithRetry = async (fn: () => Promise<any>, retries = 3, delay = 1000) => {
         try {
@@ -129,7 +220,27 @@ export default function Project() {
 }, [Repo]); // Add Repo as dependency
 
 
-
+    useEffect(() => {
+        const fetchLang=async()=> {
+            if (!projectData) return;
+            try{
+                const response = await octokit.request(`/repos/${projectData.projectOwner}/${projectData.project_repository}/languages`, {
+                     owner:projectData.projectOwner,
+                            repo:projectData.project_repository,
+                            headers: {
+                                'X-GitHub-Api-Version': '2022-11-28'
+                            }
+                }).then(response => response.data).then(res => {
+                    setLanguages(res)
+                })
+                        
+            }
+            catch(e){
+                console.log(e)
+            }
+        }
+        fetchLang();
+    })
     useEffect(() => {
 
         const fetchContributors = async () => {
@@ -370,6 +481,20 @@ export default function Project() {
                                                 alt={collab.login}
                                                 className="w-7 h-7 rounded-full"
                                             />
+                                        </div>
+                                    ))}
+                                </div>
+                                </div>
+                            </div>
+                            <hr className="text-gray-800 mt-4"></hr>
+                            <div>
+                                <h2 className="text-xl font-bold pt-4">Languages</h2>
+                                <div className=" pt-2 space-x-2">
+                                    <div className="flex space-x-2">
+                                    {Object.keys(languages).map((lang:any) => (
+                                        <div key={lang} className="flex items-center">
+                                            {getLanguageIcon(lang)}
+                                            
                                         </div>
                                     ))}
                                 </div>

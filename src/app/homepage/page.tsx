@@ -48,8 +48,26 @@ export default function Home(){
     const [repoData,setRepoData]=useState<any>([])
     const [projImage,setProjImage]=useState<any>(null)
     const [isLoading, setIsLoading] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [openSearch,setSearchOpen]=useState(false)
+    const router=useRouter()
+    
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.ctrlKey && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                setIsSearchOpen(prevState => !prevState);
+            } else if (e.key === 'Escape') {
+                setIsSearchOpen(false);
+            }
+        };
 
+        window.addEventListener('keydown', handleKeyDown);
 
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
     useEffect(() => {
         if (searchTerm.trim() === '') {
             setFilteredRepos(repoData);
@@ -99,15 +117,7 @@ export default function Home(){
     return(
         <>
         
-        <KBarProvider actions={actions}>
-      <KBarPortal> 
-        <KBarPositioner> 
-          <KBarAnimator>
-            <KBarSearch /> 
-          </KBarAnimator>
-        </KBarPositioner>
         
-      </KBarPortal>
       
 
         <div className='flex'>
@@ -190,24 +200,22 @@ export default function Home(){
             </div>
         </div>
 
-        <div className='mt-10 mx-4 fixed left-[30%] top-[10%] bg-black p-10 rounded-xl'>
-                <div>
-                    <h1 className='pt-3 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r from-white to-gray-500 text-3xl font-bold'>Projects in your favorite languages</h1>
-                    <p className='pt-2 dark:text-gray-400 text-[15px]'>Discover projects that match the languages you love to code in.</p>
-                    
+        {isSearchOpen && (
+            <div className='mt-10 mx-4 fixed left-[30vw] top-[10%] bg-black  rounded-xl max-h-[60vh] overflow-hidden'>
+                <div className="h-full overflow-y-auto">
                     {/* Add search input */}
-                    <div className="mb-4">
+                    <div className="w-[60vw] ">
                         <input
                             type="text"
                             placeholder="Search projects..."
-                            className="p-2 border border-gray-300 rounded w-full max-w-md"
+                            className="p-2 w-[100%] border border-gray-300 rounded  "
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={(e) => {setSearchTerm(e.target.value);setSearchOpen(true)}}
                         />
                     </div>
 
-                    <div className='py-5  gap-4'>
-                        {isLoading ? (
+                    <div className=' space-y-4 max-h-[calc(60vh-12rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent'>
+                        {isLoading && openSearch ? (
                             <>
                                 {filteredRepos.map((repo: any) => {
                                     if (!repo.image_url?.trim()) return null;
@@ -231,7 +239,7 @@ export default function Home(){
                     </div>
                 </div>
             </div>
-        </KBarProvider>
+        )}
         </>
     )
 

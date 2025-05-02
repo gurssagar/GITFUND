@@ -24,6 +24,7 @@ export default function MyProject() {  // Changed from myProject to MyProject
                         'Content-Type': 'application/json'
                     },
                 });
+
                 
                 const data = await response.json();
                 

@@ -64,7 +64,7 @@ export const App = () => {
 					/* --chat--border-radius: 0.5rem; */
 				}
 			`}</style>
-					<div id="n8n-chat" className='z-10 mt-[70px] h-[calc(100vh_-_70px)] w-[76vw]'></div>
+					<div id="n8n-chat" className='z-10 mt-[70px] h-[calc(100vh_-_70px)] w-[calc(100vw_-100px)]'></div>
 				</div>
 			</div>
 			
