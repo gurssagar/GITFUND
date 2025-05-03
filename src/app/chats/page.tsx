@@ -4,7 +4,7 @@ import '@n8n/chat/style.css';
 import { createChat } from '@n8n/chat';
 import Sidebar from '@/assets/components/sidebar';
 import Topbar from '@/assets/components/topbar';
-export const App = () => {
+const ChatPage = () => {
 	useEffect(() => {
 		createChat({
 			webhookUrl: 'https://gursagar.app.n8n.cloud/webhook/6f77413f-7659-4ae7-8bc7-c3ec85ae0f3d/chat', // Keep your original webhook URL or update if needed
@@ -72,5 +72,6 @@ export const App = () => {
 );
 };
 
-export default App;
+
+export default ChatPage;
 

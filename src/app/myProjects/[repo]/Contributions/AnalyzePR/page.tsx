@@ -19,7 +19,6 @@ export default function Page() {
       >
         Schedule a call
       </div>
-
       {completion}
     </div>
   );

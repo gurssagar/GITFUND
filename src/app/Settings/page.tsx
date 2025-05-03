@@ -2,15 +2,11 @@
 import React, { useEffect, useState } from 'react'
 import Sidebar from '@/assets/components/sidebar';
 import Topbar from '@/assets/components/topbar';
-import { useSession } from 'next-auth/react';
+import { useSession } from "next-auth/react";
 import Image from 'next/image';
-export default function page() {
+export default function Page() {
     const session = useSession();
     console.log(session.data)
-    useEffect(() => {
-        const git=async()=>{
-        }
-    })
     return (
         <>
         <div>
@@ -24,7 +20,6 @@ export default function page() {
                         </div>
                     </div>
                 </div>
-
         </div>
         
         </>

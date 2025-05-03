@@ -48,7 +48,7 @@ export default function Project() {
     console.log(octokit)
     const [width, setWidth] = useState('300px');
     const [languages, setLanguages] = useState<any>([]);
-
+    const [commitData,setCommitData]=useState<any>([]);
 
     const getLanguageIcon = (lang: string) => {
         const lowerLang = lang.toLowerCase();
@@ -165,7 +165,7 @@ export default function Project() {
 
 
     
-
+        
     useEffect(() => {
         const fetchProjectData = async () => {
             try {
@@ -378,6 +378,9 @@ export default function Project() {
 
     // ... existing code ...
     console.log(projects,"heyoo")
+
+    
+
     useEffect(() => {
     const fetchRepoDetails = async () => {
         if (!projectData) return;
@@ -418,6 +421,28 @@ export default function Project() {
 
         fetchRepoDetails();
     }, [projects]);
+    useEffect(() => {
+        const fetchCommits=async()=> {
+             if (!octokit || !projectData) return;
+             try{
+                 await octokit.request(`/repos/${projectData.projectOwner}/${projectData.project_repository}/commits`, {
+                             owner:projectData.projectOwner,
+                             repo:projectData.project_repository,
+                             headers: {
+                                 'X-GitHub-Api-Version': '2022-11-28'
+                             }
+                 }).then(response => response.data).then(res => {
+                    console.log(res,'commits')
+                    setCommitData(res)
+                 })
+             }
+             catch(e){
+                 console.log(e)
+             }
+        }
+        fetchCommits();
+     }, []);
+    
 
     if (isLoading) {
         return <div>Loading...</div>;
@@ -427,6 +452,18 @@ export default function Project() {
         return <div>Project not found</div>;
     }
     console.log(issues,'test')
+    
+    
+
+    const formatCommitDate = (dateString:any) => {
+        if (!dateString) return '';
+        return format(new Date(dateString), 'dd MMM.');
+    };
+
+    const getCommitColor = (sha:any) => {
+        const colors = ['bg-green-600', 'bg-purple-600', 'bg-blue-600'];
+        return colors[sha.charCodeAt(0) % colors.length];
+    };
 
     return (
         <>
@@ -618,6 +655,9 @@ export default function Project() {
                                                                 
                                                             </div>
                                                             
+
+                                                            
+                                                            
                                                     </div>
                                                 </div>
                                                 </div>        
@@ -628,6 +668,41 @@ export default function Project() {
 
                                 }
                                 
+                            </div>
+
+                            
+
+
+
+                            <div className="mt-6 w-full bg-black rounded-lg p-4">
+                            <h2 className="text-2xl font-bold mb-4 text-white">Recent Activity</h2>
+                            
+                            {commitData && commitData.length > 0 ? (
+                                <div className="space-y-2">
+                                    {commitData.map((commit, index) => (
+                                        <div key={commit.sha} className="flex justify-between items-center">
+                                            <div className="flex items-center">
+                                                <div className={`${getCommitColor(commit.sha)} text-white px-2 py-1 rounded-md mr-3`}>
+                                                    <span className="text-xs">{index + 2970}</span>
+                                                </div>
+                                                <a 
+                                                    href={commit.html_url} 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    className="text-white hover:underline"
+                                                >
+                                                    {commit.commit.message.split('\n')[0]}
+                                                </a>
+                                            </div>
+                                            <div className="text-gray-400 text-sm">
+                                                {formatCommitDate(commit.commit.committer?.date || commit.commit.author?.date)}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-gray-400">No recent commits found</p>
+                            )}
                             </div>
                         
                         </div>

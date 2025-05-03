@@ -1,18 +1,22 @@
-import { experimental_createMCPClient, streamText } from 'ai';
-import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
-import { groq } from '@ai-sdk/groq';
+import { NextResponse } from "next/server";
 
-export default async function handler(req:Request, res:Response) {
-  if (req.method === 'POST') {
-    // Process the webhook payload
-    const payload = req.body;
-    // Do something with the payload (e.g., log it or save it in the database)
-    console.log('Webhook received:', payload);
-    // Send a response to acknowledge receipt of the webhook
-    res.status(200).json({ message: 'Webhook received successfully' });
-  } else {
-    // Respond with a 405 Method Not Allowed if the method is not POST
-    res.setHeader('Allow', ['POST']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
-  }
+import io from 'socket.io-client';
+const socket = io('http://localhost:4000');
+
+export async function POST(req:any, res:any) {
+
+    try {
+
+        // do something you need to do in the backend 
+        // (like database operations, etc.)
+
+        socket.emit('message1', 'Sync Process Completed');
+
+        return NextResponse.json({ data: 'Success' }, { status: 200 });
+
+    } catch (error) {
+        console.error('Error:', error);
+        return NextResponse.json({ error: error }, { status: 200 })
+    }
+    
 }
