@@ -124,33 +124,41 @@ export default function Home(){
             <div className='ml-[12em] w-[calc(100%_-_12em)]'>
                 <Topbar/>
                 
-                
+               
                 <div className='mt-20 mx-4'>
                         <div>
                             <h1 className='pt-3 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r from-white to-gray-500 text-3xl font-bold'>Projects in your favorite languages </h1>
                             <p className='pt-2 dark:text-gray-400 text-[15px]'>Discover projects that match the languages you love to code in.</p>
+                             <div className="mt-4 mx-4">
+                            <input
+                                    type="text"
+                                    placeholder="Search projects by name or description..."
+                                    className="p-2 w-full border border-gray-600 rounded bg-gray-900 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)} // Update state on change
+                                />
+                            </div>
                             <div className=' py-5 grid grid-cols-3 gap-4'>
                             {
                                 isLoading?
                                 <>
-                                {repoData.map((repo:any) => {
-                        if (!repo.image_url?.trim()) return null;
-                        
-                        return (
-                            <div key={repo.projectName} className="hover:scale-[1.02] transition-transform duration-200">
-                                <a href={`/projects/${repo.project_repository}`}>
-                                    <Issue 
-                                        image={repo.image_url || 'back_2.jpg'}
-                                        Project={repo.projectName}
-                                        Fork={42}
-                                        Stars={128}
-                                        Contributors={8}
-                                        shortDescription={repo.shortdes}
-                                    />
-                                </a>
-                            </div>
-                        );
-                    })}
+                                {filteredRepos.map((repo: any) => {
+                                    if (!repo.image_url?.trim()) return null;
+                                    return (
+                                        <div key={repo.projectName} className="hover:scale-[1.02] transition-transform duration-200">
+                                            <a href={`/projects/${repo.project_repository}`}>
+                                                <Issue 
+                                                    image={repo.image_url || 'back_2.jpg'}
+                                                    Project={repo.projectName}
+                                                    Fork={42}
+                                                    Stars={128}
+                                                    Contributors={8}
+                                                    shortDescription={repo.shortdes}
+                                                />
+                                            </a>
+                                        </div>
+                                    );
+                                })}
                             
                                 </>:
                                 <></>

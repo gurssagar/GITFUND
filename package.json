@@ -25,6 +25,7 @@
     "@splinetool/runtime": "^1.9.82",
     "ai": "^4.3.10",
     "cookies-next": "^5.1.0",
+    "date-fns": "^4.1.0",
     "devicon": "^2.16.0",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.41.0",
