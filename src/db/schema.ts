@@ -32,4 +32,31 @@ export const assignIssues = pgTable('assignIssues', {
   description: text('description'),
 });
 
+export const assignedIssues= pgTable('assignedIssues', {
+  projectName: varchar('projectName',{ length: 256 }),
+  Contributor_id: varchar('Contributor', { length: 256 }),
+  issue: varchar('issue', { length: 256 }),
+  image_url: varchar('image_url', { length: 256 }),
+  name: varchar('name', { length: 256 }),
+  description: text('description')
+})
+
+export const pendingReview= pgTable('pendingReview', {
+  projectName: varchar('projectName',{ length: 256 }),
+  Contributor_id: varchar('Contributor', { length: 256 }),
+  issue: varchar('issue', { length: 256 }),
+  image_url: varchar('image_url', { length: 256 }),
+  name: varchar('name', { length: 256 }),
+  description: text('description')
+})
+
+export const completedIssues= pgTable('completedIssues', {
+  projectName: varchar('projectName',{ length: 256 }),
+  Contributor_id: varchar('Contributor', { length: 256 }),
+  issue: varchar('issue', { length: 256 }),
+  image_url: varchar('image_url', { length: 256 }),
+  name: varchar('name', { length: 256 }),
+  description: text('description')
+})
+
 

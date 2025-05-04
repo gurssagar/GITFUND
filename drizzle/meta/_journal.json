@@ -50,6 +50,20 @@
       "when": 1744025830099,
       "tag": "0006_green_tyger_tiger",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1746332786350,
+      "tag": "0007_strong_paladin",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1746332875580,
+      "tag": "0008_smart_phil_sheldon",
+      "breakpoints": true
     }
   ]
 }
