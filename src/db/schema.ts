@@ -59,4 +59,13 @@ export const completedIssues= pgTable('completedIssues', {
   description: text('description')
 })
 
+export const Rewards=pgTable('rewards',{
+  projectName: varchar('projectName',{ length: 256 }),
+  Contributor_id: varchar('Contributor', { length: 256 }),
+  issue: varchar('issue', { length: 256 }),
+  value:varchar('value', { length: 256 }),
+  date:varchar('date', { length: 256 }),
+  }
+)
+
 
