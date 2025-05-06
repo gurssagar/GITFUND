@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-const CONTRACT_ADDRESS = "0x5311cc38317DeBd3cc0e30dfd67c933a53828737"; // Replace with your contract address
+const CONTRACT_ADDRESS = "0x62a15F8b2824F0788771A75e7179b11801F56AfA"; // Replace with your contract address
 const CONTRACT_ABI = [
 	{
 		"anonymous": false,

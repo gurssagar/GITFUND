@@ -306,7 +306,7 @@ export default function Project() {
                                 <input id="projectImage" name="projectImage" type="file" className="w-full p-2 border-1 border-gray-800 rounded-md"/>
                                 </div>
                                 <div className="w-1/3">
-                                <label className="text-[14px]" htmlFor="projectImage">Reward Amount in Eth(Educhain)</label>
+                                <label className="text-[14px]" htmlFor="projectImage">Reward Amount in Pharos</label>
                                 <input id="reward" name="reward" type="text" className="w-full p-2 border-1 border-gray-800 rounded-md"/>
                                 </div>
                                 <div className="space-y-2 w-1/3">
