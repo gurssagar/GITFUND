@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GitFund
+
+GitFund is a web platform designed to bridge the gap between open-source software development on GitHub and cryptocurrency-based rewards. It allows project owners to fund specific issues or pull requests, and contributors to earn crypto (e.g., ETH on networks like Pharos/Educhain) for their work.
+
+## Key Features
+
+*   **GitHub Integration:** Authenticate with GitHub, list your repositories, select issues, view collaborators, and manage pull requests.
+*   **Smart Contract Funding:** Project owners can deposit cryptocurrency into a dedicated smart contract to fund specific tasks.
+*   **Crypto Rewards:** Contributors receive cryptocurrency rewards directly to their wallets upon successful merging of their pull requests by the project owner.
+*   **Web3 Wallet Connection:** Integrates with browser wallets like MetaMask for seamless deposit and withdrawal operations.
+*   **Project & Issue Management:** Create detailed project listings, link them to GitHub repositories and specific issues, and track contributions.
+*   **AI-Powered Descriptions:** Automatically generates project descriptions using AI based on the repository's README content.
+*   **S3 Image Storage:** Project images are uploaded and stored securely using AWS S3.
+
+## How It Works
+
+1.  **Project Creation:** Project owners connect their GitHub account and Web3 wallet. They create a project listing on GitFund, selecting a repository, an issue, and setting a reward amount.
+2.  **Funding:** The owner deposits the specified reward amount into the project's associated smart contract.
+3.  **Contribution:** Developers browse listed projects/issues. They can apply to work on an issue (feature might exist or be planned).
+4.  **Development & PR:** The contributor works on the issue and submits a Pull Request on GitHub.
+5.  **Review & Merge:** The project owner reviews the PR via the GitFund interface.
+6.  **Reward Payout:** Upon deciding to merge, the owner triggers a function that first attempts to withdraw the reward from the smart contract to the contributor's (or owner's, based on current implementation) wallet. If successful, the PR is merged on GitHub, and the transaction is recorded.
+
+## Technology Stack
+
+*   **Frontend:** Next.js, React, TypeScript, Tailwind CSS
+*   **Blockchain Interaction:** Ethers.js
+*   **GitHub API:** Octokit.js
+*   **Authentication:** NextAuth.js (with GitHub Provider)
+*   **AI:** Groq SDK (using models like Llama)
+*   **File Storage:** AWS S3 (via pre-signed URLs)
+*   **Backend:** Next.js API Routes
 
 ## Getting Started
 
-First, run the development server:
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd GITFUND
+    ```
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    # or
+    yarn install
+    ```
+3.  **Set up environment variables:** Create a `.env.local` file and add necessary variables (GitHub credentials, S3 keys, Groq API key, Smart Contract address, Network details, etc. - *Specific variables need documentation*).
+4.  **Run the development server:**
+    ```bash
+    npm run dev
+    # or
+    yarn dev
+    ```
+5.  Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+*(Note: You'll need a configured Web3 wallet like MetaMask connected to the appropriate network (e.g., Pharos, Educhain Testnet) and funded with test ETH for contract interactions.)*
