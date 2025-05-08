@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { SessionProvider } from 'next-auth/react';
 import {Web3Provider} from "../assets/components/web3Context";
-
+import { SidebarProvider } from '@/assets/components/SidebarContext';
 
 import "./globals.css";
 import ChatPage from "../assets/components/chatPage";
@@ -34,7 +34,7 @@ export default function RootLayout({
       <body
         className={`bg-background text-foreground`}
       >
-        
+        <SidebarProvider>
         <Web3Provider>
          <SessionProvider>
          
@@ -45,6 +45,7 @@ export default function RootLayout({
         
         </SessionProvider>
         </Web3Provider>
+        </SidebarProvider>
         
       </body>
     </html>

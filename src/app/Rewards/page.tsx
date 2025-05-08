@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react'; // Added useState
 import { useSession } from 'next-auth/react';
 import Topbar from '@/assets/components/topbar';
 import Sidebar from '@/assets/components/sidebar';
+import { useSidebarContext } from '@/assets/components/SidebarContext';
+
 // Removed unused useSearchParams for now
 // Consider adding an icon library like react-icons if needed: npm install react-icons
 // import { FiFilter, FiSearch } from 'react-icons/fi'; // Example icon import
@@ -27,7 +29,7 @@ export default function Rewards() {
     const [loading, setLoading] = useState(false); // Example loading state
     const [error, setError] = useState<string | null>(null); // Example error state
     const [searchTerm, setSearchTerm] = useState(''); // State for search input
-
+    const { isShrunk } = useSidebarContext(); // Assuming you have a SidebarContext
     // Placeholder summary data - fetch this from your API
     const totalRewarded = 0;
     const totalPaid = 0;
@@ -63,8 +65,8 @@ export default function Rewards() {
     return (
         <div className="flex h-screen text-gray-200">
             <Sidebar />
-            <div className="flex-1 flex flex-col overflow-hidden ml-[192px]"> {/* Adjust margin based on actual Sidebar width */}
-                <Topbar />
+            <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
+            <Topbar />
                 <main className="flex-1 overflow-x-hidden overflow-y-auto  mt-[60px]"> {/* Adjust margin based on actual Topbar height */}
                     <div className="container mx-auto px-6 py-8">
                         {/* Top Summary Cards */}

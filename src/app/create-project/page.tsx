@@ -8,7 +8,7 @@ import { Groq } from 'groq-sdk';
 import { ethers } from 'ethers';
 import { useWeb3 } from "../../assets/components/web3Context";
 import { getContract } from "../../assets/components/contract";
-
+import { useSidebarContext } from '@/assets/components/SidebarContext';
 export default function Project() {
     const session = useSession();
     const [token, setToken] = useState('');
@@ -16,7 +16,7 @@ export default function Project() {
     const [selectedRepo, setSelectedRepo] = useState<any>();
     const [data, setData] = useState<any[]>();
     const [issues, setIssues] = useState<any[]>();
-
+    const { isShrunk } = useSidebarContext();
     const { provider, signer } = useWeb3(); // Removed unused account
     const [contractBalance, setContractBalance] = useState("0");
 
@@ -182,7 +182,7 @@ export default function Project() {
             if (!signer) return alert("Connect your wallet first!");
             try {
                 const contract = getContract(signer);
-                const tx = await contract.deposit({ value: ethers.parseEther(rewardAmount) });
+                const tx = await contract.deposit({ value: ethers.parseEther(rewardAmount) },{username:ethers.parseEther((session.data as any)?.user?.username)});
                 await tx.wait();
                 await fetchBalance();
             } catch (error) {
@@ -281,7 +281,7 @@ export default function Project() {
         <>
             <div className='flex'>
             <Sidebar/>
-            <div className='ml-[12em] w-[calc(100%_-_12em)]'>
+            <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
                     <Topbar />
                     <div className="mt-20  justify-center">
                         <form onSubmit={addProject} className=" p-10 mx-auto space-y-4">

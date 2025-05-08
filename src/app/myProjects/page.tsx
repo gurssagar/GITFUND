@@ -6,9 +6,11 @@ import { useSession } from 'next-auth/react';
 import Sidebar from '@/assets/components/sidebar';
 import Topbar from '@/assets/components/topbar';
 import Issue from '@/assets/components/issue';
+import {useSidebarContext} from '@/assets/components/SidebarContext'
 export default function MyProject() {  // Changed from myProject to MyProject
     const session = useSession();
     console.log(session.data)
+    const {isShrunk}=useSidebarContext()
     const [image,updateImage]=useState('')
     const [visible,setVisible]=useState(null)
     const [repoData,setRepoData]=useState<any>([])
@@ -48,8 +50,8 @@ export default function MyProject() {  // Changed from myProject to MyProject
         <>
         <div className='flex'>
             <Sidebar/>
-            <div className='ml-[12em] w-[calc(100%_-_12em)]'>
-                <Topbar/>
+            <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
+            <Topbar/>
                 <div className='pt-20 grid grid-cols-3 gap-6 mx-10'>
                     {repoData.map((repo:any) => {
                         if (!repo.image_url?.trim()) return null;

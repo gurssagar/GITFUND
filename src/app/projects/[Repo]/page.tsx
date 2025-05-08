@@ -11,7 +11,8 @@ import remarkHtml from 'remark-html';
 import { Groq } from 'groq-sdk';
 import Link from 'next/link';
 import { format } from 'date-fns'; // Add import for format
-
+import { useSidebarContext } from '@/assets/components/SidebarContext';
+import {isShrunk} from '@/assets/components/SidebarContext'
 import {
     FaJs, FaPython, FaHtml5, FaCss3Alt, FaReact, FaNodeJs, FaJava, FaPhp, FaRust, FaSwift, FaDocker, FaGitAlt, FaSass, FaVuejs, FaAngular, FaDatabase, FaLinux, FaApple, FaWindows, FaAndroid, FaCode, FaTerminal, FaMarkdown
 } from 'react-icons/fa';
@@ -29,6 +30,7 @@ export default function Project() {
     const params = useParams();
     const session = useSession();
     const Repo = params?.Repo as string;
+    const { isShrunk } = useSidebarContext();
     
     // State declarations
     const [aiReply, setAiReply] = useState("");
@@ -322,14 +324,14 @@ export default function Project() {
     return (
         <>
             {rateLimitExceeded && (
-                <div className="fixed top-0 left-0 right-0 bg-yellow-500 text-white p-4 text-center">
+                <div className="fixed top-0 left-0 right-0 bg-yellow-500 dark:text-white text-black p-4 text-center">
                     Rate limit exceeded. Please wait {retryAfter} seconds before trying again.
                 </div>
             )}
             <div className='flex'>
             <Sidebar/>
-            <div className='ml-[12em] w-[calc(100%_-_12em)]'>
-                <Topbar/>
+            <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
+            <Topbar/>
                 <div className="px-4 py-8 flex pt-20">
                     <div className="w-[300px]">
                         <div>
@@ -470,12 +472,12 @@ export default function Project() {
                                                         }
                                                     }}
                                                 >
-                                                    <button className="bg-white text-black px-2 py-1 rounded">Contribute Now</button>
+                                                    <button className="dark:bg-white bg-black text-white  dark:text-black  px-2 py-1 rounded">Contribute Now</button>
                                                 </Link>
                                                 <div>
                                                     {projects.map((project: any) => (
                                                         project.project_issues && project.project_issues.includes(issue.number.toString()) && (
-                                                            <div key={project.id} className="text-gray-300 text-bold">{project.rewardAmount} ETH</div>
+                                                            <div key={project.id} className="dark:text-gray-300  text-gray-900 text-bold">{project.rewardAmount} ETH</div>
                                                         )
                                                     ))}
                                                 </div>
@@ -486,21 +488,21 @@ export default function Project() {
                             </div>
 
                             <div className="mt-6 w-full border border-rounded-full border-gray-800 rounded-lg p-4">
-                                <h2 className="text-2xl font-bold mb-4 text-white">Recent Activity</h2>
+                                <h2 className="text-2xl font-bold mb-4 dark:text-white text-black">Recent Activity</h2>
                                 
                                 {commitData && commitData.length > 0 ? (
                                     <div className="space-y-2">
                                         {commitData.slice(0, 10).map((commit: any, index: number) => (
                                             <div key={commit.sha} className="flex justify-between items-center">
                                                 <div className="flex items-center">
-                                                    <div className={`${getCommitColor(commit.sha)} text-white px-2 py-1 rounded-md mr-3`}>
+                                                    <div className={`${getCommitColor(commit.sha)} dark:text-white text-black px-2 py-1 rounded-md mr-3`}>
                                                         <span className="text-xs">{index + 2970}</span>
                                                     </div>
                                                     <a 
                                                         href={commit.html_url} 
                                                         target="_blank" 
                                                         rel="noopener noreferrer"
-                                                        className="text-white hover:underline"
+                                                        className="dark:text-white text-black hover:underline"
                                                     >
                                                         {commit.commit.message.split('\n')[0]}
                                                     </a>

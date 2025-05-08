@@ -5,7 +5,8 @@ const nextConfig: NextConfig = {
     domains: [
       'avatars.githubusercontent.com',
       's3.tebi.io',
-      'gursagar.app.n8n.cloud'
+      'gursagar.app.n8n.cloud',
+      
       // Add other domains you need here
     ],
   },

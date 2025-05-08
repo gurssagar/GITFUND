@@ -14,8 +14,11 @@ import { useCompletion } from '@ai-sdk/react';
 import { ethers } from 'ethers';
 import { useWeb3 } from "../../../../assets/components/web3Context";
 import { getContract } from "../../../../assets/components/contract";
+import { useSidebarContext } from '@/assets/components/SidebarContext';
 export default function Contributions() {
     const session=useSession();
+    const {isShrunk}=useSidebarContext()
+
     const searchParams = useSearchParams();
     const repo = searchParams.get('repo');
     const issueNumber = searchParams.get('issueNumber');
@@ -288,8 +291,8 @@ export default function Contributions() {
           <>
           <div className='flex'>
               <Sidebar/>
-              <div className='ml-[12em] w-[calc(100%_-_12em)]'>
-                      <Topbar/>
+              <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
+              <Topbar/>
                       <div className="px-4 py-8 pt-20">
                           <h1 className="text-2xl font-bold mb-6">Pull Requests for {repo}</h1>
                           <div className="space-y-4">
