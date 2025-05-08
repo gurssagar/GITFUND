@@ -63,7 +63,7 @@ export default function Sidebar() {
                         {!isShrunk && "Contributions"}
                     </div>
                     </Link>
-                    <Link href="/projects" className=''>
+                    <Link href="/assignedProjects" className=''>
                     <div className='rounded-lg text-sm data-[active=true]:bg-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a] px-2 py-2 flex'>
                         <svg xmlns="http://www.w3.org/2000/svg" className='my-auto mr-2' width="20" height="20" viewBox="0 0 48 48"><defs><mask id="ipSSeoFolder0"><g fill="none" stroke-width="4"><path fill="#fff" stroke="#fff" stroke-linejoin="round" d="M5 8a2 2 0 0 1 2-2h12l5 6h17a2 2 0 0 1 2 2v26a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/>
                         <path stroke="#000" stroke-linecap="round" stroke-linejoin="round" d="m14 22l5 5l-5 5"/><path stroke="#000" stroke-linecap="round" d="M26 32h8"/></g></mask></defs>

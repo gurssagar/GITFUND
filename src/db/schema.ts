@@ -4,6 +4,7 @@ import { pgTable,json, text, varchar } from "drizzle-orm/pg-core";
 export const users = pgTable('users', {
   id: varchar('id',{ length: 256 }).primaryKey(),
   fullName: text('full_name'),
+  image_url: varchar('image_url', { length: 256 }),
   metaMask: varchar('MetaMask Wallet Address', { length: 256 }),
   email: varchar('email', { length: 256 }),
 });
@@ -34,6 +35,7 @@ export const assignIssues = pgTable('assignIssues', {
 
 export const assignedIssues= pgTable('assignedIssues', {
   projectName: varchar('projectName',{ length: 256 }),
+  projectOwner: varchar('projectOwner', { length: 256 }),
   Contributor_id: varchar('Contributor', { length: 256 }),
   issue: varchar('issue', { length: 256 }),
   image_url: varchar('image_url', { length: 256 }),

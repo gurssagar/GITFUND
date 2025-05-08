@@ -22,8 +22,10 @@ export default function Contributions() {
 
     // State for applied issues (from requestIssue)
     const [applied, setApplied] = useState<IssueData[]>([]);
+    console.log(applied,"APPLIED"); // Log the fetched data t
     // State for assigned issues (from assignedIssue)
     const [assigned, setAssigned] = useState<IssueData[]>([]);
+    console.log(assigned,"ASSIGNED"); // Log the fetched data to the console
 
     useEffect(() => {
         const fetchIssues = async () => {
@@ -62,21 +64,25 @@ export default function Contributions() {
     // Create a Set of keys for assigned issues for efficient lookup
     // Using projectName and issue number as a composite key
     const assignedIssueKeys = new Set(
-        assigned.map(a => `${a.projectName}-${a.issue}`)
+        assigned.map(a => `${a.projectName}-${a.issue}-${a.Contributor_id}`)
     );
+    console.log(assignedIssueKeys, "ASSIGNED ISSUE KEYS"); // Log the Set to the console
 
     // Filter applied list: show only those applied by the user AND NOT present in the assigned list
     const userAppliedOnlyIssues = applied.filter(issue =>
         currentUser &&
         issue.Contributor_id === currentUser &&
-        !assignedIssueKeys.has(`${issue.projectName}-${issue.issue}`) // Exclude if assigned
+        !assignedIssueKeys.has(`${issue.projectName}-${issue.issue}-${issue.Contributor_id}`) // Exclude if assigned
     );
 
     // The 'assigned' state already contains issues assigned to the user (fetched via API filter or filtered here if API doesn't support it)
     // If your API doesn't filter by Contributor_id, you'd filter 'assigned' here:
     // const userAssignedIssues = assigned.filter(issue => currentUser && issue.Contributor_id === currentUser);
     // Since we assume the API filters or the fetchAssignedIssues function handles it, we can use 'assigned' directly.
-    const userAssignedIssues = assigned; // Use the state directly if API filtered
+    const userAssignedIssues = assigned.filter(assigned => 
+        currentUser &&
+        assigned.Contributor_id===currentUser
+    ); // Use the state directly if API filtered
 
     // --- Helper function to render an issue card ---
     const renderIssueCard = (issue: IssueData, index: number) => {

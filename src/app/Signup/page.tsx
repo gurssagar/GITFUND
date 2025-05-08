@@ -14,6 +14,7 @@ interface SessionUser {
 const id = (session?.data?.user as SessionUser)?.username;
     const email = session?.data?.user?.email;
     const name = session?.data?.user?.name;
+    const image_url = session?.data?.user?.image;
         const avail = async () => {
         try {
             const response = await fetch('/api/user-exists', {
@@ -73,6 +74,7 @@ const id = (session?.data?.user as SessionUser)?.username;
                     id,
                     email,
                     name,
+                    image_url,
                     walletAddress
                 }),
             });
