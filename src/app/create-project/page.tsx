@@ -84,7 +84,7 @@ export default function Project() {
     //ai reply
     const [aiReply, setAiReply] = useState<any>();
     const groq = useMemo(() => new Groq({ 
-        apiKey: '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', 
+        apiKey: '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', 
         dangerouslyAllowBrowser: true 
     }), []);
 
@@ -99,7 +99,7 @@ export default function Project() {
                         content: `Read this and explain the project to a developer in 100 words ${JSON.stringify(repoValue)}`,
                     },
                 ],
-                model: "llama-3.2-1b-preview",
+                model: "llama-3.1-8b-instant",
             });
             setAiReply(chatCompletion.choices[0]?.message?.content || "");
         }
@@ -139,22 +139,6 @@ export default function Project() {
           console.error("Fetch Balance Error:", error);
         }
       };
-      
-    
-      // Withdraw ETH from the contract
-      const handleWithdraw = async () => {
-        if (!signer) return alert("Connect your wallet first!");
-        try {
-          const contract = getContract(signer);
-          const tx = await contract.withdraw();
-          await tx.wait();
-          alert("Withdrawal successful!");
-          fetchBalance();
-        } catch (error) {
-          console.error("Withdraw Error:", error);
-          alert("Withdraw failed!");
-        }
-      };
 
 
    
@@ -182,11 +166,18 @@ export default function Project() {
             if (!signer) return alert("Connect your wallet first!");
             try {
                 const contract = getContract(signer);
-                const tx = await contract.deposit({ value: ethers.parseEther(rewardAmount) },{username:ethers.parseEther((session.data as any)?.user?.username)});
+                const value=ethers.parseEther(rewardAmount)
+                const username:string=((session.data as any)?.user as any)?.username
+                const tx = await contract.deposit(
+                    username,
+                    { value }
+                     // username as first argument
+                     // value as second argument
+                );           
                 await tx.wait();
                 await fetchBalance();
             } catch (error) {
-                console.error("Deposit Error:", error);
+                console.error("Deposit Error:");
                 throw new Error("Failed to deposit funds");
             }
 
@@ -236,8 +227,7 @@ export default function Project() {
                 }),
             });
         } catch (error) {
-            console.error('Error in project creation:', error);
-            alert('Project creation failed');
+            console.error('Error in project creation:');
         }
     }
 

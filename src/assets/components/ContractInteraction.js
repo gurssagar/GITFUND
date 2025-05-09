@@ -16,7 +16,9 @@ const ContractInteraction = () => {
     if (!signer) return alert("Connect your wallet first!");
     try {
       const contract = getContract(signer);
-      const tx = await contract.deposit({ value: ethers.parseEther(depositAmount) });
+      const user=((session.data)?.user )?.username
+
+      const tx = await contract.deposit(user,{ value: ethers.parseEther(depositAmount) });
       await tx.wait();
       alert(`Deposited ${depositAmount} ETH`);
       fetchBalance();

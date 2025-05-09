@@ -1,20 +1,7 @@
 import { ethers } from "ethers";
 
-const CONTRACT_ADDRESS = "0xbd0e0c852c50180443FDA4983F4b6CFf4B49B44F"; // Replace with your contract address
+const CONTRACT_ADDRESS = "0xfeE4A793833338ff675066D75c30bE2A18036b82"; // Replace with your contract address
 const CONTRACT_ABI = [
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "username",
-				"type": "string"
-			}
-		],
-		"name": "deposit",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
 	{
 		"anonymous": false,
 		"inputs": [
@@ -41,29 +28,6 @@ const CONTRACT_ABI = [
 		"type": "event"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address payable",
-				"name": "_recipient",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_amount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "username",
-				"type": "string"
-			}
-		],
-		"name": "withdraw",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"anonymous": false,
 		"inputs": [
 			{
@@ -87,6 +51,19 @@ const CONTRACT_ABI = [
 		],
 		"name": "Withdrawn",
 		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "username",
+				"type": "string"
+			}
+		],
+		"name": "deposit",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
 	},
 	{
 		"inputs": [],
@@ -156,6 +133,29 @@ const CONTRACT_ABI = [
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address payable",
+				"name": "_recipient",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_amount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "username",
+				"type": "string"
+			}
+		],
+		"name": "withdraw",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	}
 ]
