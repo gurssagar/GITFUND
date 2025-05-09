@@ -6,20 +6,15 @@ const nextConfig: NextConfig = {
       'avatars.githubusercontent.com',
       's3.tebi.io',
       'gursagar.app.n8n.cloud',
-      
+      'gitfund-chat-app.vercel.app',
       // Add other domains you need here
     ],
   },
+  
   typescript: {
-    // !! WARN !!
-    // Dangerously allow production builds to successfully complete even if
-    // your project has type errors.
-    // !! WARN !!
     ignoreBuildErrors: true,
   },
   eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
 };
