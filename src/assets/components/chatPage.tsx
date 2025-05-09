@@ -28,7 +28,7 @@ const ChatPage = () => {
     useEffect(() => {
 
         // Create socket connection
-        const newSocket = io('http://localhost:4000', {
+        const newSocket = io('http://64.227.156.174', {
             reconnectionAttempts: 5,
             reconnectionDelay: 1000,
         });
