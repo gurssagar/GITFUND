@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Sidebar from '@/assets/components/sidebar';
 import Topbar from '@/assets/components/topbar'
 import { useSession } from 'next-auth/react';
-
+import { useSidebarContext } from '@/assets/components/SidebarContext';
 // Define the interface for the issue data (can be used for both applied and assigned)
 interface IssueData {
     projectName: string;
@@ -17,12 +17,15 @@ interface IssueData {
 
 export default function Contributions() {
     const session = useSession();
+    const { isShrunk } = useSidebarContext();
     const currentUser = (session?.data?.user as any)?.username; // Get current user's identifier
 
     // State for applied issues (from requestIssue)
     const [applied, setApplied] = useState<IssueData[]>([]);
+    console.log(applied,"APPLIED"); // Log the fetched data t
     // State for assigned issues (from assignedIssue)
     const [assigned, setAssigned] = useState<IssueData[]>([]);
+    console.log(assigned,"ASSIGNED"); // Log the fetched data to the console
 
     useEffect(() => {
         const fetchIssues = async () => {
@@ -61,21 +64,25 @@ export default function Contributions() {
     // Create a Set of keys for assigned issues for efficient lookup
     // Using projectName and issue number as a composite key
     const assignedIssueKeys = new Set(
-        assigned.map(a => `${a.projectName}-${a.issue}`)
+        assigned.map(a => `${a.projectName}-${a.issue}-${a.Contributor_id}`)
     );
+    console.log(assignedIssueKeys, "ASSIGNED ISSUE KEYS"); // Log the Set to the console
 
     // Filter applied list: show only those applied by the user AND NOT present in the assigned list
     const userAppliedOnlyIssues = applied.filter(issue =>
         currentUser &&
         issue.Contributor_id === currentUser &&
-        !assignedIssueKeys.has(`${issue.projectName}-${issue.issue}`) // Exclude if assigned
+        !assignedIssueKeys.has(`${issue.projectName}-${issue.issue}-${issue.Contributor_id}`) // Exclude if assigned
     );
 
     // The 'assigned' state already contains issues assigned to the user (fetched via API filter or filtered here if API doesn't support it)
     // If your API doesn't filter by Contributor_id, you'd filter 'assigned' here:
     // const userAssignedIssues = assigned.filter(issue => currentUser && issue.Contributor_id === currentUser);
     // Since we assume the API filters or the fetchAssignedIssues function handles it, we can use 'assigned' directly.
-    const userAssignedIssues = assigned; // Use the state directly if API filtered
+    const userAssignedIssues = assigned.filter(assigned => 
+        currentUser &&
+        assigned.Contributor_id===currentUser
+    ); // Use the state directly if API filtered
 
     // --- Helper function to render an issue card ---
     const renderIssueCard = (issue: IssueData, index: number) => {
@@ -83,7 +90,7 @@ export default function Contributions() {
         const imageUrl = issue.image_url?.trim().replace(/`/g, '') || ''; // Handle potentially missing/empty URL
 
         return (
-            <div key={key} className='border border-gray-700 bg-gray-800 rounded p-3 mb-3 flex flex-col gap-2'>
+            <div key={key} className='border border-gray-700 bg-[#181a1f] rounded p-3 mb-3 flex flex-col gap-2'>
                 {/* Top row: Project Name and Issue Number */}
                 <div className="flex justify-between items-center">
                     <h3 className='font-semibold text-md'>{issue.projectName}</h3>
@@ -115,11 +122,11 @@ export default function Contributions() {
         <>
             <div>
                 <Sidebar />
-                <div className='mx-[16em]'>
+                <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
                     <Topbar />
                     <div className={`flex w-[calc(100vw_-_17em)] my-[70px] px-4 gap-4`}>
                         {/* Applied Issues Column - Filtered */}
-                        <div className='min-h-[100vh] w-1/3 py-4 px-3 rounded border border-gray-800 overflow-y-auto bg-gray-900 text-gray-200'>
+                        <div className='min-h-[100vh] w-1/3 py-4 px-3 rounded border border-gray-800 overflow-y-auto  text-gray-200'>
                             <h3 className='font-bold text-lg mb-4 px-2'>My Applied Issues</h3>
                             {userAppliedOnlyIssues.length > 0 ? (
                                 userAppliedOnlyIssues.map(renderIssueCard) // Use the helper function
@@ -129,7 +136,7 @@ export default function Contributions() {
                         </div>
 
                         {/* Assigned Issue Column */}
-                        <div className='min-h-[100vh] py-4 px-3 w-1/3 rounded border border-gray-800 overflow-y-auto bg-gray-900 text-gray-200'> {/* Added styles */}
+                        <div className='min-h-[100vh] py-4 px-3 w-1/3 rounded border border-gray-800 overflow-y-auto  text-gray-200'> {/* Added styles */}
                             <h3 className='font-bold text-lg mb-4 px-2'>My Assigned Issues</h3> {/* Adjusted text */}
                             {userAssignedIssues.length > 0 ? (
                                 userAssignedIssues.map(renderIssueCard) // Use the helper function
@@ -139,7 +146,7 @@ export default function Contributions() {
                         </div>
 
                         {/* Pending Review Column */}
-                        <div className='min-h-[100vh] py-4 px-3 w-1/3 rounded border border-gray-800 overflow-y-auto bg-gray-900 text-gray-200'> {/* Added styles */}
+                        <div className='min-h-[100vh] py-4 px-3 w-1/3 rounded border border-gray-800 overflow-y-auto text-gray-200'> {/* Added styles */}
                             <h3 className='font-bold text-lg mb-4 px-2'>Pending Review</h3> {/* Adjusted text */}
                             {/* Content for Pending Review - Add logic similar to above */}
                              <p className="text-gray-400 px-2">No issues pending review.</p> {/* Placeholder */}

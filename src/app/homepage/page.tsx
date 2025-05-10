@@ -1,6 +1,8 @@
 'use client'
 import { useSession } from 'next-auth/react';
-import {useEffect, useState} from'react'
+import {useEffect, useState} from'react';
+import { useSidebarContext } from '@/assets/components/SidebarContext';
+
 import {useRouter} from 'next/navigation'
 import Image from 'next/image';
 import Link from 'next/link';
@@ -20,25 +22,8 @@ export default function Home(){
     const session=useSession();
     const [searchTerm, setSearchTerm] = useState('');
     const [filteredRepos, setFilteredRepos] = useState<any>([]);
-
+    const {isShrunk}=useSidebarContext()
     //kbar
-
-    const actions = [
-        {
-          id: "blog",
-          name: "Blog",
-          shortcut: ["b"],
-          keywords: "writing words",
-          perform: () => (window.location.pathname = "blog"),
-        },
-        {
-          id: "contact",
-          name: "Contact",
-          shortcut: ["c"],
-          keywords: "email",
-          perform: () => (window.location.pathname = "contact"),
-        },
-      ]
 
     
     console.log(session)
@@ -122,7 +107,7 @@ export default function Home(){
 
         <div className='flex'>
             <Sidebar/>
-            <div className='ml-[12em] w-[calc(100%_-_12em)]'>
+            <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
                 <Topbar/>
                 
                 <div className='flex pt-16'>

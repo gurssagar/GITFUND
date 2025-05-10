@@ -7,6 +7,8 @@ import Link from 'next/link';
 import Sidebar from '@/assets/components/sidebar';
 import Topbar from '@/assets/components/topbar';
 import Issue from '@/assets/components/issue';
+import { useSidebarContext } from '@/assets/components/SidebarContext';
+
 import {
     KBarProvider,
     KBarPortal,
@@ -22,6 +24,7 @@ export default function Home(){
     const [filteredRepos, setFilteredRepos] = useState<any>([]);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [openSearch,setSearchOpen]=useState(false)
+    const {isShrunk}=useSidebarContext()
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.ctrlKey && e.key.toLowerCase() === 'k') {
@@ -121,8 +124,8 @@ export default function Home(){
 
         <div className='flex'>
             <Sidebar/>
-            <div className='ml-[12em] w-[calc(100%_-_12em)]'>
-                <Topbar/>
+            <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
+            <Topbar/>
                 
                
                 <div className='mt-20 mx-4'>

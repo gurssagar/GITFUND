@@ -7,6 +7,7 @@ import Sidebar from "@/assets/components/sidebar";
 import Topbar from "@/assets/components/topbar";
 import Issue from "@/assets/components/issue";
 import { useSearchParams } from 'next/navigation';
+import { useSidebarContext } from '@/assets/components/SidebarContext';
 
 const IssueCommentForm = () => {
   const searchParams = useSearchParams();
@@ -20,7 +21,7 @@ const IssueCommentForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  
+  const { isShrunk } = useSidebarContext();
   const parsedContributors = contributors ? JSON.parse(contributors) : [];
   console.log(parsedContributors,"tegs")
 
@@ -78,8 +79,8 @@ const IssueCommentForm = () => {
         
         <div className='flex'>
             <Sidebar/>
-            <div className='ml-[12em] w-[calc(100%_-_12em)]'>
-                <Topbar/>
+            <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
+            <Topbar/>
                 <div className='flex'>
                 <div className='w-[85%]'>
                 <div className="mt-20 mx-auto w-[calc(100%_-_16rem)] justify-center">

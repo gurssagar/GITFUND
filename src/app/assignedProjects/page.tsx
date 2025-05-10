@@ -4,6 +4,7 @@ import Sidebar from '@/assets/components/sidebar';
 import Topbar from '@/assets/components/topbar';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image'; // Import Image for project icons/avatars
+import { useSidebarContext } from '@/assets/components/SidebarContext';
 
 // Define interfaces for the data structures - ADD fields based on image
 interface Project {
@@ -38,7 +39,7 @@ interface UserContributionData {
 export default function AssignedProjects() {
     const session = useSession();
     const currentUser = (session?.data?.user as any)?.username; // Example: Get current user
-
+    const { isShrunk } = useSidebarContext();
     const [projects, setProjects] = useState<Project[]>([]);
     const [assignedIssues, setAssignedIssues] = useState<AssignedIssue[]>([]);
     // Placeholder for user-specific data - fetch this separately if needed
@@ -123,8 +124,8 @@ export default function AssignedProjects() {
         <>
             <div>
                 <Sidebar />
-                <div className='ml-[256px]'> {/* Adjusted margin-left based on sidebar width */}
-                    <Topbar />
+                <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
+                <Topbar />
                     <div className='mt-[70px] px-4'>
                         <div className="text-2xl font-bold mb-6"> {/* Increased margin-bottom */}
                             My Assigned Projects

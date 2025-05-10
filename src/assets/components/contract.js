@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-const CONTRACT_ADDRESS = "0x5311cc38317DeBd3cc0e30dfd67c933a53828737"; // Replace with your contract address
+const CONTRACT_ADDRESS = "0xfeE4A793833338ff675066D75c30bE2A18036b82"; // Replace with your contract address
 const CONTRACT_ABI = [
 	{
 		"anonymous": false,
@@ -10,6 +10,12 @@ const CONTRACT_ABI = [
 				"internalType": "address",
 				"name": "sender",
 				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "username",
+				"type": "string"
 			},
 			{
 				"indexed": false,
@@ -32,6 +38,12 @@ const CONTRACT_ABI = [
 			},
 			{
 				"indexed": false,
+				"internalType": "string",
+				"name": "username",
+				"type": "string"
+			},
+			{
+				"indexed": false,
 				"internalType": "uint256",
 				"name": "amount",
 				"type": "uint256"
@@ -41,7 +53,13 @@ const CONTRACT_ABI = [
 		"type": "event"
 	},
 	{
-		"inputs": [],
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "username",
+				"type": "string"
+			}
+		],
 		"name": "deposit",
 		"outputs": [],
 		"stateMutability": "payable",
@@ -63,6 +81,63 @@ const CONTRACT_ABI = [
 	{
 		"inputs": [
 			{
+				"internalType": "string",
+				"name": "username",
+				"type": "string"
+			}
+		],
+		"name": "getUsernameBalance",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"name": "usernameToAddress",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"name": "usernameToBalance",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
 				"internalType": "address payable",
 				"name": "_recipient",
 				"type": "address"
@@ -71,6 +146,11 @@ const CONTRACT_ABI = [
 				"internalType": "uint256",
 				"name": "_amount",
 				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "username",
+				"type": "string"
 			}
 		],
 		"name": "withdraw",

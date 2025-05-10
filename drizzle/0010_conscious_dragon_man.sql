@@ -1,0 +1,1 @@
+ALTER TABLE "assignedIssues" ADD COLUMN "projectOwner" varchar(256);

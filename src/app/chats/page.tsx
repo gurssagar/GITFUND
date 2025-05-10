@@ -4,7 +4,10 @@ import '@n8n/chat/style.css';
 import { createChat } from '@n8n/chat';
 import Sidebar from '@/assets/components/sidebar';
 import Topbar from '@/assets/components/topbar';
+import { useSidebarContext } from '@/assets/components/SidebarContext';
+
 const ChatPage = () => {
+	const { isShrunk } = useSidebarContext();
 	useEffect(() => {
 		createChat({
 			webhookUrl: 'https://gursagar.app.n8n.cloud/webhook/6f77413f-7659-4ae7-8bc7-c3ec85ae0f3d/chat', // Keep your original webhook URL or update if needed
@@ -40,7 +43,7 @@ const ChatPage = () => {
 		<>
 			<div>
 				<Sidebar/>
-				<div className='mx-[16em]'>
+                <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
 					<Topbar/>
 					<style jsx global>{`
 				:root {
@@ -64,7 +67,7 @@ const ChatPage = () => {
 					/* --chat--border-radius: 0.5rem; */
 				}
 			`}</style>
-					<div id="n8n-chat" className='z-10 mt-[70px] h-[calc(100vh_-_70px)] w-[calc(100vw_-_260px)]'></div>
+					<div id="n8n-chat" className={`z-10 mt-[70px]  h-[calc(100vh_-_70px)] ${isShrunk?' w-[calc(100%)]':' w-[calc(100%)]'}`}></div>
 				</div>
 			</div>
 			

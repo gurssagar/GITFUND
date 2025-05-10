@@ -7,9 +7,11 @@ import Topbar from '@/assets/components/topbar';
 import Issue from '@/assets/components/issue';
 import { useSearchParams } from 'next/navigation';
 import { AnyARecord } from 'dns';
+import { useSidebarContext } from '@/assets/components/SidebarContext';
 
 export default function AssignIssues() {
     const { data: session } = useSession();
+    const { isShrunk } = useSidebarContext();
     const [assignments, setAssignments] = useState([]);
     const searchParams = useSearchParams();
     const issueNumber = searchParams.get('issueNumber');
@@ -106,8 +108,8 @@ export default function AssignIssues() {
         <>
         <div className='flex'>
             <Sidebar />
-            <div className='ml-[12em] w-[calc(100%_-_12em)]'>
-                <Topbar />
+            <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
+            <Topbar />
                 <div className='mt-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mx-10'> {/* Responsive grid */}
                     {/* Ensure assignments state uses the Assignment interface */}
                     {assignments.map((assignment: any) => {
