@@ -9,6 +9,11 @@ import { ethers } from 'ethers';
 import { useWeb3 } from "../../assets/components/web3Context";
 import { getContract } from "../../assets/components/contract";
 import { useSidebarContext } from '@/assets/components/SidebarContext';
+import {
+    Alert,
+    AlertDescription,
+    AlertTitle,
+  } from "@/components/ui/alert"
 export default function Project() {
     const session = useSession();
     const [token, setToken] = useState('');
@@ -19,8 +24,17 @@ export default function Project() {
     const { isShrunk } = useSidebarContext();
     const { provider, signer } = useWeb3(); // Removed unused account
     const [contractBalance, setContractBalance] = useState("0");
+    const [rewardAmount, setRewardAmount] = useState();
+    const [alertMessage, setAlertMessage] = useState<string | null>(null);
 
-
+    useEffect(() => {
+        if (alertMessage) {
+            const timer = setTimeout(() => {
+                setAlertMessage(null);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [alertMessage]);
     // Set token and user from session
     useEffect(() => {
         if(session.data) {
@@ -141,29 +155,31 @@ export default function Project() {
       };
 
 
-   
-
+    
 
     const addProject = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         
         const formData = new FormData(e.currentTarget);
         const fileInput = formData.get('projectImage') as File;
-        const rewardAmount = formData.get('reward') as string;
         
         // Validate inputs
         if (!repoValue) {
             console.error('Repository content is not available');
+            setAlertMessage('Repository content is not available');
             return;
         }
         if (!rewardAmount || isNaN(Number(rewardAmount))) {
-            alert('Please enter a valid reward amount');
+            setAlertMessage('Please enter a valid reward amount');
             return;
         }
 
         try {
             // Handle deposit first
-            if (!signer) return alert("Connect your wallet first!");
+            if (!signer) {
+                setAlertMessage("Connect your wallet first!");
+                return;
+            }
             try {
                 const contract = getContract(signer);
                 const value=ethers.parseEther(rewardAmount)
@@ -171,13 +187,12 @@ export default function Project() {
                 const tx = await contract.deposit(
                     username,
                     { value }
-                     // username as first argument
-                     // value as second argument
                 );           
                 await tx.wait();
                 await fetchBalance();
             } catch (error) {
                 console.error("Deposit Error:");
+                setAlertMessage("Failed to deposit funds");
                 throw new Error("Failed to deposit funds");
             }
 
@@ -228,6 +243,7 @@ export default function Project() {
             });
         } catch (error) {
             console.error('Error in project creation:');
+            setAlertMessage('Error in project creation');
         }
     }
 
@@ -269,11 +285,20 @@ export default function Project() {
 
     return (
         <>
+            <div className="fixed bottom-20 right-10">
+            {alertMessage && (
+                <Alert>
+                    <AlertTitle>Notice</AlertTitle>
+                    <AlertDescription>{alertMessage}</AlertDescription>
+                </Alert>
+            )}
+            </div>
             <div className='flex'>
             <Sidebar/>
             <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
                     <Topbar />
                     <div className="mt-20  justify-center">
+                        
                         <form onSubmit={addProject} className=" p-10 mx-auto space-y-4">
                             <div className="text-3xl mb-6">
                                 Project Information
@@ -297,7 +322,14 @@ export default function Project() {
                                 </div>
                                 <div className="w-1/3">
                                 <label className="text-[14px]" htmlFor="projectImage">Reward Amount in Pharos</label>
-                                <input id="reward" name="reward" type="text" className="w-full p-2 border-1 border-gray-800 rounded-md"/>
+                                <input
+                                    id="reward"
+                                    name="reward"
+                                    type="text"
+                                    className="w-full p-2 border-1 border-gray-800 rounded-md"
+                                    value={rewardAmount}
+                                    onChange={e => setRewardAmount(e.target.value)}
+                                />
                                 </div>
                                 <div className="space-y-2 w-1/3">
                                 <label className="text-[14px]" htmlFor="difficulty">Difficulty</label>
@@ -341,10 +373,7 @@ export default function Project() {
                                 >
                                     <option value="">Select a repository</option>
                                     {data?.map((repo: any) => (
-                                        <option value={repo.name} key={repo.id}>
-                                        
-                                        
-                                        
+                                        <option value={repo.name} key={repo.id}>                                        
                                             {repo.name}
                                         </option>
                                     ))}
@@ -372,6 +401,7 @@ export default function Project() {
                                 </button>
                             </div>
                         </form>
+                        
                     </div>
                 </div>
             </div>
