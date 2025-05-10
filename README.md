@@ -1,8 +1,5 @@
 # GitFund
 
-GitFund is a web platform designed to bridge the gap between open-source software development on GitHub and cryptocurrency-based rewards. It allows project owners to fund specific issues or pull requests, and contributors to earn crypto (e.g., ETH on networks like Pharos/Educhain) for their work.
-
-## Key Features
 
 *   **GitHub Integration:** Authenticate with GitHub, list your repositories, select issues, view collaborators, and manage pull requests.
 *   **Smart Contract Funding:** Project owners can deposit cryptocurrency into a dedicated smart contract to fund specific tasks.
