@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { db } from '../../../db/index';
-// Assuming 'assignIssues' is the correct table for storing reward info for now.
-// Consider creating a dedicated 'rewards' table if appropriate.
-import { assignIssues } from '../../../db/schema';
+// Assuming 'Rewards' is the correct table for storing reward info for now.
+// Consider creating a dedicated 'Rewards' table if appropriate.
+import { Rewards } from '../../../db/schema';
 
 
 export async function POST(request: Request) {
@@ -34,8 +34,8 @@ export async function POST(request: Request) {
         // Optional: Add date validation if needed
 
         // --- Database Insertion ---
-        // Ensure the keys here exactly match the column names in your assignIssues schema
-        await db.insert(assignIssues).values({
+        // Ensure the keys here exactly match the column names in your Rewards schema
+        await db.insert(Rewards).values({
             projectName,
             Contributor, // Use the correct schema column name if different
             issue,
@@ -57,11 +57,11 @@ export async function POST(request: Request) {
 export async function GET() {
     try {
         // Consider adding filtering (e.g., by Contributor, projectName) and pagination for large datasets
-        const query = db.select().from(assignIssues);
+        const query = db.select().from(Rewards);
 
         const results = await query.execute();
         // Return results under a key that matches the endpoint's purpose
-        return NextResponse.json({ rewards: results });
+        return NextResponse.json({ Rewards: results });
     } catch (error) {
         console.error('Error fetching reward entries:', error);
         const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
