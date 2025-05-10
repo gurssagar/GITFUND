@@ -7,6 +7,12 @@ export const users = pgTable('users', {
   image_url: varchar('image_url', { length: 256 }),
   metaMask: varchar('MetaMask Wallet Address', { length: 256 }),
   email: varchar('email', { length: 256 }),
+  Location: varchar('Location', { length: 256 }),
+  Bio: text('Bio'),
+  Telegram: varchar('Telegram', { length: 256 }),
+  Twitter: varchar('Twitter', { length: 256 }),
+  Linkedin: varchar('Linkedin', { length: 256 }),
+  
 });
 
 export const projects = pgTable('projects', {

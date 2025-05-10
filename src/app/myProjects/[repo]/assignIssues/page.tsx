@@ -21,10 +21,16 @@ export default function AssignIssues() {
     useEffect(() => {
         const fetchAssignments = async () => {
             try {
-                const response = await fetch('/api/requestIssue');
+                const response = await fetch(`/api/requestIssueBasedonProj?${searchParams}`,{
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
                 const data = await response.json();
+                console.log(`/api/requestIssueBasedonProj/${searchParams}`,'tedsjnadjha')
                 console.log('Assignments:', data);
-                setAssignments(data.assignments || []);
+                setAssignments(data.result || []);
             } catch (error) {
                 console.error('Error fetching assignments:', error);
             }

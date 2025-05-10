@@ -102,7 +102,7 @@ export default function MyProject() {  // Changed from myProject to MyProject
                                     query: {
                                         owner:repo.projectOwner,
                                         repo: repo.project_repository,
-                                        issueNumber: repo.issue_number || '1' // Default to 1 if not available
+                                        issueNumber: repo.project_issues || '1' // Default to 1 if not available
                                     }
                                 }}>
                                     <button className='hover:scale-1.05 bg-white text-black px-3 py-2 rounded-xl'>Issues</button>
@@ -112,7 +112,7 @@ export default function MyProject() {  // Changed from myProject to MyProject
                                     query: {
                                         owner:repo.projectOwner,
                                         repo: repo.project_repository,
-                                        issueNumber: repo.issue_number || '1' // Default to 1 if not available
+                                        issueNumber: repo.project_issues || '1' // Default to 1 if not available
                                     }
                                 }}>
                                     <button className='hover:scale-1.05 bg-white text-black px-3 py-2 rounded-xl'>Contributions</button>
