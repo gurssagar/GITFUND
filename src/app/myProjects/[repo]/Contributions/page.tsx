@@ -93,21 +93,16 @@ export default function Contributions() {
 
               // *** Estimate Gas ***
               console.log("Estimating gas for withdrawal...");
-              const estimatedGas = await contract.withdraw.estimateGas(
-                  account, // The recipient of the funds
-                  amountInWei // Use the parsed reward amount in Wei
-              );
-              // Add a 20% buffer to the estimated gas
-              const gasLimit = (estimatedGas * BigInt(120)) / BigInt(100);
-              console.log(`Estimated Gas: ${estimatedGas.toString()}, Gas Limit with 20% buffer: ${gasLimit.toString()}`);
-              // *** End Gas Estimation ***
+              
 
               // Ensure 'account' is the intended RECIPIENT address.
               // If the contributor should receive the funds directly, 'account' might need to be replaced
               // with the contributor's wallet address if available.
+              const user:string=(session?.data?.user as any)?.username
               const tx = await contract.withdraw(
                   account, // The recipient of the funds
-                  amountInWei, // Use the parsed reward amount in Wei
+                  amountInWei,
+                  user,
                   { gasLimit: 3000000 } // Pass the calculated gas limit
               );
 
@@ -130,7 +125,7 @@ export default function Contributions() {
                  alert(`Withdraw failed! Could not estimate gas. The transaction might fail or require manual gas limit.`);
                  console.error("Gas estimation failed. This often indicates an issue that would cause the transaction to revert.");
               } else {
-                 alert(`Withdraw completed`);
+                 alert(`Withdraw failed!`);
               }
               // Log the arguments again in case of failure
               console.error(`Failed withdrawal attempt: Recipient=${account}, Amount=${rewardAmount} ETH`);
@@ -157,6 +152,25 @@ export default function Contributions() {
           }
 
           try {
+              // Step 0: Check if PR is mergeable
+              const prDetails = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
+                  owner: owner as string,
+                  repo: repo as string,
+                  pull_number: Number(pullNumber),
+                  headers: {
+                      'X-GitHub-Api-Version': '2022-11-28'
+                  }
+              });
+              // The mergeable property can be true, false, or null (if not yet computed)
+              if (prDetails.data.mergeable === false) {
+                  alert(`PR #${pullNumber} is not mergeable. Please resolve conflicts or check PR status.`);
+                  return;
+              }
+              if (prDetails.data.mergeable === null) {
+                  alert(`PR #${pullNumber} mergeability is unknown. Please try again in a few seconds.`);
+                  return;
+              }
+
               console.log(`Starting process for PR #${pullNumber} with reward ${rewardAmount} ETH`);
 
               // Step 1: Attempt Withdrawal
@@ -220,8 +234,6 @@ export default function Contributions() {
 
       useEffect(() => {
           try{
-
-              
               const fetchRegistered = async () => {
                   const response = await fetch('/api/requestIssue', {
                       method: 'GET',
