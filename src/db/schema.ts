@@ -29,6 +29,9 @@ export const projects = pgTable('projects', {
   Difficulty: varchar('Difficulty', { length: 256 }),
   priority: varchar('priority', { length: 256 }),
   languages:json('languages'),
+  stars:varchar('stars'),
+  forks:varchar('forks'),
+
 });
 
 export const assignIssues = pgTable('assignIssues', {

@@ -27,6 +27,8 @@ export default function Project() {
     const [rewardAmount, setRewardAmount] = useState();
     const [alertMessage, setAlertMessage] = useState<string | null>(null);
     const [languages,setlanguages]=useState<any>();
+    const [stars, setStars] = useState(0);
+    const [forks, setForks] = useState(0);
 
     useEffect(() => {
         if (alertMessage) {
@@ -258,14 +260,19 @@ export default function Project() {
                     priority:formData.get('priority'),
                     rewardAmount: rewardAmount,
                     email:(session.data as any)?.user?.email,
-                    languages:languages
+                    languages:languages,
+                    stars:stars,
+                    forks:forks,
+                    
                 }),
+                
             });
         } catch (error) {
             console.error('Error in project creation:');
             setAlertMessage('Error in project creation');
         }
     }
+    
 
     //collab
     const [collabs, setCollabs] = useState<any>();
@@ -289,6 +296,16 @@ export default function Project() {
                 console.log(res,'collabs')
                 setCollabs(res) 
             });
+
+            const response = await octokit.request('GET /repos/{owner}/{repo}', {
+                owner: user,
+                repo: selectedRepo,
+                headers: {
+                    'X-GitHub-Api-Version': '2022-11-28'
+                }
+            });
+            setStars(response.data.stargazers_count);
+            setForks(response.data.forks_count);
             
             // Fetch languages
             await octokit.request(

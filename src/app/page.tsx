@@ -325,6 +325,7 @@ export default function LandingPage() {
                                             Stars={128}
                                             Contributors={8}
                                             shortDescription={repo.shortdes}
+                                            languages={repo.languages}
                                         />
                                     </a>
                                 </div>

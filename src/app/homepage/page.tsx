@@ -168,15 +168,19 @@ export default function Home(){
                         return (
                             <div key={repo.projectName} className="hover:scale-[1.02] transition-transform duration-200">
                                 <a href={`/projects/${repo.project_repository}`}>
-                                    <Issue 
-                                        image={repo.image_url || 'back_2.jpg'}
-                                        Project={repo.projectName}
-                                        Fork={42}
-                                        Stars={128}
-                                        Contributors={8}
-                                        shortDescription={repo.shortdes}
-                                        languages={repo.languages}
-                                    />
+                                <Issue 
+                                    image={repo.image_url || 'back_2.jpg'}
+                                    Project={repo.projectName}
+                                    Fork={repo.forks?repo.forks:0}
+                                    Stars={repo.stars?repo.stars:0}
+                                    Contributors={
+                                        repo.contributors && repo.contributors.collabs
+                                            ? Object.keys(repo.contributors.collabs).length
+                                            : 0
+                                    }
+                                    shortDescription={repo.shortdes}
+                                    languages={repo.languages}
+                                />
                                 </a>
                             </div>
                         );

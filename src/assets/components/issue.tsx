@@ -68,7 +68,7 @@ export default function Issue({image, Project, Fork, Stars, Contributors, shortD
                         const iconName = getLanguageIcon(language);
                         return (
                             <div key={language} className="inline-flex text-[20px] text-white py-1">
-                                {iconName && <Icon icon={iconName} className="-ml-1 rounded-full" width="20" height="20" />}
+                                {iconName && <Icon icon={iconName} className="ml-1 rounded-full" width="20" height="20" />}
                             </div>
                         );
                     })}
