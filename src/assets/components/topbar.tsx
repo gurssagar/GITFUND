@@ -29,12 +29,22 @@ export default function Topbar(  ) {
             </div>
             <div className="flex space-x-4 ">
                             {account ? (
-                                <p>Connected: {account}</p>
+                                <p>Wallet Connected</p>
                             ) : (
                                 <button onClick={connectWallet} className="px-4 text-[14px] py-1 bg-gray-900 text-white rounded">
                                 Connect Wallet
                                 </button>
                             )}
+                                                        <div>
+                                <button onClick={() => {}} className="flex items-center space-x-2 bg-[#1a1a1a] hover:bg-[#2a2a2a] text-gray-300 px-3 py-1.5 rounded-md text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>
+                                    <span>Search</span>
+                                    <span className="text-xs bg-[#2a2a2a] px-1.5 py-0.5 rounded">⌘K</span>
+                                </button>
+                            </div>
                             {
                                 session?.data?.user?.image?
                                 <>
