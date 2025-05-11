@@ -364,22 +364,22 @@ export default function Project() {
                                 </h1>
                             </div>
                             
-                            <div className={`text-gray-400 pt-4 h-[${width}] overflow-hidden`}>
+                            <div className={`dark:text-gray-300 text-gray-600 pt-4 h-[${width}] overflow-hidden`}>
                                 {projects[0]?.aiDescription || aiReply}                         
                             </div>
                             <div className="text-center">
-                                <button onClick={handleResize} className="text-center bg-white text-black rounded px-2 py-1 ">
+                                <button onClick={handleResize} className="text-center dark:bg-white text-white dark:text-black bg-black text-black rounded px-2 py-1 ">
                                     {isExpanded ? 'Show Less' : 'Show More'}
                                 </button>
                             </div>
                             </div>
                             
-                            <div className="border-gray-800 border-1 rounded-xl p-4 mt-7">
+                            <div className="border-gray-300 dark:border-gray-800 border-1 rounded-xl p-4 mt-7">
                                 <div>
                                     <h1 className="text-xl font-bold">Issues</h1>
                                 </div>
                                 {issues.map((issue: any) => (
-                                    <div key={issue.id} className="mt-2 p-4 border-gray-800 border-1 rounded-xl">
+                                    <div key={issue.id} className="mt-2 p-4 border-gray-300 dark:border-gray-800 border-1 rounded-xl">
                                         <div className="flex justify-between"> 
                                             <div>
                                                 <div className="flex justify-between gap-2">
@@ -456,7 +456,7 @@ export default function Project() {
                                 ))}
                             </div>
 
-                            <div className="mt-6 w-full border border-rounded-full border-gray-800 rounded-lg p-4">
+                            <div className="mt-6 w-full border border-rounded-full border-gray-300 dark:border-gray-800 rounded-lg p-4">
                                 <h2 className="text-2xl font-bold mb-4 dark:text-white text-black">Recent Activity</h2>
                                 
                                 {commitData && commitData.length > 0 ? (
@@ -465,7 +465,7 @@ export default function Project() {
                                             <div key={commit.sha} className="flex justify-between items-center">
                                                 <div className="flex items-center">
                                                     <div className={`${getCommitColor(commit.sha)} dark:text-white text-black px-2 py-1 rounded-md mr-3`}>
-                                                        <span className="text-xs">{index + 2970}</span>
+                                                        <span className="text-xs text-white dark:text-black">{index + 2970}</span>
                                                     </div>
                                                     <a 
                                                         href={commit.html_url} 

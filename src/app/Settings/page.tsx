@@ -4,78 +4,198 @@ import Sidebar from '@/assets/components/sidebar';
 import Topbar from '@/assets/components/topbar';
 import { useSession } from "next-auth/react";
 import Image from 'next/image';
+import { Button } from '@/components/ui/button'; // Assuming you have a Button component
+
+interface UserProfile {
+    name: string;
+    // Add other editable fields here if needed
+}
+
 export default function Page() {
-    const session = useSession();
-    console.log(session.data)
-    return (
-        <>
-        <div>
-            <Sidebar />
-				<div className='ml-[16em]'>
-					<Topbar/>
-                    <div className='mt-[80px] px-[2vw]'>
-                        {
-                            session?
-                            <>
-                                <div className='flex gap-6 '>
-                                    <div>
-                                        <Image src={session?.data?.user?.image} width={200} height={200} className="rounded rounded-xl" alt='profile'/>
+    const { data: sessionData, status } = useSession();
+    const [profile, setProfile] = useState<UserProfile>({
+        name: '',
+    });
+    const [initialProfile, setInitialProfile] = useState<UserProfile>({
+        name: '',
+    });
 
-                                    </div>
-                                    
-                                    <div className='w-[calc(100%_-200px)] text-xl'>
-                                        <div>
-                                            <h1 className='text-3xl font-semibold mb-4'>Settings</h1>
-                                        </div>
-                                        <form className='grid grid-cols-2 gap-6'>
-                                            <div className=''>
-                                                <div className='my-1 text-sm'>Username</div>
-                                                <input
-                                                    type='text'
-                                                    placeholder='name'
-                                                    className='border border-gray-800 px-2 bg-black py-2 text-[16px] rounded-md p-1 w-full'
-                                                    value={(session?.data?.user as any)?.username || ""}
-                                                    readOnly
-                                                /> 
-                                            </div>
-                                            <div className=''>
-                                                <div className='my-1 text-sm'>Name</div>
-                                                <input
-                                                    type='text'
-                                                    placeholder='name'
-                                                    className='border border-gray-800 px-2 bg-black py-2 text-[16px] rounded-md p-1 w-full'
-                                                    value={session?.data?.user?.name || ""}
-                                                    readOnly
-                                                /> 
-                                            </div>
-                                            <div className=''>
-                                                <div className='my-1 text-sm'>Email</div>
-                                                <input
-                                                    type='text'
-                                                    placeholder='name'
-                                                    className='border border-gray-800 px-2 text-[16px] bg-black py-2 rounded-md p-1 w-full'
-                                                    value={session?.data?.user?.email || ""}
-                                                    readOnly
-                                                /> 
-                                            </div>
-                                            
-                                        </form>
-                                    </div> 
+    useEffect(() => {
+        if (sessionData?.user) {
+            const userData = {
+                name: sessionData.user.name || '',
+            };
+            setProfile(userData);
+            setInitialProfile(userData);
+        }
+    }, [sessionData]);
 
-                                </div>
-                                   
-                            </>:
-                            <>
-                            </>
-                        }
-                       
-                        <div>                            
-                        </div>
-                    
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setProfile(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleSaveProfile = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Here you would typically make an API call to save the profile data
+        console.log("Saving profile:", profile);
+        // For demonstration, update initialProfile to reflect saved state
+        setInitialProfile(profile);
+        alert("Profile changes saved (logged to console)!");
+    };
+
+    const handleCancelChanges = () => {
+        setProfile(initialProfile); // Reset to last saved state
+    };
+
+    const hasChanges = JSON.stringify(profile) !== JSON.stringify(initialProfile);
+
+    if (status === "loading") {
+        return (
+            <div>
+                <Sidebar />
+                <div className='ml-[16em]'>
+                    <Topbar />
+                    <div className='mt-[80px] px-[2vw] flex justify-center items-center h-[calc(100vh-80px)]'>
+                        <p>Loading settings...</p>
                     </div>
                 </div>
-        </div>
-        
+            </div>
+        );
+    }
+
+    if (!sessionData?.user) {
+        return (
+            <div>
+                <Sidebar />
+                <div className='ml-[16em]'>
+                    <Topbar />
+                    <div className='mt-[80px] px-[2vw] flex justify-center items-center h-[calc(100vh-80px)]'>
+                        <p>Please log in to view settings.</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <>
+            <div>
+                <Sidebar />
+                <div className='ml-[16em]'>
+                    <Topbar />
+                    <div className='mt-[80px] px-[2vw] py-8'>
+                        <h1 className='text-3xl font-semibold mb-8'>Settings</h1>
+
+                        {/* Profile Section */}
+                        <section className="mb-10 p-6 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
+                            <h2 className="text-2xl font-medium mb-6">Profile Information</h2>
+                            <div className='flex flex-col md:flex-row gap-8 items-start'>
+                                <div className="flex-shrink-0">
+                                    {sessionData.user.image && (
+                                        <Image 
+                                            src={sessionData.user.image} 
+                                            width={150} 
+                                            height={150} 
+                                            className="rounded-full object-cover border-2 border-gray-300 dark:border-gray-600" 
+                                            alt='profile'
+                                        />
+                                    )}
+                                    {/* Add a button to change profile picture if functionality exists */}
+                                    {/* <Button variant="outline" className="mt-4 w-full">Change Picture</Button> */}
+                                </div>
+                                
+                                <form onSubmit={handleSaveProfile} className='flex-grow space-y-6'>
+                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                                        <div>
+                                            <label htmlFor="username" className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>Username</label>
+                                            <input
+                                                id="username"
+                                                type='text'
+                                                className='border border-gray-300 dark:border-gray-600 px-3 dark:bg-gray-800 bg-gray-50 py-2 text-[16px] rounded-md w-full text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                                                value={(sessionData.user as any)?.username || sessionData.user.email?.split('@')[0] || "N/A"}
+                                                readOnly
+                                            /> 
+                                        </div>
+                                        <div>
+                                            <label htmlFor="name" className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>Full Name</label>
+                                            <input
+                                                id="name"
+                                                name="name"
+                                                type='text'
+                                                placeholder='Your full name'
+                                                className='border border-gray-300 dark:border-gray-600 px-3 dark:bg-gray-900 bg-white py-2 text-[16px] rounded-md w-full focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-indigo-400 dark:focus:border-indigo-400'
+                                                value={profile.name}
+                                                onChange={handleInputChange}
+                                            /> 
+                                        </div>
+                                        <div>
+                                            <label htmlFor="email" className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>Email</label>
+                                            <input
+                                                id="email"
+                                                type='email'
+                                                className='border border-gray-300 dark:border-gray-600 px-3 dark:bg-gray-800 bg-gray-50 py-2 text-[16px] rounded-md w-full text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                                                value={sessionData.user.email || "N/A"}
+                                                readOnly
+                                            /> 
+                                        </div>
+                                    </div>
+                                    {/* Add more profile fields here, e.g., bio, location */}
+                                    {/* <div>
+                                        <label htmlFor="bio" className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>Bio</label>
+                                        <textarea
+                                            id="bio"
+                                            name="bio"
+                                            rows={3}
+                                            placeholder='Tell us a bit about yourself'
+                                            className='border border-gray-300 dark:border-gray-600 px-3 dark:bg-gray-900 bg-white py-2 text-[16px] rounded-md w-full focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-indigo-400 dark:focus:border-indigo-400'
+                                            // value={profile.bio}
+                                            // onChange={handleInputChange}
+                                        />
+                                    </div> */}
+                                    {hasChanges && (
+                                        <div className="flex justify-end gap-3 mt-6">
+                                            <Button type="button" variant="outline" onClick={handleCancelChanges}>
+                                                Cancel
+                                            </Button>
+                                            <Button type="submit">
+                                                Save Changes
+                                            </Button>
+                                        </div>
+                                    )}
+                                </form> 
+                            </div>
+                        </section>
+
+                        {/* Appearance Section */}
+                        <section className="mb-10 p-6 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm">
+                            <h2 className="text-2xl font-medium mb-6">Appearance</h2>
+                            <p className="text-gray-600 dark:text-gray-400">
+                                Theme preferences (Light/Dark/System) can be adjusted using the theme toggle button in the top navigation bar.
+                            </p>
+                            {/* You could add more appearance settings here if needed */}
+                        </section>
+
+                        {/* Account Section */}
+                        <section className="p-6 border border-red-300 dark:border-red-700 rounded-lg shadow-sm bg-red-50 dark:bg-red-900/20">
+                            <h2 className="text-2xl font-medium mb-6 text-red-700 dark:text-red-400">Account Management</h2>
+                            <div className="space-y-4">
+                                <p className="text-gray-600 dark:text-gray-400">Manage your account settings and data.</p>
+                                {/* <Button variant="outline">Change Password</Button> */}
+                                <Button 
+                                    variant="destructive" 
+                                    onClick={() => alert("Delete account functionality not yet implemented. This would typically require confirmation and an API call.")}
+                                >
+                                    Delete Account
+                                </Button>
+                                <p className="text-sm text-red-600 dark:text-red-500">
+                                    Warning: Deleting your account is irreversible and will remove all your data.
+                                </p>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
         </>
     )
 }

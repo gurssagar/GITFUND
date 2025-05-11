@@ -72,7 +72,7 @@ export default function Rewards() {
     
 
     return (
-        <div className="flex h-screen text-gray-200">
+        <div className="flex h-screen">
             <Sidebar />
             <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
             <Topbar />
@@ -81,27 +81,27 @@ export default function Rewards() {
                         {/* Top Summary Cards */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                             {/* Rewarded Amount Card */}
-                            <div className="rounded-lg shadow-md p-6 bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 text-white relative">
+                            <div className="rounded-lg shadow-md p-6 bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 text-dark dark:text-white relative">
                                 <h3 className="text-sm font-medium text-gray-100">Rewarded amount</h3>
-                                <p className="text-3xl font-semibold mt-1">{totalRewarded} PHAROS</p>
-                                <button className="absolute bottom-4 right-4 text-gray-200 hover:text-white">
+                                <p className="text-3xl font-semibold text-white mt-1">{totalRewarded} PHAROS</p>
+                                <button className="absolute bottom-4 right-4 hover:text-dark text-white">
                                     {/* Placeholder for arrow icon */}
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
                                 </button>
                             </div>
 
                             {/* Paid Card */}
-                            <div className="rounded-lg shadow-md p-6 bg-gray-800 relative">
+                            <div className="rounded-lg shadow-md p-6 bg-gray-50 dark:bg-gray-800  relative">
                                 <h3 className="text-sm font-medium text-gray-400">Paid</h3>
-                                <p className="text-3xl font-semibold mt-1 text-white">{totalRewarded} PHAROS</p>
-                                 <button className="absolute bottom-4 right-4 text-gray-400 hover:text-white">
+                                <p className="text-3xl font-semibold mt-1 text-dark dark:text-dark dark:text-white">{totalRewarded} PHAROS</p>
+                                 <button className="absolute bottom-4 right-4 text-gray-400 hover:text-dark dark:text-white">
                                     {/* Placeholder for arrow icon */}
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
                                 </button>
                             </div>
 
                             {/* Rewards Charts Card */}
-                            <div className="rounded-lg shadow-md p-6 bg-gray-800">
+                            <div className="rounded-lg shadow-md p-6 bg-gray-50 dark:bg-gray-800 ">
                                 <h3 className="text-sm font-medium text-gray-400 mb-3">Rewards Charts</h3>
                                 {/* Chart based on reward dates */}
                                 <div className="flex justify-around items-end h-20">
@@ -173,9 +173,9 @@ export default function Rewards() {
                         </div>
 
                         {/* Filter and Search Bar */}
-                        <div className="flex items-center justify-between mb-4 bg-gray-800 p-3 rounded-lg">
+                        <div className="flex items-center justify-between mb-4 bg-gray-50 dark:bg-gray-800  p-3 rounded-lg">
                             <div className="flex items-center space-x-3">
-                                <button className="p-2 rounded text-gray-400 hover:bg-gray-700 hover:text-white">
+                                <button className="p-2 rounded text-gray-400 hover:bg-gray-700 hover:text-dark dark:text-white">
                                     {/* Placeholder for Filter Icon */}
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 20 20" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-.293.707L13 10.414V15a1 1 0 01-.293.707l-2 2A1 1 0 019 17v-6.586L4.293 6.707A1 1 0 014 6V4z" /></svg>
                                 </button>
@@ -189,20 +189,20 @@ export default function Rewards() {
                                         placeholder="Search"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="bg-gray-700 text-white placeholder-gray-500 rounded-md py-2 pl-10 pr-4 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                        className="bg-gray-300 dark:bg-gray-700 text-dark dark:text-white placeholder-gray-500 rounded-md py-2 pl-10 pr-4 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                     />
                                 </div>
                             </div>
-                            <button className="p-2 rounded text-gray-400 hover:bg-gray-700 hover:text-white">
+                            <button className="p-2 rounded text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700 hover:text-dark dark:text-white">
                                 {/* Placeholder for View Toggle Icon */}
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" /></svg> {/* Example Table Icon */}
                             </button>
                         </div>
 
                         {/* Rewards Table */}
-                        <div className="overflow-x-auto bg-gray-800 rounded-lg shadow">
+                        <div className="overflow-x-auto bg-gray-50 dark:bg-gray-800  rounded-lg shadow">
                             <table className="min-w-full divide-y divide-gray-700">
-                                <thead className="bg-gray-800">
+                                <thead className="bg-gray-50 dark:bg-gray-800 ">
                                     <tr>
                                         {/* Add sort icons/functionality later */}
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
@@ -214,7 +214,7 @@ export default function Rewards() {
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-gray-800 divide-y divide-gray-700">
+                                <tbody className="bg-gray-50 dark:bg-gray-800  divide-y divide-gray-700">
                                     {loading && (
                                         <tr><td colSpan={7} className="text-center py-4 text-gray-500">Loading...</td></tr>
                                     )}
@@ -225,13 +225,13 @@ export default function Rewards() {
                                         <tr><td colSpan={7} className="text-center py-10 text-gray-500">No items found.</td></tr>
                                     )}
                                     {!loading && !error && filteredRewards.map((reward) => (
-                                        <tr key={reward.id} className="hover:bg-gray-700/50">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{reward.date}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{reward.id}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{reward.projectName}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{reward.Contributor}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-white">{reward.issue}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{reward.value} PHAROS</td>
+                                        <tr key={reward.id} className="hover:bg-gray-100/50 dark:hover:bg-gray-700/50">
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-dark dark:text-gray-300">{reward.date}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-dark dark:text-white">{reward.id}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-dark dark:text-white">{reward.projectName}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-dark dark:text-white">{reward.Contributor}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-dark dark:text-white">{reward.issue}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-dark dark:text-gray-300">{reward.value} PHAROS</td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 Complete
                                             </td>

@@ -122,26 +122,26 @@ export default function AssignIssues() {
                          // Define unique key for loading state check
                         const loadingKey = `${assignment.Contributor_id}-${assignment.issue}`;
                         return (
-                            <div key={`${assignment.projectName}-${assignment.issue}-${assignment.Contributor_id}`} className="border border-gray-700 bg-gray-800 text-gray-200 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                            <div key={`${assignment.projectName}-${assignment.issue}-${assignment.Contributor_id}`} className="border border-gray-100 dark:border-gray-700 dark:bg-[#1a1a1a] dark:text-gray-200 p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
                                 <div> {/* Content wrapper */}
                                     <div className="flex items-center space-x-3 mb-3">
                                         <img
-                                            className="w-10 h-10 rounded-full object-cover border-2 border-gray-600" // Added border
+                                            className="w-10 h-10 rounded-full object-cover border-2 dark:border-gray-600 border-gray-100" // Added border
                                             src={assignment.image_url?.trim().replace(/`/g, '')} // Clean URL
                                             alt={assignment.Contributor_id}
                                         />
                                         <div>
-                                            <h3 className="font-semibold text-gray-100">{assignment.projectName}</h3> {/* Adjusted text color */}
-                                            <p className="text-sm text-gray-400">@{assignment.Contributor_id}</p> {/* Adjusted text color */}
+                                            <h3 className="font-semibold text-black dark:text-gray-100">{assignment.projectName}</h3> {/* Adjusted text color */}
+                                            <p className="text-sm text-gray-800 dark:text-gray-400">@{assignment.Contributor_id}</p> {/* Adjusted text color */}
                                         </div>
                                     </div>
 
                                     <div className="space-y-2 mb-4">
                                         <div className="flex items-center">
-                                            <span className="text-sm font-medium text-gray-300 mr-2">Issue:</span> {/* Adjusted text color */}
-                                            <span className="text-sm text-gray-300">#{assignment.issue}</span> {/* Adjusted text color */}
+                                            <span className="text-sm font-medium  text-black dark:text-gray-100 mr-2">Issue:</span> {/* Adjusted text color */}
+                                            <span className="text-sm  text-gray-800 dark:text-gray-400">#{assignment.issue}</span> {/* Adjusted text color */}
                                         </div>
-                                        <p className="text-sm text-gray-300 line-clamp-3"> {/* Adjusted text color & line-clamp */}
+                                        <p className="text-sm  text-gray-800 dark:text-gray-400 line-clamp-3"> {/* Adjusted text color & line-clamp */}
                                             {assignment.description || 'No description provided'}
                                         </p>
                                     </div>
@@ -151,7 +151,7 @@ export default function AssignIssues() {
                                 <button
                                     onClick={() => addContributor(assignment)} // Pass the whole assignment object
                                     disabled={isAdding === loadingKey} // Disable only the specific button being processed
-                                    className="mt-auto w-full text-black bg-white hover:bg-gray-200 py-2 px-4 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed" // Added full width and disabled style
+                                    className="mt-auto w-full dark:text-black dark:bg-white bg-black text-white dark:hover:bg-gray-200 hover:bg-gray-900 py-2 px-4 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed" // Added full width and disabled style
                                 >
                                     {isAdding === loadingKey ? 'Adding...' : 'Add Contributor'}
                                 </button>

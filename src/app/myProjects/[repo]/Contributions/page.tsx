@@ -333,6 +333,15 @@ export default function Contributions() {
                                                   </p>
                                               </div>
                                           </div>
+                                          <div className='flex gap-4'>
+                                            <div>
+                                              {pr.rewardAmount && (
+                                                  <span className="text-xl font-bold text-black-400 dark:text-white">
+                                                     {pr.rewardAmount} PHAROS
+                                                  </span>
+                                              )}
+                                         
+                                         </div>
                                           <span className={`px-2 py-1 text-xs rounded-full ${
                                               pr.state === 'open' 
                                                   ? 'bg-green-500 text-white' 
@@ -340,6 +349,7 @@ export default function Contributions() {
                                           }`}>
                                               {pr.state}
                                           </span>
+                                          </div>
                                       </div>
                                       <div className='flex justify-between'>
                                       <div className="mt-3 flex items-center text-sm text-gray-400">
@@ -355,14 +365,9 @@ export default function Contributions() {
                                               </svg>
                                               {pr.comments} comments
                                           </span>
-                                          <div>
-                                              {pr.rewardAmount && (
-                                                  <span className="text-yellow-400">
-                                                      Reward: {pr.rewardAmount} ETH
-                                                  </span>
-                                              )}
-                                          </div>
+                                          
                                       </div>
+                                      
                                       <div className="flex gap-4">
                                           <div >
                                               <div
@@ -372,21 +377,23 @@ export default function Contributions() {
                                                       `Analyze the changes made in a pull request https://github.com/${owner}/${repo}/pull/${pr.number}. Focus on a technical review: explain the purpose of the changes, evaluate the code quality, identify any potential issues or improvements, and assess if the modifications align with best coding practices. Assume the reader is familiar with programming concepts.`,
                                                   );
                                                   } }
-                                                   className='text-black bg-white  rounded px-4 py-2 hover:bg-gray-300 hover:scale-[90%]'
+                                                   className='text-white dark:hover:bg-[#0a0a0a] bg-black dark:text-black dark:bg-white  rounded px-4 py-2 dark:hover:bg-gray-300 hover:scale-[90%]'
                                               >
                                                   AI Review
                                               </div>
                                               </div>
                                           <div>
-                                          <button onClick={() => handleSubmit(pr)} className='text-black bg-white  rounded px-4 py-2 hover:bg-gray-300 hover:scale-[90%]'>
+                                          <button onClick={() => handleSubmit(pr)} className='text-white dark:hover:bg-[#0a0a0a] bg-black dark:text-black dark:bg-white  rounded px-4 py-2 dark:hover:bg-gray-300 hover:scale-[90%]'
+                                          >
                                               Merge Pull Request
                                           </button>
                                           </div>
                                       </div>
                                       </div>
+                                      
                                       <div>
                                           
-                                          <h2 className="mt-10 text-xl font-bold text-white mb-4 flex items-center gap-2">
+                                          <h2 className="mt-10 text-xl font-bold text-black dark:text-white mb-4 flex items-center gap-2">
                                               <svg className="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                               </svg>

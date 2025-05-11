@@ -152,17 +152,17 @@ export default function Home(){
                                 <input
                                     type="text"
                                     placeholder="Search projects by name or description..."
-                                    className="px-2 w-2/3 w-full bg-white border border-gray-300 dark:border-gray-600 rounded bg-[#191919] dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                    className="px-2 w-2/3 w-full border border-gray-600 rounded bg-[#191919] text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)} 
                                 />
-                                <div className=" mx-4 w-1/3">
+                                <div className="mt-4 mx-4 w-1/3">
                                     <label htmlFor="language-select-main" className="sr-only">Filter by language</label>
                                     <select
                                         id="language-select-main"
                                         value={selectedLanguage}
                                         onChange={handleLanguageChange}
-                                        className="p-2   w-full bg-white text-black  border border-gray-300 dark:border-gray-600 rounded dark:bg-[#191919] dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                        className="p-2 w-full border border-gray-600 rounded bg-[#191919] text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                                     >
                                         <option value="">All Languages</option>
                                         {availableLanguages.map(lang => (

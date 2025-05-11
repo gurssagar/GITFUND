@@ -105,7 +105,7 @@ export default function MyProject() {  // Changed from myProject to MyProject
                                         issueNumber: repo.project_issues || '1' // Default to 1 if not available
                                     }
                                 }}>
-                                    <button className='hover:scale-1.05 bg-white text-black px-3 py-2 rounded-xl'>Issues</button>
+                                    <button className='hover:scale-1.05 bg-black text-white dark:bg-white dark:text-black px-3 py-2 rounded-xl'>Issues</button>
                                 </Link>
                                 <Link href={{
                                     pathname: `/myProjects/${repo.project_repository}/Contributions`,
@@ -115,7 +115,7 @@ export default function MyProject() {  // Changed from myProject to MyProject
                                         issueNumber: repo.project_issues || '1' // Default to 1 if not available
                                     }
                                 }}>
-                                    <button className='hover:scale-1.05 bg-white text-black px-3 py-2 rounded-xl'>Contributions</button>
+                                    <button className='hover:scale-1.05 bg-black text-white dark:bg-white dark:text-black px-3 py-2 rounded-xl'>Contributions</button>
                                 </Link>
                                 </div>  
 

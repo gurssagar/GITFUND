@@ -389,7 +389,7 @@ export default function Project() {
                                 <select 
                                     id="difficulty" 
                                     name="difficulty" 
-                                    className="bg-[#0a0a0a] text-[14px] w-full p-2 border-1 border-gray-800 rounded-md"
+                                    className="dark:bg-[#0a0a0a] text-[14px] w-full p-2 border-1 border-gray-800 rounded-md"
                                     
                                 >
                                     <option value="">Select difficulty</option>
@@ -406,7 +406,7 @@ export default function Project() {
                                 <select 
                                     id="priority" 
                                     name="priority" 
-                                    className="bg-[#0a0a0a] w-full p-2 border-1 border-gray-800 rounded-md"
+                                    className="dark:bg-[#0a0a0a] w-full p-2 border-1 border-gray-800 rounded-md"
                                     
                                 >
                                     <option value="">Select The Priority</option>
@@ -420,7 +420,7 @@ export default function Project() {
                                 <select 
                                     id="projectRepo" 
                                     name="projectRepo" 
-                                    className="bg-[#0a0a0a] w-full p-2 border-1 border-gray-800 rounded-md"
+                                    className="dark:bg-[#0a0a0a] w-full p-2 border-1 border-gray-800 rounded-md"
                                     onChange={(e) => setSelectedRepo(e.target.value)}
                                     value={selectedRepo}
                                 >
@@ -437,7 +437,7 @@ export default function Project() {
                                 <select 
                                     id="projectIssue" 
                                     name="projectIssue" 
-                                    className="bg-[#0a0a0a] w-full p-2 border-1 border-gray-800 rounded-md"
+                                    className="dark:bg-[#0a0a0a] w-full p-2 border-1 border-gray-800 rounded-md"
                                 >
                                     <option value="">Select an issue</option>
                                     {issues?.map((issue: any) => (

@@ -137,55 +137,55 @@ export default function AssignedProjects() {
                                 <div className='overflow-x-auto'> {/* Added for horizontal scrolling on small screens */}
                                     {filteredProjects.length > 0 ? (
                                         <table className="min-w-full divide-y divide-gray-700">
-                                            <thead className="bg-black">
+                                            <thead className="bg-gray-100 text-black  dark:bg-black">
                                                 <tr>
                                                     {/* Define Table Headers based on image */}
-                                                    <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-300 sm:pl-6">Project name</th>
-                                                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-300">Project leads</th>
-                                                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-300">Contributors</th>
-                                                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-300">Available issues</th>
-                                                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-300">My contributions</th>
-                                                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-300">My rewards</th>
-                                                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-300">Languages</th>
-                                                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-300">Repositories</th>
+                                                    <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold  text-black dark:text-gray-300 sm:pl-6">Project name</th>
+                                                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-black dark:text-gray-300">Project leads</th>
+                                                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-black dark:text-gray-300">Contributors</th>
+                                                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-black dark:text-gray-300">Available issues</th>
+                                                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-black dark:text-gray-300">My contributions</th>
+                                                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-black dark:text-gray-300">My rewards</th>
+                                                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-black dark:text-gray-300">Languages</th>
+                                                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-black dark:text-gray-300">Repositories</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-gray-950 ">
                                                 {filteredProjects.map((project) => (
-                                                    <tr key={project.id} className="hover:bg-gray-700/50">
+                                                    <tr key={project.id} className="hover:bg-gray-100 dark:hover:bg-gray-700/50">
                                                         {/* Project Name */}
-                                                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-white sm:pl-6 flex items-center gap-2">
+                                                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-black dark:text-white sm:pl-6 flex items-center gap-2">
                                                             {project.project_icon_url && <Image src={project.project_icon_url} alt="" width={24} height={24} className="rounded" />}
                                                             {project.project_repository}
                                                         </td>
                                                         {/* Project Leads */}
-                                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-300">
+                                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-black dark:text-gray-300">
                                                             <div className='flex items-center gap-1'>
                                                                 <span>{project.project_leads?.[0]?.name || '-'}</span>
                                                             </div>
                                                         </td>
                                                         {/* Contributors */}
-                                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-300">
+                                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-black dark:text-gray-300">
                                                             <span className='inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-600 text-xs font-medium text-gray-200'>
                                                                 {project.contributors_count ?? '-'}
                                                             </span>
                                                         </td>
                                                         {/* Available Issues */}
-                                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-300">{project.available_issues_count ?? '-'}</td>
+                                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-black dark:text-gray-300">{project.available_issues_count ?? '-'}</td>
                                                         {/* My Contributions (User Specific) */}
-                                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-300">
+                                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-black dark:text-gray-300">
                                                             <span className='inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-600 text-xs font-medium text-gray-200'>
                                                                 {userContributionData.contributions_count ?? '-'}
                                                             </span>
                                                         </td>
                                                         {/* My Rewards (User Specific) */}
-                                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-300">
+                                                        <td className="whitespace-nowrap px-3 py-4 text-sm ">
                                                             <span className='inline-flex items-center rounded-md bg-gray-700 px-2 py-1 text-xs font-medium text-gray-300 ring-1 ring-inset ring-gray-600'>
                                                                 {userContributionData.rewards_usd ?? 0} USD
                                                             </span>
                                                         </td>
                                                         {/* Languages */}
-                                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-300">
+                                                        <td className="whitespace-nowrap px-3 py-4 text-sm ">
                                                             {project.languages?.map(lang => (
                                                                 <span key={lang} className='inline-flex items-center rounded-md bg-blue-900/50 px-2 py-1 text-xs font-medium text-blue-300 ring-1 ring-inset ring-blue-700 mr-1'>
                                                                     {/* Add language icon if available */} {lang}
