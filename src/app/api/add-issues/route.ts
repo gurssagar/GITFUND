@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
 
 export async function POST(request: Request) {
     try {
-        const { email, projectName, priority, difficulty, rewardAmount, contributors, aiDescription, projectOwner, shortdes, longdis, image_url, project_repository, project_issues } = await request.json();
+        const { email, projectName,languages, priority, difficulty, rewardAmount, contributors, aiDescription, projectOwner, shortdes, longdis, image_url, project_repository, project_issues } = await request.json();
         
         // First insert the project
         await db.insert(projects).values({
@@ -31,6 +31,7 @@ export async function POST(request: Request) {
             Difficulty:difficulty,
             rewardAmount:rewardAmount,
             priority:priority,
+            languages:languages
         });
 
         // Then send email notification

@@ -271,10 +271,11 @@ export default function Project() {
     const [collabs, setCollabs] = useState<any>();
     useEffect(() => {
     const fetchProjectData = async () => {
-        if (!session) return;
+        if (!session || !user || !selectedRepo) return;
         
         try {
             const octokit = new Octokit({ auth: token });
+            // Fetch collaborators
             await octokit.request(
                 `GET /repos/${user}/${selectedRepo}/collaborators`,
                 {
@@ -287,9 +288,22 @@ export default function Project() {
             ).then(response => response.data).then(res => {
                 console.log(res,'collabs')
                 setCollabs(res) 
-            })
+            });
             
-            
+            // Fetch languages
+            await octokit.request(
+                `GET /repos/${user}/${selectedRepo}/languages`,
+                {
+                    owner:user,
+                    repo:selectedRepo,
+                    headers: {
+                        'X-GitHub-Api-Version': '2022-11-28'
+                    }
+                }
+            ).then(response => response.data).then(res => {
+                console.log(res,'languages')
+                setlanguages(res)
+            });
         } 
         catch (error) {
             console.error('Error fetching project data:', error);

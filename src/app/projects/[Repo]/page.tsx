@@ -19,6 +19,8 @@ import {
 import {
     SiTypescript, SiSolidity, SiCplusplus, SiGo, SiKotlin, SiRuby, SiPerl, SiScala, SiLua, SiDart, SiElixir, SiClojure, SiR, SiAssemblyscript, SiGnubash, SiGraphql, SiKubernetes, SiTerraform, SiSwift
 } from 'react-icons/si';
+import { Icon } from '@iconify/react';
+// Remove all react-icons imports
 
 interface ProjectData {
     projectOwner: string;
@@ -69,84 +71,47 @@ export default function Project() {
 
     const getLanguageIcon = (lang: string) => {
         const lowerLang = lang.toLowerCase();
-        // Prioritize specific languages first
-        switch (lowerLang) {
-            case 'javascript':
-                return <FaJs className="mr-1" size={30} />;
-            case 'typescript':
-                return <SiTypescript className="mr-1" size={30} />;
-            case 'python':
-                return <FaPython className="mr-1" size={30} />;
-            case 'java':
-                return <FaJava className="mr-1" size={30} />;
-            case 'c++': case 'cpp':
-                return <SiCplusplus className="mr-1" size={30} />;
-            case 'c': // Often just 'c'
-                return <SiCplusplus className="mr-1" size={30} />; // Using C++ icon as a fallback
-            case 'php':
-                return <FaPhp className="mr-1" size={30} />;
-            case 'ruby':
-                return <SiRuby className="mr-1" size={30} />;
-            case 'go': case 'golang':
-                return <SiGo className="mr-1" size={30} />;
-            case 'rust':
-                return <FaRust className="mr-1" size={30} />;
-            case 'swift':
-                return <SiSwift className="mr-1" size={30} />;
-            case 'kotlin':
-                return <SiKotlin className="mr-1" size={30} />;
-            case 'scala':
-                return <SiScala className="mr-1" size={30} />;
-            case 'perl':
-                return <SiPerl className="mr-1" size={30} />;
-            case 'lua':
-                return <SiLua className="mr-1" size={30} />;
-            case 'dart':
-                return <SiDart className="mr-1" size={30} />;
-            case 'r':
-                return <SiR className="mr-1" size={30} />;
-            case 'solidity':
-                return <SiSolidity className="mr-1" size={30} />;
-            case 'html': case 'html5':
-                return <FaHtml5 className="mr-1" size={30} />;
-            case 'css': case 'css3':
-                return <FaCss3Alt className="mr-1" size={30} />;
-            case 'sass': case 'scss':
-                return <FaSass className="mr-1" size={30} />;
-            case 'sql': // Generic SQL
-                return <FaDatabase className="mr-1" size={30} />;
-            case 'shell': case 'bash': case 'sh':
-                return <SiGnubash className="mr-1" size={30} />; // Or FaTerminal
-            case 'assembly': case 'asm':
-                return <SiAssemblyscript className="mr-1" size={30} />; // Using AssemblyScript icon
-            case 'objective-c': // Often 'objective-c'
-                return <FaApple className="mr-1" size={30} />; // Using Apple icon as fallback
-            case 'elixir':
-                return <SiElixir className="mr-1" size={30} />;
-            case 'clojure':
-                return <SiClojure className="mr-1" size={30} />;
-            case 'vue': case 'vue.js':
-                return <FaVuejs className="mr-1" size={30} />;
-            case 'react': case 'react.js':
-                return <FaReact className="mr-1" size={30} />;
-            case 'angular': case 'angular.js':
-                return <FaAngular className="mr-1" size={30} />;
-            case 'node.js': case 'node':
-                return <FaNodeJs className="mr-1" size={30} />;
-            case 'dockerfile':
-                return <FaDocker className="mr-1" size={30} />;
-            case 'graphql':
-                return <SiGraphql className="mr-1" size={30} />;
-            case 'kubernetes': case 'k8s':
-                return <SiKubernetes className="mr-1" size={30} />;
-            case 'terraform':
-                return <SiTerraform className="mr-1" size={30} />;
-            case 'markdown': case 'md':
-                return <FaMarkdown className="mr-1" size={30} />;
-            // Default fallback icon
-            default:
-                return <FaCode className="mr-1" size={30} />; // Generic code icon
-        }
+        const iconMap: Record<string, string> = {
+            'javascript': 'logos:javascript',
+            'typescript': 'logos:typescript-icon',
+            'python': 'logos:python',
+            'java': 'logos:java',
+            'c++': 'logos:c-plusplus',
+            'c#': 'logos:c-sharp',
+            'php': 'logos:php',
+            'ruby': 'logos:ruby',
+            'go': 'logos:go',
+            'rust': 'logos:rust',
+            'swift': 'logos:swift',
+            'kotlin': 'logos:kotlin-icon',
+            'scala': 'logos:scala',
+            'perl': 'logos:perl',
+            'lua': 'logos:lua',
+            'dart': 'logos:dart',
+            'r': 'logos:r',
+            'solidity': 'logos:solidity',
+            'sass': 'logos:sass',
+            'scss': 'logos:sass',
+            'sql': 'logos:mysql',
+            'shell': 'logos:bash-icon',
+            'bash': 'logos:bash-icon',
+            'sh': 'logos:bash-icon',
+            'assembly': 'logos:assemblyscript',
+            'objective-c': 'logos:objective-c',
+            'elixir': 'logos:elixir',
+            'clojure': 'logos:clojure',
+            'vue': 'logos:vue',
+            'react': 'logos:react',
+            'angular': 'logos:angular-icon',
+            'node.js': 'logos:nodejs-icon',
+            'node': 'logos:nodejs-icon',
+            'dockerfile': 'logos:docker-icon',
+            'graphql': 'logos:graphql',
+            'kubernetes': 'logos:kubernetes',
+            'terraform': 'logos:terraform-icon',
+        };
+        const iconName = iconMap[lowerLang] || null;
+        return <Icon icon={iconName} className="rounded-full -ml-[2px]" width={30} height={30} />;
     };
 
     const handleResize = () => {
@@ -375,12 +340,16 @@ export default function Project() {
                             <div>
                                 <h2 className="text-xl font-bold pt-4">Languages</h2>
                                 <div className="pt-2 space-x-2">
-                                    <div className="flex space-x-2">
-                                    {Object.keys(languages).map((lang: any) => (
-                                        <div key={lang} className="flex items-center">
-                                            {getLanguageIcon(lang)}
-                                        </div>
-                                    ))}
+                                    <div className="flex ">
+                                    {Object.keys(languages).map((lang: any) => {
+                                        const icon = getLanguageIcon(lang);
+                                        if (!icon) return null;
+                                        return (
+                                            <div key={lang} className="flex ">
+                                                <div className="rounded-full -ml-1">{icon}</div>
+                                            </div>
+                                        );
+                                    })}
                                     </div>
                                 </div>
                             </div>

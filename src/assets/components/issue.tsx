@@ -1,8 +1,30 @@
 'use client';
+import { Icon } from '@iconify/react';
 
+export default function Issue({image, Project, Fork, Stars, Contributors, shortDescription, languages}: {image: string, Project: string, Fork: number, Stars: number, Contributors: number, shortDescription: string, languages: any}) {
+    const getLanguageIcon = (language: string) => {
+        const iconMap: Record<string, string> = {
+            'JavaScript': 'logos:javascript',
+            'TypeScript': 'logos:typescript-icon',
+            'Python': 'logos:python',
+            'Java': 'logos:java',
+            'C++': 'logos:c-plusplus',
+            'C#': 'logos:c-sharp',
+            'PHP': 'logos:php',
+            'Ruby': 'logos:ruby',
+            'Go': 'logos:go',
+            'Swift': 'logos:swift',
+            'Kotlin': 'logos:kotlin-icon',
+            'Rust': 'logos:rust',
+            'SCSS': 'logos:sass',
+            'Dart': 'logos:dart',
+            'Elixir': 'logos:elixir',
+            'React': 'logos:react'
+        };
+        return iconMap[language] || null;
+    };
 
-export default function Issue({image, Project, Fork, Stars, Contributors, shortDescription}: {image: string, Project: string, Fork: number, Stars: number, Contributors: number, shortDescription: string}){
-    return(
+    return (
         <>
         <div className="p-4 rounded-xl border-1 border-gray-400 dark:border-gray-800">
             <div className="flex">
@@ -36,11 +58,24 @@ export default function Issue({image, Project, Fork, Stars, Contributors, shortD
                             {shortDescription}
                         </h3>
                     </div>
-                </div>
+            </div>
+            <div className='flex justify-between'>
                 <div>
 
+                </div>
+                <div>
+                    {languages && typeof languages === 'object' && Object.keys(languages).map((language: string) => {
+                        const iconName = getLanguageIcon(language);
+                        return (
+                            <div key={language} className="inline-flex text-[20px] text-white py-1">
+                                {iconName && <Icon icon={iconName} className="-ml-1 rounded-full" width="20" height="20" />}
+                            </div>
+                        );
+                    })}
+                </div>
+                
             </div>
         </div>
         </>
-    )
+    );
 }

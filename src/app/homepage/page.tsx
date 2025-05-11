@@ -175,6 +175,7 @@ export default function Home(){
                                         Stars={128}
                                         Contributors={8}
                                         shortDescription={repo.shortdes}
+                                        languages={repo.languages}
                                     />
                                 </a>
                             </div>
@@ -275,8 +276,18 @@ export default function Home(){
                                                             {repo.shortdes}
                                                         </h3>
                                                     </div>
-                                                </div>
-                                                <div>
+                                                    
+                                            </div>
+                                            <div>
+                                                {repo.languages && Object.keys(repo.languages).map((language:string) => {
+                                                    return(
+                                                        <div key={language} className="inline-block bg-[#1a1a1c] text-[12px] text-white rounded px-2 py-1 mr-2">
+                                                            {language}
+                                                        </div>
+                                                    )
+                                                })}
+                                            </div>
+                                            <div>
 
                                             </div>
                                         </div>
