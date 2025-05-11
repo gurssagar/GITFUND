@@ -44,7 +44,7 @@
 3.  **Set up environment variables:** Create a `.env.local` file and add necessary variables (GitHub credentials, S3 keys, Groq API key, Smart Contract address, Network details, etc. - *Specific variables need documentation*).
 4.  **Run the development server:**
     ```bash
-    npm run dev
+    bun run dev
     # or
     yarn dev
     ```
