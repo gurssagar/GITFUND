@@ -135,7 +135,7 @@ export default function LandingPage() {
                 Home
               </Link>
               <Link
-                href="/projects"
+                href="/Browse"
                 className="px-3 py-2 text-sm text-gray-300 hover:text-white transition-colors"
               >
                 Projects
@@ -257,7 +257,7 @@ export default function LandingPage() {
           <div className='mt-6'>
             <ul className="space-y-4 text-sm lg:text-lg text-gray-300 list-disc pl-6 marker:text-white">
               <li className="pl-2">
-                Maintainers sign in with GitHub and connect their crypto wallet (Tezos or Etherlink-based).
+                Maintainers sign in with GitHub and connect their crypto wallet .
               </li>
               <li className="pl-2">
                 They select repositories they maintain and highlight issues they want to get fixed.

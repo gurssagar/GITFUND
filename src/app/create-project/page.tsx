@@ -26,6 +26,7 @@ export default function Project() {
     const [contractBalance, setContractBalance] = useState("0");
     const [rewardAmount, setRewardAmount] = useState();
     const [alertMessage, setAlertMessage] = useState<string | null>(null);
+    const [languages,setlanguages]=useState<any>();
 
     useEffect(() => {
         if (alertMessage) {
@@ -61,7 +62,25 @@ export default function Project() {
                 console.error('Error fetching repositories:', error);
             }
         };
+
+
+        const fetchRepoLanguages = async () => {
+            const octokit = new Octokit({ auth: token });
+            const response=await octokit.request(
+                `GET /repos/${user}/${selectedRepo}/languages`,
+                {
+                    owner:user,
+                    repo:selectedRepo,
+                    headers: {
+                        'X-GitHub-Api-Version': '2022-11-28'
+                    }
+                }
+            )
+            console.log(response.data,'languages')
+            setlanguages(response.data)
+        }
         fetchRepos();
+        fetchRepoLanguages();
     }, [token]);
 
     //fetch readme.md 
@@ -239,6 +258,7 @@ export default function Project() {
                     priority:formData.get('priority'),
                     rewardAmount: rewardAmount,
                     email:(session.data as any)?.user?.email,
+                    languages:languages
                 }),
             });
         } catch (error) {
@@ -267,7 +287,9 @@ export default function Project() {
             ).then(response => response.data).then(res => {
                 console.log(res,'collabs')
                 setCollabs(res) 
-            })     
+            })
+            
+            
         } 
         catch (error) {
             console.error('Error fetching project data:', error);
@@ -328,7 +350,7 @@ export default function Project() {
                                     type="text"
                                     className="w-full p-2 border-1 border-gray-800 rounded-md"
                                     value={rewardAmount}
-                                    onChange={e => setRewardAmount(e.target.value)}
+                                    onChange={e => setRewardAmount(e.target.value as any)}
                                 />
                                 </div>
                                 <div className="space-y-2 w-1/3">
