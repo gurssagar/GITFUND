@@ -17,6 +17,29 @@ import MacbookScrollDemo from "@/assets/components/macbookscrool";
 import ShootingStarBorder from "@/assets/border";
 import { LampContainer } from "@/components/ui/lamp";
 import { PointerHighlight } from "@/components/ui/pointer-highlight";
+import {
+  Card,
+  CardContent,
+  CardHeader
+} from "@/components/ui/card";
+import {
+  UsersIcon,
+  GitPullRequestIcon,
+  WalletIcon,
+  LinkIcon,
+  SearchIcon,
+  CodeIcon,
+  ZapIcon,
+  ShieldCheckIcon,
+  GitBranchIcon,
+  AwardIcon,
+  Link2Icon,
+  CoinsIcon
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
+import { InfiniteMovingCards } from "@/components/ui/infinite-moving-cards";
 
 export default function LandingPage() {
   const { account, connectWallet } = useWeb3();
@@ -119,14 +142,46 @@ export default function LandingPage() {
   ];
 
 
-  function scaleScreen(){
-    if(window.innerWidth <= 768){
-      
-    }
-  }
-
+  const testimonials = [
+    {
+      quote:
+        "GitFund brought in top contributors within days and helped us resolve high-priority issues faster than ever—paid out automatically and securely.",
+      name: "Sarah Chen",
+      designation: "Project Maintainer at TechFlow",
+      src: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=3560&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    {
+      quote:
+        "The integration with GitHub and smart contracts is seamless. GitFund removes the friction of rewarding contributors in crypto—it's simply brilliant.",
+      name: "Michael Rodriguez",
+      designation: "CTO at InnovateSphere",
+      src: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    {
+      quote:
+        "GitFund completely changed the way we contribute to open source. Getting rewarded in crypto for merged PRs motivates us to do our best work.",
+      name: "Emily Watson",
+      designation: "Contributor at CloudScale",
+      src: "https://images.unsplash.com/photo-1623582854588-d60de57fa33f?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    {
+      quote:
+        "The automated payout system is a game-changer. We no longer need to manually track and reward contributions—GitFund does it all on-chain.",
+      name: "James Kim",
+      designation: "Engineering Lead at DataPro",
+      src: "https://images.unsplash.com/photo-1636041293178-808a6762ab39?q=80&w=3464&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    {
+      quote:
+        "With GitFund, we've scaled our project while fairly compensating contributors from around the world. The transparency builds real trust.",
+      name: "Lisa Thompson",
+      designation: "VP of Technology at FutureNet",
+      src: "https://images.unsplash.com/photo-1624561172888-ac93c696e10c?q=80&w=2592&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+  ];
+  
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen bg-white ">
       
       
       
@@ -146,7 +201,7 @@ export default function LandingPage() {
             <nav className="hidden md:flex items-center space-x-2">
               <Link
                 href="/"
-                className="px-3 py-2 text-sm text-gray-300 hover:text-white transition-colors"
+                className="px-3 py-2 text-sm text-gray-300 hover:text-black dark:hover:text-white transition-colors"
               >
                 Home
               </Link>
@@ -182,7 +237,7 @@ export default function LandingPage() {
       <section>
           <div>
             <div className="bg-[url('')]">
-            <div className="relative flex mt-[200px] items-center justify-center bg-white dark:bg-black">
+            <div className="relative flex pt-[200px] items-center justify-center bg-white dark:bg-black">
               <div
                 className={cn(
                   "absolute inset-0",
@@ -196,7 +251,7 @@ export default function LandingPage() {
               <div className="pointer-events-none absolute inset-0 block items-center justify-center bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black"></div>
               <div className="">
                   <div className="text-center"> {/* Added text-center to the parent div */}
-                    <div className="relative rounded-full z-20 bg-[#ececec] dark:bg-[#373737] dark:text-white text-center px-5 py-2 inline-block"> {/* Added inline-block */}
+                    <div className="relative rounded-full z-20 bg-[#ececec] dark:bg-[#1a1a1a] dark:text-white text-center px-5 py-2 inline-block"> {/* Added inline-block */}
                             Trusted. Transparent. Blockchain-Powered.
                     </div>
                     
@@ -205,7 +260,7 @@ export default function LandingPage() {
                        Fuel Open Source Innovation
                   </p>
                   <p className="mx-auto max-w-[60vw] text-center">
-                  GitFund seamlessly bridges the gap between open-source development and decentralized finance by integrating GitHub repositories with blockchain smart contracts. This allows project maintainers to post issues with pre-funded bounties and enables developers to earn cryptocurrency—such as Tezos or Etherlink—automatically upon successful code contributions, like merged pull requests. By removing intermediaries and ensuring instant, transparent payouts, GitFund creates a sustainable, trustless incentive system that rewards real coding impact.
+                  GitFund seamlessly bridges the gap between open-source development and decentralized finance by integrating GitHub repositories with blockchain smart contracts. This allows project maintainers to post issues with pre-funded bounties and enables developers to earn cryptocurrency—such as Pharos—automatically upon successful code contributions, like merged pull requests. By removing intermediaries and ensuring instant, transparent payouts, GitFund creates a sustainable, trustless incentive system that rewards real coding impact.
                   </p>
 
                   <div className="mt-50 mx-auto">
@@ -222,79 +277,188 @@ export default function LandingPage() {
           </div>        
       </section>
 
-  
-      <ScrollVelocity
-        texts={['Code Contribute Collect', 'Hack Solve Earn']} 
-        velocity={100} 
-        className="custom-scroll-text"
+   {/* Testimonials Section */}
+   <div className=" rounded-md flex flex-col antialiased bg-white dark:bg-black dark:bg-grid-white/[0.05] items-center justify-center relative overflow-hidden">
+      <p className="text-center relative z-20 bg-black dark:bg-gradient-to-b from-neutral-200 to-neutral-500 bg-clip-text py-8 text-4xl font-bold text-transparent sm:text-7xl">
+                      
+      </p>
+      <InfiniteMovingCards
+        items={testimonials}
+        direction="right"
+        speed="slow"
       />
+    </div>
+      
 
-        
-
-      <motion.div
-        className='mx-[auto] text-center mt-20'
-        initial={{ scale: 0.5, opacity: 0 }}
-        whileInView={{ scale: 1, opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ ease: "easeOut", duration: 1 }}
-      >
-          <div className='text-5xl mb-10 lg:mb-28 lg:text-6xl lg:px-20 text-center font-bold'>How It Works</div>
-      </motion.div>
-      <div className='block lg:hidden text-center text-xl font-bold lg:text-5xl'>
-          Maintainers List Repositories
-      </div>
-      <div className='flex flex-col-reverse lg:flex-row mx-5 lg:mx-[8em] mt-10'>
-        <div className='lg:w-1/2'>
-          <div className='hidden lg:block font-bold lg:text-5xl'>
-          Maintainers
-          </div>
-          <div className='hidden lg:block font-bold lg:text-5xl'>
-          List Repositories
-          </div>
-          <div className='mt-6'>
-            <ul className="space-y-4 text-sm lg:text-lg text-gray-300 list-disc pl-6 marker:text-white">
-              <li className="pl-2">
-                Maintainers sign in with GitHub and connect their crypto wallet .
-              </li>
-              <li className="pl-2">
-                They select repositories they maintain and highlight issues they want to get fixed.
-              </li>
-              <li className="pl-2">
-                For each issue, they:
-                <ul className="ml-6 mt-2 space-y-2 list-disc pl-4 marker:text-purple-400">
-                  <li className="pl-2">Set a bounty amount in crypto</li>
-                  <li className="pl-2">Define clear acceptance criteria</li>
-                  <li className="pl-2">Specify the deadline for completion</li>
-                  <li className="pl-2">Optionally add additional context or resources</li>
-                </ul>
-              </li>
-              <li className="pl-2">
-                Once submitted, the issue appears publicly on the GitFund board.
-              </li>
-            </ul>
-          </div>
+    <div className={`pt-40 dark:bg-black `}>
+      <div className="mx-auto flex justify-center">
+        <div className="relative  rounded-full z-20 bg-[#ececec] dark:bg-[#1a1a1a] dark:text-white text-center px-5 py-2 inline-block "> {/* Added inline-block */}
+          Reward Open-Source Work. Automatically.
         </div>
-        <div className='lg:w-1/2'>
-                    <video
-            className="w-full rounded-xl object-cover"
-            src="/listbounty.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
-            aria-label="Demo video showing how to list bounties"
-          >
-            <track kind="captions" srcLang="en" label="English captions" />
-            Your browser does not support the video tag.
-          </video>
-        </div>
-       
       </div>
+      
+      <h1 className="text-center relative z-20 bg-black dark:bg-gradient-to-b from-neutral-200 to-neutral-500 bg-clip-text py-8 text-4xl font-bold text-transparent sm:text-6xl">
+      
+        How Gitfund Works?
+      </h1>
+      
+    <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+      {/* Maintainers Card */}
+      <Card className="col-span-1 md:col-span-2 lg:col-span-3">
+        <CardHeader>
+          <h2 className="text-2xl font-bold">🔧 For Maintainers</h2>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-5 gap-4">
+            <Card>
+              <CardHeader>
+                <Link2Icon />
+                <h3 className="text-lg font-semibold">Connect GitHub Repository</h3>
+              </CardHeader>
+              <CardContent>
+                <p>Login via GitHub OAuth to access your repositories and select one to fund.</p>
+                <Button variant="outline" className="mt-2">Connect GitHub</Button>
+              </CardContent>
+            </Card>
 
+            <Card>
+              <CardHeader>
+                <CoinsIcon />
+                <h3 className="text-lg font-semibold">List Issue & Set Bounty</h3>
+              </CardHeader>
+              <CardContent>
+                <p>Choose an open issue and lock your bounty in Pharos/ via smart contract escrow.</p>
+                <Badge className="mt-2">Pharos </Badge>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <UsersIcon />
+                <h3 className="text-lg font-semibold">Wait for Contributions</h3>
+              </CardHeader>
+              <CardContent>
+                <p>Developers can view your issue with bounty, tags, difficulty, and estimates to begin work.</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <GitPullRequestIcon />
+                <h3 className="text-lg font-semibold">Review Pull Request</h3>
+              </CardHeader>
+              <CardContent>
+                <p>Merge PRs via GitHub as usual. Ensure code meets your expectations.</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <WalletIcon />
+                <h3 className="text-lg font-semibold">Funds Auto-Released</h3>
+              </CardHeader>
+              <CardContent>
+                <p>Smart contract releases bounty automatically on PR merge via GitHub webhook.</p>
+              </CardContent>
+            </Card>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Contributors Card */}
+      <Card className="col-span-1 md:col-span-2 lg:col-span-3">
+        <CardHeader>
+          <h2 className="text-2xl font-bold">👨‍💻 For Contributors</h2>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-4 gap-4">
+            <Card>
+              <CardHeader>
+                <LinkIcon />
+                <h3 className="text-lg font-semibold">Connect GitHub and Wallet</h3>
+              </CardHeader>
+              <CardContent>
+                <p>Sign in with GitHub and connect your wallet to get paid.</p>
+                <div className="flex gap-2 mt-2">
+                  <Badge>Kukai</Badge>
+                  <Badge>Temple</Badge>
+                  <Badge>MetaMask</Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <SearchIcon />
+                <h3 className="text-lg font-semibold">Browse Available Bounties</h3>
+              </CardHeader>
+              <CardContent>
+                <p>Explore by tech stack, reward, and repo popularity.</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CodeIcon />
+                <h3 className="text-lg font-semibold">Solve the Issue</h3>
+              </CardHeader>
+              <CardContent>
+                <p>Fork, clone, and push code as with any open-source issue.</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <ZapIcon />
+                <h3 className="text-lg font-semibold">Get Paid Instantly</h3>
+              </CardHeader>
+              <CardContent>
+                <p>Once merged, GitFund releases bounty trustlessly to your wallet.</p>
+              </CardContent>
+            </Card>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Behind the Scenes */}
+      <Card>
+        <CardHeader>
+          <ShieldCheckIcon />
+          <h2 className="text-xl font-semibold">Smart Contract Escrow</h2>
+        </CardHeader>
+        <CardContent>
+          <p>Pharos or  smart contracts hold and release funds securely.</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <GitBranchIcon />
+          <h2 className="text-xl font-semibold">GitHub Webhooks</h2>
+        </CardHeader>
+        <CardContent>
+          <p>Track PRs and merges in real-time using GitHub APIs.</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <AwardIcon />
+          <h2 className="text-xl font-semibold">NFT Badge System</h2>
+        </CardHeader>
+        <CardContent>
+          <p>Earn on-chain NFT badges to showcase verified contributions and reputation.</p>
+        </CardContent>
+      </Card>
+    </div>
+    </div>
+  
+
+    
       
 
       <motion.div
-            className='mx-[auto] text-center mt-20'
+            className='mx-[auto] text-center mt-40'
             initial={{ scale: 0.5, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
             viewport={{ once: true }}
@@ -336,9 +500,9 @@ export default function LandingPage() {
                                 }
                       
         </div>
-        <div className="mx-auto text-center mt-10">
+        <div className="mx-auto text-center my-10">
           <motion.button 
-            className="text-black bg-white text-center justify-center mx-auto py-2 px-4 rounded-md" // Added rounded-md for better appearance
+            className="text-white bg-black dark:text-black dark:bg-white text-center justify-center mx-auto py-2 px-4 rounded-md" // Added rounded-md for better appearance
             whileHover={{ scale: 1.05 }} // Scale up slightly on hover
             whileTap={{ scale: 0.95 }}   // Scale down slightly on tap
             transition={{ type: "spring", stiffness: 400, damping: 17 }} // Add a spring transition
@@ -350,14 +514,14 @@ export default function LandingPage() {
         </div>
       
 
-      <div className="flex flex-col items-center w-full min-h-screen pt-40 bg-[#0a0a0a] text-white px-4">
+      <div className="flex flex-col items-center w-full min-h-screen pt-40 bg-white dark:bg-black  text-black dark:text-white px-4">
       <div className="max-w-5xl mx-auto text-center mb-16">
         <h2 className="text-6xl font-bold mb-4">Simple & Transparent Pricing</h2>
         <p className="text-gray-400 max-w-xl mx-auto">Choose the plan that works best for you and your team.</p>
         
         {/* Billing toggle */}
         <div className="flex items-center justify-center mt-8 space-x-4">
-          <span className={`${billingCycle === "monthly" ? "text-white" : "text-gray-400"}`}>Monthly</span>
+          <span className={`${billingCycle === "monthly" ? "text-black dark:text-white" : "text-gray-400"}`}>Monthly</span>
           <button 
             className="relative inline-flex h-6 w-12 items-center rounded-full bg-gray-700"
             onClick={() => setBillingCycle(billingCycle === "monthly" ? "annual" : "monthly")}
@@ -369,7 +533,7 @@ export default function LandingPage() {
               }`} 
             />
           </button>
-          <span className={`${billingCycle === "annual" ? "text-white" : "text-gray-400"}`}>
+          <span className={`${billingCycle === "annual" ? "text-black dark:text-white" : "text-gray-400"}`}>
             Annual <span className="text-emerald-400 text-sm ml-1">Save 17%</span>
           </span>
         </div>
@@ -381,8 +545,8 @@ export default function LandingPage() {
             key={plan.name}
             className={`rounded-xl p-8 ${
               plan.featured 
-                ? "bg-gradient-to-br from-[#0a0a0a] to-[#181a1f] border border-gray-700 shadow-lg" 
-                : "bg-[#0a0a0a] border border-gray-800"
+                ? "dark:bg-gradient-to-br from-[#0a0a0a] to-[#181a1f] bg-gradient-to-br from-[#ececec] to-[#c2c4c5] border border-gray-700 shadow-lg" 
+                : "bg-[#ececec] dark:bg-[#0a0a0a] border border-gray-800"
             }`}
           >
             {plan.featured && (
@@ -430,61 +594,7 @@ export default function LandingPage() {
     </div>
       
 
-      {/* Testimonials Section */}
-      <section className="py-20 px-4 md:px-8 lg:px-16">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
-            Our wall of love
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Testimonial cards would go here */}
-            <div className="bg-gray-900/80 backdrop-blur-sm p-6 rounded-xl border border-gray-800">
-              <div className="flex items-center mb-4">
-                <div className="w-10 h-10 rounded-full bg-gray-700 mr-3"></div>
-                <div>
-                  <h4 className="font-semibold">Developer Name</h4>
-                  <p className="text-sm text-gray-400">Project Maintainer</p>
-                </div>
-              </div>
-              <p className="text-gray-300">
-                "GitFund has transformed how I maintain my open-source projects.
-                The funding model is transparent and the community support is
-                incredible."
-              </p>
-            </div>
-
-            <div className="bg-gray-900/80 backdrop-blur-sm p-6 rounded-xl border border-gray-800">
-              <div className="flex items-center mb-4">
-                <div className="w-10 h-10 rounded-full bg-gray-700 mr-3"></div>
-                <div>
-                  <h4 className="font-semibold">Contributor Name</h4>
-                  <p className="text-sm text-gray-400">Open Source Developer</p>
-                </div>
-              </div>
-              <p className="text-gray-300">
-                "I've been able to contribute to projects I'm passionate about
-                and get rewarded for my work. GitFund makes open-source
-                sustainable for everyone."
-              </p>
-            </div>
-
-            <div className="bg-gray-900/80 backdrop-blur-sm p-6 rounded-xl border border-gray-800">
-              <div className="flex items-center mb-4">
-                <div className="w-10 h-10 rounded-full bg-gray-700 mr-3"></div>
-                <div>
-                  <h4 className="font-semibold">Company Name</h4>
-                  <p className="text-sm text-gray-400">Blockchain Project</p>
-                </div>
-              </div>
-              <p className="text-gray-300">
-                "We've found amazing talent through GitFund and have been able
-                to accelerate our development roadmap significantly."
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+     
 
       {/* CTA Section */}
       <section className="py-20 px-4 md:px-8 lg:px-16 bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-3xl mx-4 md:mx-8 lg:mx-16 my-12">
@@ -507,12 +617,20 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
               <Image
+                src="/gitfund.webp"
+                alt="GitFund logo"
+                width={100}
+                height={40}
+                className="mb-4 dark:hidden block"
+              />
+              <Image
                 src="/gitfund-white.webp"
                 alt="GitFund logo"
                 width={100}
                 height={40}
-                className="mb-4"
+                className="mb-4 dark:block hidden"
               />
+              
               <p className="text-sm text-gray-400">
                 Empowering open-source communities through sustainable funding.
               </p>
@@ -522,17 +640,17 @@ export default function LandingPage() {
               <h4 className="font-semibold mb-4">Platform</h4>
               <ul className="space-y-2 text-sm text-gray-400">
                 <li>
-                  <Link href="/" className="hover:text-white">
+                  <Link href="/" className="hover:text-black dark:hover:text-white">
                     How it works
                   </Link>
                 </li>
                 <li>
-                  <Link href="/" className="hover:text-white">
+                  <Link href="/" className="hover:text-black dark:hover:text-white">
                     Pricing
                   </Link>
                 </li>
                 <li>
-                  <Link href="/" className="hover:text-white">
+                  <Link href="/" className="hover:text-black dark:hover:text-white">
                     FAQ
                   </Link>
                 </li>
@@ -543,17 +661,17 @@ export default function LandingPage() {
               <h4 className="font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-sm text-gray-400">
                 <li>
-                  <Link href="/" className="hover:text-white">
+                  <Link href="/" className="hover:text-black dark:hover:text-white">
                     Terms
                   </Link>
                 </li>
                 <li>
-                  <Link href="/" className="hover:text-white">
+                  <Link href="/" className="hover:text-black dark:hover:text-white">
                     Privacy
                   </Link>
                 </li>
                 <li>
-                  <Link href="/" className="hover:text-white">
+                  <Link href="/" className="hover:text-black dark:hover:text-white">
                     Cookies
                   </Link>
                 </li>
@@ -564,17 +682,17 @@ export default function LandingPage() {
               <h4 className="font-semibold mb-4">Community</h4>
               <ul className="space-y-2 text-sm text-gray-400">
                 <li>
-                  <Link href="/" className="hover:text-white">
+                  <Link href="/" className="hover:text-black dark:hover:text-white">
                     GitHub
                   </Link>
                 </li>
                 <li>
-                  <Link href="/" className="hover:text-white">
+                  <Link href="/" className="hover:text-black dark:hover:text-white">
                     Discord
                   </Link>
                 </li>
                 <li>
-                  <Link href="/" className="hover:text-white">
+                  <Link href="/" className="hover:text-black dark:hover:text-white">
                     Twitter
                   </Link>
                 </li>
@@ -587,7 +705,7 @@ export default function LandingPage() {
               © 2023 GitFund. All rights reserved.
             </p>
             <div className="flex space-x-4 mt-4 md:mt-0">
-              <Link href="/" className="text-gray-400 hover:text-white">
+              <Link href="/" className="text-gray-400 hover:text-black dark:hover:text-white">
                 <svg
                   className="h-5 w-5"
                   fill="currentColor"
@@ -601,7 +719,7 @@ export default function LandingPage() {
                   />
                 </svg>
               </Link>
-              <Link href="/" className="text-gray-400 hover:text-white">
+              <Link href="/" className="text-gray-400 hover:text-black dark:hover:text-white">
                 <svg
                   className="h-5 w-5"
                   fill="currentColor"
@@ -615,7 +733,7 @@ export default function LandingPage() {
                   />
                 </svg>
               </Link>
-              <Link href="/" className="text-gray-400 hover:text-white">
+              <Link href="/" className="text-gray-400 hover:text-black dark:hover:text-white">
                 <svg
                   className="h-5 w-5"
                   fill="currentColor"
