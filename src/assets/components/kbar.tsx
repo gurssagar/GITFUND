@@ -33,9 +33,7 @@ export default function Kbar() {
     return (
         <>
             {/* SearchModal will now get its state from the context directly */}
-            <Suspense fallback={null}> {/* Added fallback={null} */}
             <SearchModal />
-            </Suspense>
         </>
     );
 }
