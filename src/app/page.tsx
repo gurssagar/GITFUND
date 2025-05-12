@@ -8,6 +8,7 @@ import { motion } from "motion/react"
 import GitHubIssueList from "../components/issue";
 import Image from "next/image";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { useWeb3 } from "@/assets/components/web3Context";
 import MetaMaskButton from "@/assets/components/metamask";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
@@ -15,6 +16,8 @@ import heroImage from "@/assets/components/bg-1.jpg";
 import MacbookScrollDemo from "@/assets/components/macbookscrool";
 import ShootingStarBorder from "@/assets/border";
 import { LampContainer } from "@/components/ui/lamp";
+import { PointerHighlight } from "@/components/ui/pointer-highlight";
+
 export default function LandingPage() {
   const { account, connectWallet } = useWeb3();
   const [billingCycle, setBillingCycle] = useState("monthly");
@@ -115,34 +118,22 @@ export default function LandingPage() {
     { name: "Mar 2024", value: 10000 },
   ];
 
+
+  function scaleScreen(){
+    if(window.innerWidth <= 768){
+      
+    }
+  }
+
   return (
     <div className="min-h-screen ">
-      <div className="flex">
-      <LampContainer className="flex">
-      <motion.h1
-        initial={{ opacity: 0.5, y: 100 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{
-          delay: 0.3,
-          duration: 0.8,
-          ease: "easeInOut",
-        }}
-        className="mt-8 bg-gradient-to-br from-slate-300 to-slate-500 py-4 bg-clip-text text-center text-4xl font-medium tracking-tight text-transparent md:text-7xl"
-      >
-        
-      </motion.h1>
       
-    </LampContainer>
-      <div>
-      Welcome to GitFund, your one-stop platform for finding and fixing issues in open-source projects.
-      </div>
-      </div>
       
       
 
       {/* Header/Navigation */}
       <header className="fixed top-4 left-4 right-4 z-50">
-        <div className="max-w-7xl mx-auto bg-[#1A1A1A]/80 backdrop-blur-md rounded-full border border-gray-800/50">
+        <div className="max-w-7xl mx-auto bg-black dark:bg-[#1A1A1A]/80 backdrop-blur-md rounded-full border border-gray-800/50">
           <div className="flex justify-between items-center px-6 py-3">
             <div>
               <Image
@@ -187,67 +178,48 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 md:px-8 lg:px-16 relative overflow-hidden">
-        {/* Background Image */}
-        <div
-          className="absolute inset-0 z-0"
-        />
 
-        <div className="flex  z-10 mx-auto">
-          <div className=''>
-          <div className='grid bg-black/05 backdrop-blur-xs rounded-xl p-4 grid-cols-2 lg:grid-cols-4 gap-3 opacity-50'>
-            {Array.from({ length: screen }).map((_, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 0.5, y: 0 }}
-                transition={{ 
-                  delay: Math.random() * 5, // Random delay between 0-2 seconds
-                  duration: 0.8, 
-                  ease: "easeOut" 
-                }}
-              >
-                <GitHubIssueList />
-              </motion.div>
-            ))}
-          </div>
-          <div className="absolute top-[50%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 text-6xl md:text-8xl font-bold mb-6 text-center w-full max-w-[35em]">
-            <motion.div initial={{scale:0.5,opacity:0}} animate={{scale:1,opacity:1}} transition={{ease:"easeOut",duration:2}}>
-              <h1>Stuck with</h1>
-              <h1>Github Issues</h1>
-            </motion.div>
-            <div className="flex justify-center gap-4 pt-10">
-              <motion.div
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay:3, ease: "easeOut", duration: 1 }}>
-                  <Link
-                  href="/Login"
-                  className="px-8 py-3 border bg-[#0a0a0a] border-1 border-white hover:bg-white hover:text-black rounded-full text-lg font-medium hover:from-purple-700 hover:to-blue-600 transition-all"
-                  >
-                    Lets Contribute
-                    </Link>
-                </motion.div>
-                <motion.div
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay:3, ease: "easeOut", duration: 1 }}>
-                  <Link
-                  href="/Login"
-                  className="px-8 py-3 border bg-[#0a0a0a] hover:opacity-100  backdrop-blur-xl border-white hover:bg-white hover:text-black rounded-full text-lg font-medium hover:from-purple-700 hover:to-blue-600 transition-all"
-                  >
-                    List Bounties
-                    </Link>
-                </motion.div>
-            
-          </div>
-          </div>
-          </div>
+      <section>
+          <div>
+            <div className="bg-[url('')]">
+            <div className="relative flex mt-[200px] items-center justify-center bg-white dark:bg-black">
+              <div
+                className={cn(
+                  "absolute inset-0",
+                  "[background-size:30px_30px]",
+                  "[background-image:radial-gradient(#d4d4d4_1px,transparent_1px)]",
+                  "dark:[background-image:radial-gradient(#404040_1px,transparent_1px)]",
+                )}
+              />
+              {/* Radial gradient for the container to give a faded look */}
+              
+              <div className="pointer-events-none absolute inset-0 block items-center justify-center bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black"></div>
+              <div className="">
+                  <div className="text-center"> {/* Added text-center to the parent div */}
+                    <div className="relative rounded-full z-20 bg-[#ececec] dark:bg-[#373737] dark:text-white text-center px-5 py-2 inline-block"> {/* Added inline-block */}
+                            Trusted. Transparent. Blockchain-Powered.
+                    </div>
+                    
+                  </div>
+                  <p className="text-center relative z-20 bg-black dark:bg-gradient-to-b from-neutral-200 to-neutral-500 bg-clip-text py-8 text-4xl font-bold text-transparent sm:text-7xl">
+                       Fuel Open Source Innovation
+                  </p>
+                  <p className="mx-auto max-w-[60vw] text-center">
+                  GitFund seamlessly bridges the gap between open-source development and decentralized finance by integrating GitHub repositories with blockchain smart contracts. This allows project maintainers to post issues with pre-funded bounties and enables developers to earn cryptocurrency—such as Tezos or Etherlink—automatically upon successful code contributions, like merged pull requests. By removing intermediaries and ensuring instant, transparent payouts, GitFund creates a sustainable, trustless incentive system that rewards real coding impact.
+                  </p>
 
-          {/* Circular flow diagram */}
+                  <div className="mt-50 mx-auto">
+                      <div className="transition z-20">
+                          <Image onScroll={() =>{}} className="block z-20 dark:hidden " src="/screen-white.png" height={1600} width={1600} alt={`homepage`}></Image>
+                          <Image onScroll={() => {}} className="hidden z-20 dark:block " src="/screen.png" height={1600} width={1600} alt={`homepage`}></Image>
 
-        </div>
+                      </div>
+                  </div>
+              </div>
+              
+            </div>
+            </div>
+          </div>        
       </section>
 
   
