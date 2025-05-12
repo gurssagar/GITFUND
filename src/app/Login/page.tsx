@@ -27,10 +27,10 @@ export default function Login(){
        <Suspense>
         <div>
             <div className='block lg:flex'>
-                <div className='w-1/2'>
+                <div className='lg:w-1/2'>
                     <img src="/signup.jpg"></img>
                 </div>
-                <div className='w-1/2 my-auto px-20'>
+                <div className='lg:w-1/2 my-auto px-20'>
                     <div className='text-4xl font-bold py-4'>Welcome to GitFund</div>
                     <hr className='text-gray-800'></hr>
                     

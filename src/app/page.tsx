@@ -456,9 +456,9 @@ export default function LandingPage() {
 
     
       
-
+    <div className="bg-white dark:bg-black">
       <motion.div
-            className='mx-[auto] text-center mt-40'
+            className='mx-[auto] text-center pt-40'
             initial={{ scale: 0.5, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
             viewport={{ once: true }}
@@ -500,7 +500,7 @@ export default function LandingPage() {
                                 }
                       
         </div>
-        <div className="mx-auto text-center my-10">
+        <div className="mx-auto text-center py-10">
           <motion.button 
             className="text-white bg-black dark:text-black dark:bg-white text-center justify-center mx-auto py-2 px-4 rounded-md" // Added rounded-md for better appearance
             whileHover={{ scale: 1.05 }} // Scale up slightly on hover
@@ -512,6 +512,7 @@ export default function LandingPage() {
             </Link>
           </motion.button>
         </div>
+       </div>
       
 
       <div className="flex flex-col items-center w-full min-h-screen pt-40 bg-white dark:bg-black  text-black dark:text-white px-4">
@@ -595,9 +596,10 @@ export default function LandingPage() {
       
 
      
+    <div className="bg-white dark:bg-black">
 
       {/* CTA Section */}
-      <section className="py-20 px-4 md:px-8 lg:px-16 bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-3xl mx-4 md:mx-8 lg:mx-16 my-12">
+      <section className="py-20 px-4 md:px-8 lg:px-16 bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-3xl mx-4 md:mx-8 lg:mx-16 py-12">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-8">
             Try our app now
@@ -747,6 +749,8 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+      </div>
+
     </div>
   );
 }

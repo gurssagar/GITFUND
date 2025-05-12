@@ -79,7 +79,7 @@ export default function Sidebar() {
                     </div>
                     </a>
                 </div>
-                <div className='pt-7'>
+                <div className='pt-3'>
                     {!isShrunk && <div className='text-[13px] text-gray-400 py-2'>Maintainer</div>}
                     <Link href="/create-project">
                     <div className='rounded-lg text-sm focus:bg-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a] px-2 py-2 flex'>
@@ -95,7 +95,17 @@ export default function Sidebar() {
                         {!isShrunk && "My Projects"}
                         </div>
                     </Link>
+                    <Link href="/gitfundChat">
+                    <div className='rounded-lg text-sm focus:bg-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a] pl-1 pr-4 py-2 flex'>
+                        <div className='flex gap-1'>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1"><path d="M4 12a8 8 0 1 1 16 0v5.09c0 .848 0 1.27-.126 1.609a2 2 0 0 1-1.175 1.175C18.36 20 17.937 20 17.09 20H12a8 8 0 0 1-8-8Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 11h6m-3 4h3"/></g></svg>                   
+                        {!isShrunk && "Gitfund Chat"}
+                        </div>
+                        </div>
+                    </Link>
                 </div>
+
+                
                 </div>
             </div>
         </div>

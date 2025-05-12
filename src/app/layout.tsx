@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { SessionProvider } from 'next-auth/react';
 import {Web3Provider} from "../assets/components/web3Context";
 import { SidebarProvider } from '@/assets/components/SidebarContext';
+import { ChatSidebarProvider } from '@/assets/components/chats/chatSiderbarContext';
 import { ThemeProvider } from 'next-themes';
 import Kbar from '../assets/components/kbar';
 import { SearchProvider } from '@/assets/components/SearchContext'; // Import SearchProvider
@@ -42,21 +43,25 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-          <SidebarProvider>
-            <Web3Provider>
-              <SessionProvider>
-                <SearchProvider> {/* Wrap Kbar and children with SearchProvider */}
-                  <Kbar />
-                  {children}
-                  <div className="fixed right-10 bottom-10">
-                      <ChatPage/>
-                  </div>
-                </SearchProvider>
-              </SessionProvider>
-            </Web3Provider>
-          </SidebarProvider>
+            <SidebarProvider>
+              
+              <Web3Provider>
+                <SessionProvider>
+                  <SearchProvider>
+                  <ChatSidebarProvider>
+
+                    <Kbar />
+                    {children}
+                    <div className="fixed right-10 bottom-10">
+                        <ChatPage/>
+                    </div>
+                    </ChatSidebarProvider>
+
+                  </SearchProvider>
+                </SessionProvider>
+              </Web3Provider>
+              </SidebarProvider>
         </ThemeProvider>
-        
       </body>
     </html>
   );
