@@ -5,7 +5,7 @@ import Topbar from '@/assets/components/topbar';
 import { useSession } from "next-auth/react";
 import Image from 'next/image';
 import { Button } from '@/components/ui/button'; // Assuming you have a Button component
-
+import { useSidebarContext } from '@/assets/components/SidebarContext';
 interface UserProfile {
     name: string;
     // Add other editable fields here if needed
@@ -13,6 +13,7 @@ interface UserProfile {
 
 export default function Page() {
     const { data: sessionData, status } = useSession();
+    const { isShrunk } = useSidebarContext();
     const [profile, setProfile] = useState<UserProfile>({
         name: '',
     });
@@ -82,7 +83,7 @@ export default function Page() {
         <>
             <div>
                 <Sidebar />
-                <div className='ml-[16em]'>
+                <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
                     <Topbar />
                     <div className='mt-[80px] px-[2vw] py-8'>
                         <h1 className='text-3xl font-semibold mb-8'>Settings</h1>

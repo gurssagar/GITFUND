@@ -12,7 +12,9 @@ import { useWeb3 } from "@/assets/components/web3Context";
 import MetaMaskButton from "@/assets/components/metamask";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import heroImage from "@/assets/components/bg-1.jpg";
+import MacbookScrollDemo from "@/assets/components/macbookscrool";
 import ShootingStarBorder from "@/assets/border";
+import { LampContainer } from "@/components/ui/lamp";
 export default function LandingPage() {
   const { account, connectWallet } = useWeb3();
   const [billingCycle, setBillingCycle] = useState("monthly");
@@ -114,7 +116,30 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen ">
+      <div className="flex">
+      <LampContainer className="flex">
+      <motion.h1
+        initial={{ opacity: 0.5, y: 100 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{
+          delay: 0.3,
+          duration: 0.8,
+          ease: "easeInOut",
+        }}
+        className="mt-8 bg-gradient-to-br from-slate-300 to-slate-500 py-4 bg-clip-text text-center text-4xl font-medium tracking-tight text-transparent md:text-7xl"
+      >
+        
+      </motion.h1>
+      
+    </LampContainer>
+      <div>
+      Welcome to GitFund, your one-stop platform for finding and fixing issues in open-source projects.
+      </div>
+      </div>
+      
+      
+
       {/* Header/Navigation */}
       <header className="fixed top-4 left-4 right-4 z-50">
         <div className="max-w-7xl mx-auto bg-[#1A1A1A]/80 backdrop-blur-md rounded-full border border-gray-800/50">
