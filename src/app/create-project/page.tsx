@@ -14,6 +14,7 @@ import {
     AlertDescription,
     AlertTitle,
   } from "@/components/ui/alert"
+import { Suspense } from "react";
 export default function Project() {
     const session = useSession();
     const [token, setToken] = useState('');
@@ -338,6 +339,7 @@ export default function Project() {
 
     return (
         <>
+        <Suspense>
             <div className="fixed bottom-20 right-10">
             {alertMessage && (
                 <Alert>
@@ -458,6 +460,7 @@ export default function Project() {
                     </div>
                 </div>
             </div>
+            </Suspense>
         </>
     )
 }

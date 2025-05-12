@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react';
 import Topbar from '@/assets/components/topbar';
 import Sidebar from '@/assets/components/sidebar';
 import { useSidebarContext } from '@/assets/components/SidebarContext';
-
+import { Suspense } from 'react';
 // Removed unused useSearchParams for now
 // Consider adding an icon library like react-icons if needed: npm install react-icons
 // import { FiFilter, FiSearch } from 'react-icons/fi'; // Example icon import
@@ -72,6 +72,7 @@ export default function Rewards() {
     
 
     return (
+        <Suspense fallback={<div>Loading...</div>}>
         <div className="flex h-screen">
             <Sidebar />
             <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
@@ -244,5 +245,6 @@ export default function Rewards() {
                 </main>
             </div>
         </div>
+        </Suspense>
     );
 }

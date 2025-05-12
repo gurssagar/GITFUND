@@ -2,7 +2,7 @@
 import { useEffect } from 'react';
 import SearchModal from './SearchModal';
 import { useSearch } from './SearchContext'; // Import the context hook
-
+import {Suspense} from'react';
 // Removed unused imports: Image, Link, useSession, Sidebar
 // Removed useState as isSearchOpen is now managed by context
 
@@ -33,7 +33,9 @@ export default function Kbar() {
     return (
         <>
             {/* SearchModal will now get its state from the context directly */}
+            <Suspense fallback={null}> {/* Added fallback={null} */}
             <SearchModal />
+            </Suspense>
         </>
     );
 }

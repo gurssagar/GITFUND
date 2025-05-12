@@ -3,7 +3,7 @@ import {useState,useEffect} from 'react'
 import { useSession } from 'next-auth/react'
 import { signIn } from "next-auth/react"
 import Router from 'next/router'
-
+import { Suspense } from 'react'
 export default function Login(){
     const session=useSession()
     const id = (session?.data?.user as any)?.username;
@@ -24,6 +24,7 @@ export default function Login(){
 
     return (
        <>
+       <Suspense>
         <div>
             <div className='block lg:flex'>
                 <div className='w-1/2'>
@@ -59,6 +60,7 @@ export default function Login(){
             </div>
             
         </div>
+        </Suspense>
        </> 
     )
 

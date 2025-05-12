@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react';
+import { Suspense } from 'react';
 export default function GitBot() {
     const [data, setData] = useState();
     const fetchData = async () => {
@@ -18,9 +19,11 @@ export default function GitBot() {
     }
     return (
         <>
+        <Suspense>
             <div>
                 <button onClick={fetchData}>Fetch Data</button>
             </div>
+            </Suspense>
         </>
     )
 }

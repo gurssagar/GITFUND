@@ -46,7 +46,7 @@ export default function RootLayout({
             <Web3Provider>
               <SessionProvider>
                 <SearchProvider> {/* Wrap Kbar and children with SearchProvider */}
-                  <Kbar />
+                  
                   {children}
                   <div className="fixed right-10 bottom-10">
                       <ChatPage/>

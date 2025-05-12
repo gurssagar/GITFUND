@@ -5,7 +5,7 @@ import { createChat } from '@n8n/chat';
 import Sidebar from '@/assets/components/sidebar';
 import Topbar from '@/assets/components/topbar';
 import { useSidebarContext } from '@/assets/components/SidebarContext';
-
+import {Suspense} from'react';
 const ChatPage = () => {
 	const { isShrunk } = useSidebarContext();
 	useEffect(() => {
@@ -41,6 +41,7 @@ const ChatPage = () => {
 	// Ensure you have a target element if using 'target' option
 	return (
 		<>
+			<Suspense fallback={<div>Loading...</div>}>
 			<div>
 				<Sidebar/>
                 <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
@@ -70,7 +71,7 @@ const ChatPage = () => {
 					<div id="n8n-chat" className={`z-10 mt-[70px]  h-[calc(100vh_-_70px)] ${isShrunk?' w-[calc(100%)]':' w-[calc(100%)]'}`}></div>
 				</div>
 			</div>
-			
+			</Suspense>
 		</>
 );
 };

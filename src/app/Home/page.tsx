@@ -4,6 +4,7 @@ import {useEffect, useState} from 'react'
 import {useRouter} from 'next/navigation'
 import { signIn } from "next-auth/react"
 import { signOut } from "next-auth/react"
+import { Suspense } from 'react';
 export default function Home(){
     const router = useRouter();
     const [hasHttpOnlyCookie, setHasHttpOnlyCookie] = useState(false);
@@ -29,6 +30,7 @@ export default function Home(){
     }, []);
     return(
         <>
+        <Suspense>
         <div className="fixed top-10 left-0 right-0 z-50 w-max-[50%] mx-40">
       <div className=" flex justify-between py-4 px-10 bg-black dark:bg-transparent  dark:backdrop-blur-[10px] rounded-full">
         <div>
@@ -117,6 +119,7 @@ export default function Home(){
         </div>
       </div>
     </div>
+    </Suspense>
         </>
     )
 }

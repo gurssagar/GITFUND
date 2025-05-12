@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { format } from 'date-fns'; // Add import for format
 import { useSidebarContext } from '@/assets/components/SidebarContext';
 import {isShrunk} from '@/assets/components/SidebarContext'
+import { Suspense } from "react";
 import {
     FaJs, FaPython, FaHtml5, FaCss3Alt, FaReact, FaNodeJs, FaJava, FaPhp, FaRust, FaSwift, FaDocker, FaGitAlt, FaSass, FaVuejs, FaAngular, FaDatabase, FaLinux, FaApple, FaWindows, FaAndroid, FaCode, FaTerminal, FaMarkdown
 } from 'react-icons/fa';
@@ -288,6 +289,8 @@ export default function Project() {
 
     return (
         <>
+            <Suspense fallback={<div>Loading...</div>}>
+                
             {rateLimitExceeded && (
                 <div className="fixed top-0 left-0 right-0 bg-yellow-500 dark:text-white text-black p-4 text-center">
                     Rate limit exceeded. Please wait {retryAfter} seconds before trying again.
@@ -491,6 +494,7 @@ export default function Project() {
                 </div>
             </div>
             </div>
+            </Suspense>
         </>
     );
 }

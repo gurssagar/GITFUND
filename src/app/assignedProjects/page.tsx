@@ -5,7 +5,7 @@ import Topbar from '@/assets/components/topbar';
 import { useSession } from 'next-auth/react';
 import Image from 'next/image'; // Import Image for project icons/avatars
 import { useSidebarContext } from '@/assets/components/SidebarContext';
-
+import { Suspense } from 'react';
 // Define interfaces for the data structures - ADD fields based on image
 interface Project {
     id: number | string;
@@ -122,6 +122,8 @@ export default function AssignedProjects() {
 
     return (
         <>
+        <Suspense fallback={<div>Loading...</div>}>
+           
             <div>
                 <Sidebar />
                 <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
@@ -211,6 +213,7 @@ export default function AssignedProjects() {
                     </div>
                 </div>
             </div>
+            </Suspense>
         </>
     );
 }

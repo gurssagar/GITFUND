@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import Sidebar from '@/assets/components/sidebar';
 import Topbar from '@/assets/components/topbar';
+import { Suspense } from 'react';
 // Issue component is not used in this file, can be removed if not needed elsewhere via this page
 // import Issue from '@/assets/components/issue'; 
 import {useSidebarContext} from '@/assets/components/SidebarContext'
@@ -81,6 +82,8 @@ export default function MyProject() {
 
     return (
         <>
+        <Suspense fallback={<div>Loading...</div>}>
+            
         <div className='flex min-h-screen '>
             <Sidebar/>
             <div className={`flex-grow transition-all duration-300 ease-in-out ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
@@ -209,6 +212,7 @@ export default function MyProject() {
                 </main>
             </div>
         </div>
+        </Suspense>
         </>
     )
 }

@@ -2,7 +2,7 @@
 import { useSession } from 'next-auth/react';
 import {useEffect, useState} from'react';
 import { useSidebarContext } from '@/assets/components/SidebarContext';
-
+import { Suspense } from 'react';
 import {useRouter} from 'next/navigation'
 import Image from 'next/image';
 import Link from 'next/link';
@@ -104,7 +104,7 @@ export default function Home(){
         
         
       
-
+        <Suspense>
         <div className='flex'>
             <Sidebar/>
             <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
@@ -197,7 +197,7 @@ export default function Home(){
             </div>
         </div>
 
-       
+        </Suspense>
         </>
     )
 

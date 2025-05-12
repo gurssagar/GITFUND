@@ -7,6 +7,7 @@ import Sidebar from "@/assets/components/sidebar";
 import Topbar from "@/assets/components/topbar";
 import Issue from "@/assets/components/issue";
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from "react";
 import { useSidebarContext } from '@/assets/components/SidebarContext';
 
 const IssueCommentForm = () => {
@@ -76,7 +77,7 @@ const IssueCommentForm = () => {
 
   return (
     <>
-        
+        <Suspense fallback={<div>Loading page...</div>}> {/* Added fallback */}
         <div className='flex'>
             <Sidebar/>
             <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
@@ -130,7 +131,7 @@ const IssueCommentForm = () => {
     </div>
             </div>
         </div>
-
+        </Suspense>
         </>
     
   );

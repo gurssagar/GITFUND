@@ -10,6 +10,8 @@ import Sidebar from '@/assets/components/sidebar';
 import Topbar from '@/assets/components/topbar';
 import Issue from '@/assets/components/issue';
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react'
+
 import { useCompletion } from '@ai-sdk/react';
 import { ethers } from 'ethers';
 import { useWeb3 } from "../../../../assets/components/web3Context";
@@ -301,6 +303,7 @@ export default function Contributions() {
       }, [constributions, registeredUser, repoData]);
       return(
           <>
+          <Suspense>
           <div className='flex'>
               <Sidebar/>
               <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
@@ -414,6 +417,7 @@ export default function Contributions() {
                       
                   </div>
           </div>
+          </Suspense>
           
           </>
       )

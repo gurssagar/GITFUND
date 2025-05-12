@@ -7,6 +7,7 @@ import Topbar from '@/assets/components/topbar';
 import Issue from '@/assets/components/issue';
 import { useSearchParams } from 'next/navigation';
 import { AnyARecord } from 'dns';
+import { Suspense } from 'react';
 import { useSidebarContext } from '@/assets/components/SidebarContext';
 
 export default function AssignIssues() {
@@ -112,6 +113,7 @@ export default function AssignIssues() {
 
     return (
         <>
+        <Suspense fallback={<div>Loading...</div>}>
         <div className='flex'>
             <Sidebar />
             <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
@@ -161,6 +163,7 @@ export default function AssignIssues() {
                 </div>
             </div>
         </div>
+        </Suspense>
     </>
     )
 }

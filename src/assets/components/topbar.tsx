@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useWeb3 } from "./web3Context";
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { usePathname } from 'next/navigation';
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
@@ -40,6 +41,7 @@ const { isSearchOpen, toggleSearchModal, closeSearchModal } = useSearch();
   },[session?.data?.user?.image])
   return(
     <>
+    <Suspense fallback={<div>Loading...</div>}>
     <div className={`dark:bg-[#0a0a0a] bg-white fixed top-0 px-5 py-4 border-b-[1px] border-gray-600 ${isShrunk ? 'w-[calc(100%_-_4rem)]' : 'w-[calc(100%_-_16rem)]'} transition-all duration-400 ease-in-out` } style={{ transitionProperty: 'width, padding' }}>
         <div className='flex justify-between'>
             <div className='flex items-center'> {/* Added items-center for better vertical alignment */}
@@ -141,6 +143,7 @@ const { isSearchOpen, toggleSearchModal, closeSearchModal } = useSearch();
                    
                    
                 </div>
+                </Suspense>
     </>
   )
 

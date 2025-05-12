@@ -4,6 +4,7 @@ import Sidebar from '@/assets/components/sidebar';
 import Topbar from '@/assets/components/topbar'
 import { useSession } from 'next-auth/react';
 import { useSidebarContext } from '@/assets/components/SidebarContext';
+import {Suspense} from 'react';
 // Define the interface for the issue data (can be used for both applied and assigned)
 interface IssueData {
     projectName: string;
@@ -90,6 +91,8 @@ export default function Contributions() {
         const imageUrl = issue.image_url?.trim().replace(/`/g, '') || ''; // Handle potentially missing/empty URL
 
         return (
+            
+                
             <div key={key} className='border border-gray-700 dark:bg-[#181a1f] rounded p-3 mb-3 flex flex-col gap-2'>
                 {/* Top row: Project Name and Issue Number */}
                 <div className="flex justify-between items-center">
@@ -120,6 +123,7 @@ export default function Contributions() {
 
     return (
         <>
+        <Suspense>
             <div>
                 <Sidebar />
                 <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
@@ -154,6 +158,7 @@ export default function Contributions() {
                     </div>
                 </div>
             </div>
+            </Suspense>
         </>
     );
 }
