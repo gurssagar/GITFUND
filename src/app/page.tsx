@@ -546,7 +546,7 @@ export default function LandingPage() {
             key={plan.name}
             className={`rounded-xl p-8 ${
               plan.featured 
-                ? "dark:bg-gradient-to-br from-[#0a0a0a] to-[#181a1f] bg-gradient-to-br from-[#ececec] to-[#c2c4c5] border border-gray-700 shadow-lg" 
+                ? " dark:bg-[#0a0a0a]  bg-[#ececec]  border border-gray-700 shadow-lg" 
                 : "bg-[#ececec] dark:bg-[#0a0a0a] border border-gray-800"
             }`}
           >
@@ -596,7 +596,7 @@ export default function LandingPage() {
       
 
      
-    <div className="bg-white dark:bg-black">
+    <div className="py-20 bg-white dark:bg-black">
 
       {/* CTA Section */}
       <section className="py-20 px-4 md:px-8 lg:px-16 bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-3xl mx-4 md:mx-8 lg:mx-16 py-12">

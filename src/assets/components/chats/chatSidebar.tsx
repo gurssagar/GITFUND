@@ -6,10 +6,12 @@ import { usechatSidebarContext } from './chatSiderbarContext';
 import React, { useEffect, useState } from 'react'; // Added React, useEffect, useState
 
 export default function Sidebar() {
-    const { isShrunk } = usechatSidebarContext();
+    const { isShrunk, setIsShrunk, selectedUser, setSelectedUser } = usechatSidebarContext(); // Destructure selectedUser and setSelectedUser
+
     const [allUsersData, setAllUsersData] = useState<any[]>([]);
     const [assignedUsersData, setAssignedUsersData] = useState<any[]>([]);
     const [displayableUsers, setDisplayableUsers] = useState<any[]>([]);
+    
 
     const fetchAllUsersFromDB = async () => {
         try {
@@ -86,15 +88,7 @@ export default function Sidebar() {
            
 
                 <div>
-                <div className='pt-7'>
-                    {!isShrunk && <div className='text-[13px] text-gray-400 py-2'>Explore</div>}
-                    <Link href="/homepage">
-                    <div className='rounded-lg gap-4 text-sm focus:bg-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a]  px-2 py-2 flex items-center'>
-                        {/* Placeholder for Discover icon, you can use a specific one */}
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                        {!isShrunk && <span className="ml-2">Discover</span>}
-                    </div></Link>
-                </div>
+                
 
                 {/* Display Users Section */}
                 <div className='pt-7'>
@@ -102,7 +96,10 @@ export default function Sidebar() {
                     {displayableUsers.length > 0 ? (
                         displayableUsers.map((user: any) => (
                             <div 
-                                key={user.id} 
+                                key={user.id}
+                                onClick={() => {
+                                    setSelectedUser(user); // Update the selected user
+                                }} 
                                 className='rounded-lg gap-4 text-sm focus:bg-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a] px-2 py-2 flex items-center cursor-pointer'
                                 // onClick={() => { /* TODO: Implement chat opening logic if needed */ }}
                             >
@@ -121,6 +118,16 @@ export default function Sidebar() {
                         !isShrunk && <div className='text-xs text-gray-500 px-2 py-1'>No users to display.</div>
                     )}
                 </div>
+
+                <div className='pt-7'>
+                    <Link href="/homepage">
+                    <div className='rounded-lg flex justify-between gap-4 text-sm focus:bg-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a]  px-2 py-2 flex items-center'>
+                        {/* Placeholder for Discover icon, you can use a specific one */}
+                        {!isShrunk && <span className="ml-2">Exit Chat</span>}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15"><path fill="currentColor" d="M8.293 2.293a1 1 0 0 1 1.414 0l4.5 4.5a1 1 0 0 1 0 1.414l-4.5 4.5a1 1 0 0 1-1.414-1.414L11 8.5H1.5a1 1 0 0 1 0-2H11L8.293 3.707a1 1 0 0 1 0-1.414"/></svg>
+                    </div></Link>
+                </div>
+
             </div>
         </div>
         </div>

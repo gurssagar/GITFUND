@@ -1,7 +1,6 @@
 'use client'
 import { useSession } from 'next-auth/react';
 import { useState,useEffect } from 'react'
-import { useSidebarContext } from './chatSiderbarContext';
 import { signOut } from "next-auth/react"
 import Image from "next/image";
 import Link from 'next/link';
@@ -19,7 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { usechatSidebarContext } from './chatSiderbarContext';
+import { usechatSidebarContext } from './chatSiderbarContext'; // Ensure this is the correct context
 export default function Topbar(  ) {
 const { isSearchOpen, toggleSearchModal, closeSearchModal } = useSearch();
   const router = useRouter();
@@ -31,7 +30,7 @@ const { isSearchOpen, toggleSearchModal, closeSearchModal } = useSearch();
   const session = useSession()
   const [visible, setVisible] = useState(false)
   const [image,updateImage]=useState('')
-  const { isShrunk, setIsShrunk } = usechatSidebarContext();
+  const { isShrunk, setIsShrunk, selectedUser, setSelectedUser } = usechatSidebarContext(); // Destructure selectedUser and setSelectedUser
   useEffect(()=>{
       if(session?.data?.user?.image){
           updateImage(session?.data?.user?.image)
@@ -40,15 +39,34 @@ const { isSearchOpen, toggleSearchModal, closeSearchModal } = useSearch();
   return(
     <>
     <Suspense fallback={<div>Loading...</div>}>
-    <div className={`dark:bg-[#0a0a0a] bg-white fixed top-0 px-5 py-4 border-b-[1px] border-gray-600 ${isShrunk ? 'w-[calc(100%_-_4rem)]' : 'w-[calc(100%_-_16rem)]'} transition-all duration-400 ease-in-out` } style={{ transitionProperty: 'width, padding' }}>
+    <div className={`dark:bg-[#0a0a0a] z-20 bg-white fixed top-0 px-5 py-4 border-b-[1px] border-gray-600 ${isShrunk ? 'w-[calc(100%_-_4rem)]' : 'w-[calc(100%_-_16rem)]'} transition-all duration-400 ease-in-out` } style={{ transitionProperty: 'width, padding' }}>
         <div className='flex justify-between'>
             <div className='flex items-center'> {/* Added items-center for better vertical alignment */}
                 <div className='pr-2 border-r-1 border-gray-800' onClick={() => setIsShrunk(!isShrunk)} style={{ cursor: "pointer" }}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path></svg>
                 </div>
-                {/* Display breadcrumbs based on the current path */}
+                {/* Display selected user or breadcrumbs */}
                 <div className='pl-4 flex items-center text-sm text-gray-500 dark:text-gray-400'>
-                    {pathname === '/' ? (
+                    {selectedUser ? (
+                        <div className="flex items-center gap-2">
+                            <Image
+                                className="rounded-full"
+                                src={selectedUser.image_url || ''} // Fallback for missing image
+                                alt={selectedUser.fullName || 'User'}
+                                width={24}
+                                height={24}
+                                onError={(e) => { (e.target as HTMLImageElement).src = ''; }} // Fallback for broken images
+                            />
+                            <span className="font-medium text-gray-800 dark:text-gray-100">{selectedUser.fullName || 'Selected User'}</span>
+                            <button 
+                                onClick={() => setSelectedUser(null)} 
+                                className="ml-2 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                                title="Close chat"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            </button>
+                        </div>
+                    ) : pathname === '/' ? (
                         <Link href="/" className="hover:text-gray-700 dark:hover:text-gray-200">Home</Link>
                     ) : (
                         pathname.split('/').filter(part => part.length > 0).map((part, index, arr) => (

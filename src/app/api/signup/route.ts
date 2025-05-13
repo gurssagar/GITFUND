@@ -15,13 +15,14 @@ const transporter = nodemailer.createTransport({
 
 export async function POST(request: Request) {
     try {
-        const { id, email, name, walletAddress } = await request.json();
+        const { id, email, name, walletAddress,image_url } = await request.json();
         
         // Insert user into database
         await db.insert(users).values({
             id: id,
             email: email,
             fullName: name,
+            image_url:image_url,
             metaMask: walletAddress,
         });
 
