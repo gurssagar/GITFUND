@@ -81,36 +81,30 @@ function ChatPageLayout() {
         }
     };
     useEffect(() => {
+        // Only create socket and fetch users after session is available
+        if (!session?.user) return;
 
         // Create socket connection
         const newSocket = io('https://gitfund-chat-8uaxx.ondigitalocean.app/', {
-            reconnectionAttempts: 5,
-            reconnectionDelay: 1000,
+            reconnectionAttempts: 3, // Reduce attempts to pace reloads
+            reconnectionDelay: 2000, // Increase delay to pace reloads
         });
 
         newSocket.on('connect', () => {
             setIsConnected(true);
-            console.log('Connected to socket server');
-            
             // Authenticate after connection is established
-            if (session?.user) {
-                newSocket.emit('authenticate', {
-                    username: (session?.user as any)?.username,
-                    token: (session?.user as any)?.username
-                });
-            }
+            newSocket.emit('authenticate', {
+                username: (session?.user as any)?.username,
+                token: (session?.user as any)?.username
+            });
         });
 
-        
-        console.log("Users:", userData);
-        newSocket.on('authenticated', (data) => {
-            console.log('Socket authentication successful:', data);
-            // Fetch active users or other initialization after authentication
+        newSocket.on('authenticated', () => {
+            // Fetch users only after authentication
             fetchUsers();
-            fetchAssignedUsers()
+            fetchAssignedUsers();
         });
-        
-        
+
         newSocket.on('auth_error', (error) => {
             if (error === 'User already connected') {
                 alert('You are already connected from another tab or device. Please close other sessions and try again.');
@@ -129,11 +123,10 @@ function ChatPageLayout() {
 
         newSocket.on('privateMessage', (msg: ChatMessage) => {
             setMessages(prev => [...prev, msg]);
-            console.log("Received private message:", msg);
         });
 
         newSocket.on('messageDelivered', (data) => {
-            console.log("Message delivered to:", data.to, "at", data.timestamp);
+            // Optionally handle delivery confirmation
         });
 
         newSocket.on('error', (error) => {
@@ -141,12 +134,11 @@ function ChatPageLayout() {
         });
 
         setSocket(newSocket);
-        
-        // Only try to connect user if we have session data
+
         return () => {
             newSocket.disconnect();
         };
-    }, [session]);
+    }, [session]); // Remove userData from dependency array
 
     const sendMessage = () => {
         if (messageInput.trim() && socket && selectedUser) {

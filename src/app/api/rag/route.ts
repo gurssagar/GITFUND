@@ -3,6 +3,8 @@ import { db } from '../../../db/index';
 import { projects } from '../../../db/schema';
 import { Pinecone } from '@pinecone-database/pinecone';
 import { InferenceClient } from '@huggingface/inference';
+import {groq} from "@ai-sdk/groq"
+import { streamText } from 'ai';
 
 // Initialize Pinecone directly with configuration
 const pinecone = new Pinecone({
@@ -31,7 +33,7 @@ export async function GET() {
 
         // Generate real embeddings for each project
         const vectors = await Promise.all(projectData.map(async (project, id) => {
-            const embedding = await getEmbedding(project.aiDescription || "");
+            const embedding = await getEmbedding(project?.aiDescription as string);
             // If your Pinecone index expects 1024 dims, use a model that outputs 1024 dims
             // Or pad/truncate as needed:
             let values = embedding;
@@ -62,6 +64,74 @@ export async function GET() {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
         return NextResponse.json({
             error: `Failed to process data: ${errorMessage}`
+        }, { status: 500 });
+    }
+}
+
+export async function POST(req: Request) {
+    try {
+        const { messages } = await req.json();
+        console.log('Messages received:', messages);
+        // Get the latest user message for retrieval
+        const latestUserMessage = messages.filter((msg: any) => msg.role === 'user').pop();
+        
+        if (!latestUserMessage) {
+            throw new Error('No user message found');
+        }
+        
+        // Generate embedding for the user query
+        const queryEmbedding = await getEmbedding(latestUserMessage.content);
+        
+        // Adjust embedding dimensions to match Pinecone index (1024)
+        let values = queryEmbedding;
+        if (queryEmbedding.length > 1024) values = queryEmbedding.slice(0, 1024);
+        if (queryEmbedding.length < 1024) values = [...queryEmbedding, ...new Array(1024 - queryEmbedding.length).fill(0)];
+        
+        // Query Pinecone for similar projects
+        const index = pinecone.index('gitfund');
+        const queryResponse = await index.query({
+            vector: values, // Use the adjusted vector dimensions
+            topK: 3,
+            includeMetadata: true
+        });
+        
+        // Extract relevant context from the query results
+        let context = '';
+        if (queryResponse.matches && queryResponse.matches.length > 0) {
+            context = queryResponse.matches.map(match => {
+                const metadata = match.metadata as any;
+                return `Project: ${metadata.projectName}\nOwner: ${metadata.owner}\nDescription: ${metadata.description}\nRelevance Score: ${match.score?.toFixed(4)}\n`;
+            }).join('\n');
+        }
+        
+        // Create an enhanced system message with the retrieved context
+                const enhancedSystemMessage = `You are an assistant for GitFund, a platform that connects open-source projects with contributors.
+        
+Here is the ONLY information you should use to answer the query:
+${context}
+
+IMPORTANT INSTRUCTIONS:
+1. ONLY use the information provided above to answer questions
+2. If the information above doesn't contain the answer, say "I don't have information about that in my current context"
+3. Do NOT use any knowledge outside of the provided context
+4. Do NOT make up or infer information that isn't explicitly stated in the context
+5. Keep your answers factual and directly tied to the project information provided`;
+        
+        // Stream the response with the enhanced context
+        const result = streamText({
+            model: groq('llama-3.1-8b-instant'),
+            system: enhancedSystemMessage,
+            messages,
+        });
+        
+        return result.toDataStreamResponse();
+    } catch (error) {
+        console.error('Error in RAG processing:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        
+        // Return a regular response with error information
+        return NextResponse.json({
+            error: `Failed to process RAG request: ${errorMessage}`
         }, { status: 500 });
     }
 }
