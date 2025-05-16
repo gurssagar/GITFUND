@@ -1,7 +1,6 @@
 import { experimental_createMCPClient, streamText } from 'ai';
 import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import { groq } from '@ai-sdk/groq';
-import { google } from '@ai-sdk/google';
 
 export async function POST(req: Request) {
   const { prompt }: { prompt: string } = await req.json();
@@ -39,7 +38,7 @@ export async function POST(req: Request) {
       };
 
     const response = await streamText({
-      model: google("models/gemini-2.0-flash-exp"),
+      model: groq('llama-3.1-8b-instant'),
       prompt,
       tools,
     });
@@ -87,7 +86,7 @@ export async function POST(req: Request) {
 You have access to a database called gitfund which contains a table named projects. Each record in projects includes a description of the project. I am a complete beginner looking to start contributing to open-source. Based on the project descriptions, suggest projects`;
     console.log('Context Prompt:', contextPrompt);
     const analysisResponse = await streamText({
-      model: google("models/gemini-2.0-flash-exp"),
+      model: groq('llama-3.1-8b-instant'),
       prompt: contextPrompt,
       // No tools needed for analysis
     });
