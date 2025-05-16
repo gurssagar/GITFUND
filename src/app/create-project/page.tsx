@@ -120,7 +120,7 @@ export default function Project() {
     //ai reply
     const [aiReply, setAiReply] = useState<any>();
     const groq = useMemo(() => new Groq({ 
-        apiKey: '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', 
+        apiKey: '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', 
         dangerouslyAllowBrowser: true 
     }), []);
 
