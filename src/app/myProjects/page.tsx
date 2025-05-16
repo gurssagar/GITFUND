@@ -146,7 +146,7 @@ export default function MyProject() {
                                 const contributorsCount = Array.isArray(repo.contributors) ? repo.contributors.length : 0;
 
                                 return (
-                                    <div key={repo.projectName} className="bg-white dark:bg-gray-800/50 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">                            
+                                    <div key={repo.projectName} className="bg-white dark:bg-[#171717] rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">                            
                                         <div className="p-5 flex-grow">
                                             <div className="flex items-start mb-4">
                                                 {repo.image_url ? (
@@ -191,7 +191,7 @@ export default function MyProject() {
                                                     issueNumber: repo.project_issues || '1'
                                                 }
                                             }} passHref>
-                                                <div className='flex-1 text-center bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150'>Issues</div>
+                                                <div className='flex-1 text-center bg-[#3d3d3d] hover:bg-[#3d3d3d] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150'>Issues</div>
                                             </Link>
                                             <Link href={{
                                                 pathname: `/myProjects/${repo.project_repository}/Contributions`,
