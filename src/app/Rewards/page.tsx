@@ -1,5 +1,5 @@
-'use client' // Corrected typo 'cliemt' to 'client'
-import { useState, useEffect } from 'react'; // Added useState
+'use client'
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Topbar from '@/assets/components/topbar';
 import Sidebar from '@/assets/components/sidebar';
@@ -14,7 +14,7 @@ import { Suspense } from 'react';
 interface RewardTransaction {
     id: string;
     date: string; // Or Date object
-    Contributor: string;
+    Contributor_id: string;
     issue: string;
     value: string; // Amount in PHAROS
     projectName: string;
@@ -23,50 +23,71 @@ interface RewardTransaction {
 export default function Rewards() {
     const { data: session } = useSession(); // Get session data
     const [rewards, setRewards] = useState<RewardTransaction[]>([]); // State for reward transactions
-    const [loading, setLoading] = useState(false); // Example loading state
+    const [loading, setLoading] = useState(true); // Set loading to true initially
     const [error, setError] = useState<string | null>(null); // Example error state
     const [searchTerm, setSearchTerm] = useState(''); // State for search input
     const { isShrunk } = useSidebarContext(); // Assuming you have a SidebarContext
-    // Placeholder summary data - fetch this from your API
-    const totalPaid = 0;
-
-     useEffect(() => {
+    
+    useEffect(() => {
         // For testing: add a sample reward transaction
-        setRewards([
-            {
-                id: "test-1",
-                projectName: "ethapp",
-                Contributor: "gurssagar",
-                issue: "3",
-                value: "0.002",
-                date: "10-05-2025"
+        
+        const fetchRewards = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const response = await fetch('/api/rewards');
+                if (!response.ok) throw new Error('Failed to fetch rewards');
+                const data = await response.json();
+                // Combine sample data with API data for testing
+                const allRewards = data.Rewards;
+                setRewards(allRewards);
+                console.log('Fetched rewards:', allRewards);
+            } catch (err) {
+                console.error('Error fetching rewards:', err);
+                // Fall back to sample data if API fails
+                setError(err instanceof Error ? err.message : 'An unknown error occurred');
+            } finally {
+                setLoading(false);
             }
-        ]);
-        // Comment out the fetch for now if you want to test local data only
-        // const fetchRewards = async () => {
-        //     setLoading(true);
-        //     setError(null);
-        //     try {
-        //         const response = await fetch('/api/rewards');
-        //         if (!response.ok) throw new Error('Failed to fetch rewards');
-        //         const data = await response.json();
-        //         setRewards(data.Rewards || []);
-        //     } catch (err) {
-        //         setError(err instanceof Error ? err.message : 'An unknown error occurred');
-        //         setRewards([]);
-        //     } finally {
-        //         setLoading(false);
-        //     }
-        // };
-        // fetchRewards();
-     }, []);
-     const filteredRewards = rewards.filter(reward =>
-        (reward.projectName.toLowerCase().includes(searchTerm.toLowerCase())) && reward.Contributor===session?.user?.username
-    );
-     let totalRewarded= 0;
-     for (let i=0;i<filteredRewards.length;i++){
-        totalRewarded+=parseFloat(filteredRewards[i].value);
-     }
+        };
+        
+        fetchRewards();
+    }, [session]);
+    
+    console.log('Rewardss:', rewards);
+    // Modified filter to correctly filter based on the logged-in user and search term
+    const filteredRewards = rewards.filter(reward => {
+        // Ensure reward object and its properties are valid before processing
+        if (!reward || typeof reward.projectName !== 'string' || typeof reward.Contributor_id !== 'string') {
+            // console.warn('Skipping invalid reward object:', reward); // Optional: for debugging
+            return false;
+        }
+
+        const searchTermLower = searchTerm.toLowerCase();
+        const matchesSearch = reward.projectName.toLowerCase().includes(searchTermLower) ||
+                             reward.Contributor_id.toLowerCase().includes(searchTermLower);
+
+        // If the reward doesn't match the search term, exclude it immediately.
+        if (!matchesSearch) {
+            return false;
+        }
+
+        // If a session user exists, further filter by their username.
+        const currentUsername = (session?.user as any)?.username;
+        if (currentUsername) {
+            // Only include rewards where Contributor_id matches the session username (case-insensitive).
+            return reward.Contributor_id.toLowerCase() === currentUsername.toLowerCase();
+        }
+
+        // If no session user (i.e., user is not logged in), and it matched the search, include it.
+        return true;
+    });
+    console.log('Filtered rewards:', filteredRewards);
+    
+    let totalRewarded = 0;
+    for (let i=0; i<filteredRewards.length; i++){
+        totalRewarded += parseFloat(filteredRewards[i].value);
+    }
 
     // Filtered rewards based on search term (simple example)
     
@@ -207,7 +228,6 @@ export default function Rewards() {
                                     <tr>
                                         {/* Add sort icons/functionality later */}
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Date</th>
-                                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">ID</th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Project</th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">From</th>
                                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Contributions</th>
@@ -228,9 +248,8 @@ export default function Rewards() {
                                     {!loading && !error && filteredRewards.map((reward) => (
                                         <tr key={reward.id} className="hover:bg-gray-100/50 dark:hover:bg-gray-700/50">
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-dark dark:text-gray-300">{reward.date}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-dark dark:text-white">{reward.id}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-dark dark:text-white">{reward.projectName}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-dark dark:text-white">{reward.Contributor}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-dark dark:text-white">{reward.Contributor_id}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-dark dark:text-white">{reward.issue}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-dark dark:text-gray-300">{reward.value} PHAROS</td>
                                             <td className="px-6 py-4 whitespace-nowrap">
