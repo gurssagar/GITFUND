@@ -1,5 +1,17 @@
 
-import { pgTable,json, text, varchar } from "drizzle-orm/pg-core";
+import { pgTable,json, text, varchar ,timestamp} from "drizzle-orm/pg-core";
+
+export const messages = pgTable("messages", {
+  id: varchar("id", { length: 256 }).primaryKey(),
+
+  fromId: varchar("from_id", { length: 256 }),
+
+  toId: varchar("to_id", { length: 256 }),
+
+  date: timestamp("date", { withTimezone: true }),
+
+  chatData: text("chat_data"),
+});
 
 export const users = pgTable('users', {
   id: varchar('id',{ length: 256 }).primaryKey(),

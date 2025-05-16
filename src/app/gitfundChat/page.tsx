@@ -31,9 +31,8 @@ function ChatPageLayout() {
   const [isConnected, setIsConnected] = useState(false);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messageInput, setMessageInput] = useState("");
-  const { isShrunk, setIsShrunk, selectedUser } = usechatSidebarContext();
-  const [users, setUsers] = useState<any>([]);
-  const [userData, setUserData] = useState<any>([]);
+  const { isShrunk, setIsShrunk, selectedUser, filteredUsers, refreshUsers, isLoadingUsers } = usechatSidebarContext();
+  // Using context for user data instead of local state
   const [usernameAlreadySelected, setUsernameAlreadySelected] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<
     "disconnected" | "connecting" | "connected"
@@ -47,38 +46,7 @@ function ChatPageLayout() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const fetchAssignedUsers = async () => {
-    try {
-      await fetch("/api/assignedIssue", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          setUsers(data.assignedIssues || []);
-          console.log("Assigned users:", data.assignedIssues);
-        });
-    } catch (error) {
-      console.error("Error fetching assigned users:", error);
-    }
-  };
-
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch("/api/signup", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await response.json();
-      setUserData(data.users || []);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    }
-  };
+  // Not needed anymore as we're using the context for user data
 
   // Initialize socket without connecting
   useEffect(() => {
@@ -98,10 +66,9 @@ function ChatPageLayout() {
       setConnectionStatus("connected");
       setErrorMessage(null);
       console.log("Socket connected");
-
-      // Fetch users after connection
-      fetchUsers();
-      fetchAssignedUsers();
+      
+      // Refresh users after connection
+      refreshUsers();
     });
 
     newSocket.on("connecting", () => {
@@ -220,6 +187,11 @@ function ChatPageLayout() {
       }
     }
   }, [session, socket, usernameAlreadySelected]);
+  
+  // Debug logging for users from context
+  useEffect(() => {
+    console.log("Filtered users from context:", filteredUsers);
+  }, [filteredUsers]);
 
   const sendMessage = () => {
     if (messageInput.trim() && socket && selectedUser && isConnected) {
@@ -267,10 +239,7 @@ function ChatPageLayout() {
           msg.from === selectedUser.id)),
   );
 
-  // Filter users based on your project's requirements
-  const filteredUsers = userData.filter((user: any) =>
-    users?.some((contributor: any) => contributor.Contributor_id === user.id),
-  );
+  // Using filtered users from context instead of filtering locally
 
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -285,6 +254,38 @@ function ChatPageLayout() {
           <div className="p-6 mt-16">
             <div className=" mx-auto">
               <div className="h-screen p-4 space-y-5">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-semibold">Chat</h2>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={refreshUsers}
+                    disabled={isLoadingUsers}
+                  >
+                    {isLoadingUsers ? (
+                      <>
+                        <svg className="mr-2 h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Loading
+                      </>
+                    ) : (
+                      <>
+                        <svg className="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Refresh Users
+                      </>
+                    )}
+                  </Button>
+                  {filteredUsers.length === 0 && (
+                    <div className="text-center text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30 p-4 rounded-lg mt-2">
+                      No users available for chat. Try refreshing the user list.
+                    </div>
+                  )}
+                </div>
+                
                 {connectionStatus !== "connected" && (
                   <div
                     className={`text-center p-4 rounded-lg mb-4 ${
@@ -327,10 +328,14 @@ function ChatPageLayout() {
                 )}
 
                 {/* Messages */}
-                <div className="h-[calc(100vh-200px)] bg-muted/40 rounded-lg p-4 overflow-y-auto space-y-3 relative">
-                  {chatMessages.length === 0 ? (
+                <div className="h-[calc(100vh-250px)] bg-muted/40 rounded-lg p-4 overflow-y-auto space-y-3 relative">
+                  {!selectedUser ? (
                     <div className="text-center text-muted-foreground py-8">
-                      No messages yet. Start the conversation!
+                      Please select a user from the sidebar to start chatting.
+                    </div>
+                  ) : chatMessages.length === 0 ? (
+                    <div className="text-center text-muted-foreground py-8">
+                      No messages yet. Start the conversation with {selectedUser.fullName || selectedUser.username || selectedUser.id}!
                     </div>
                   ) : (
                     chatMessages.map((msg, index) => {

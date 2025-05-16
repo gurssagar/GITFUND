@@ -6,61 +6,20 @@ import { usechatSidebarContext } from './chatSiderbarContext';
 import React, { useEffect, useState } from 'react'; // Added React, useEffect, useState
 
 export default function Sidebar() {
-    const { isShrunk, setIsShrunk, selectedUser, setSelectedUser } = usechatSidebarContext(); // Destructure selectedUser and setSelectedUser
+    const { 
+        isShrunk, 
+        setIsShrunk, 
+        selectedUser, 
+        setSelectedUser,
+        filteredUsers,
+        refreshUsers,
+        isLoadingUsers
+    } = usechatSidebarContext();
 
-    const [allUsersData, setAllUsersData] = useState<any[]>([]);
-    const [assignedUsersData, setAssignedUsersData] = useState<any[]>([]);
-    const [displayableUsers, setDisplayableUsers] = useState<any[]>([]);
-    
-
-    const fetchAllUsersFromDB = async () => {
-        try {
-            const response = await fetch('/api/signup', { // Assuming this endpoint provides all users
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-            const data = await response.json();
-            console.log(data.users)
-            setAllUsersData(data.users || []);
-        } catch (error) {
-            console.error("Error fetching all users for sidebar:", error);
-        }
-    };
-
-    const fetchAssignedIssuesDetails = async () => {
-        try {
-         await fetch('/api/assignedIssue',{ // Assuming this endpoint provides users linked to issues
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-         }).then(response => response.json())
-            .then(data => {
-                setAssignedUsersData(data.assignedIssues || []);
-            })
-        }
-        catch (error) {
-            console.error("Error fetching assigned users for sidebar:", error);
-        }
-    };
-
+    // Refresh users when the component mounts
     useEffect(() => {
-        fetchAllUsersFromDB();
-        fetchAssignedIssuesDetails();
+        refreshUsers();
     }, []);
-
-    useEffect(() => {
-        if (allUsersData.length > 0 && assignedUsersData.length > 0) {
-            const filtered = allUsersData.filter((user: any) =>
-                assignedUsersData.some((contributor: any) => contributor.Contributor_id === user.id)
-            );
-            setDisplayableUsers(filtered);
-        } else {
-            setDisplayableUsers([]);
-        }
-    }, [allUsersData, assignedUsersData]);
 
     return (
         <div>
@@ -93,8 +52,11 @@ export default function Sidebar() {
                 {/* Display Users Section */}
                 <div className='pt-7'>
                     {!isShrunk && <div className='text-[13px] text-gray-400 py-2'>Messages</div>}
-                    {displayableUsers.length > 0 ? (
-                        displayableUsers.map((user: any) => (
+                    {isLoadingUsers && (
+                        <div className='text-xs text-gray-500 px-2 py-1'>Loading users...</div>
+                    )}
+                    {!isLoadingUsers && filteredUsers.length > 0 ? (
+                        filteredUsers.map((user: any) => (
                             <div 
                                 key={user.id}
                                 onClick={() => {
@@ -115,11 +77,27 @@ export default function Sidebar() {
                             </div>
                         ))
                     ) : (
-                        !isShrunk && <div className='text-xs text-gray-500 px-2 py-1'>No users to display.</div>
+                        !isLoadingUsers && !isShrunk && (
+                            <div className='text-xs text-gray-500 px-2 py-1'>
+                                No users to display.
+                                <button 
+                                    onClick={refreshUsers}
+                                    className="ml-2 text-blue-500 hover:underline"
+                                >
+                                    Refresh
+                                </button>
+                            </div>
+                        )
                     )}
                 </div>
 
                 <div className='pt-7'>
+                    <div 
+                        onClick={refreshUsers}
+                        className='rounded-lg flex justify-between gap-4 text-sm focus:bg-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a] px-2 py-2 flex items-center cursor-pointer'>
+                        {!isShrunk && <span className="ml-2">Refresh Users</span>}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 15 15"><path fill="currentColor" d="M7.5 11.173a3.673 3.673 0 1 1 0-7.346a3.673 3.673 0 0 1 0 7.346zm-5.567-1.8a6.2 6.2 0 0 0 5.567 3.527a6.2 6.2 0 0 0 5.567-3.527H15L12 8.6l-3 .773h2.493A4.675 4.675 0 0 1 7.5 12.7A4.675 4.675 0 0 1 3.507 9.9H6L3 8.6L0 9.373h1.933z"/></svg>
+                    </div>
                     <Link href="/homepage">
                     <div className='rounded-lg flex justify-between gap-4 text-sm focus:bg-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a]  px-2 py-2 flex items-center'>
                         {/* Placeholder for Discover icon, you can use a specific one */}
