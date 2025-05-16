@@ -447,11 +447,17 @@ export default function Project() {
                                                     <button className="dark:bg-white bg-black text-white  dark:text-black  px-2 py-1 rounded">Contribute Now</button>
                                                 </Link>
                                                 <div>
-                                                    {projects.map((project: any) => (
-                                                        project.project_issues && project.project_issues.includes(issue.number.toString()) && (
-                                                            <div key={project.id} className="dark:text-gray-300  text-gray-900 text-bold">{project.rewardAmount} ETH</div>
-                                                        )
-                                                    ))}
+                                                    {(() => {
+                                                        let totalReward = 0;
+                                                        projects.forEach((project: any) => {
+                                                            if (project.project_issues && project.project_issues.includes(issue.number.toString()) && project.rewardAmount) {
+                                                                totalReward += parseFloat(project.rewardAmount) || 0;
+                                                            }
+                                                        });
+                                                        return totalReward > 0 ? (
+                                                            <div className="dark:text-gray-300 text-gray-900 text-bold">{totalReward.toFixed(4)} ETH</div>
+                                                        ) : null;
+                                                    })()}
                                                 </div>
                                             </div>
                                         </div>
