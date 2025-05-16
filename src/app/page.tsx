@@ -304,8 +304,8 @@ export default function LandingPage() {
       
     <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
       {/* Maintainers Card */}
-      <Card className="col-span-1 md:col-span-2 lg:col-span-3">
-        <CardHeader>
+      <div className="col-span-1 md:col-span-2 lg:col-span-3">
+        <CardHeader className="mt-10 mb-4">
           <h2 className="text-2xl font-bold">🔧 For Maintainers</h2>
         </CardHeader>
         <CardContent>
@@ -363,11 +363,11 @@ export default function LandingPage() {
             </Card>
           </div>
         </CardContent>
-      </Card>
+      </div>
 
       {/* Contributors Card */}
-      <Card className="col-span-1 md:col-span-2 lg:col-span-3">
-        <CardHeader>
+      <div className="col-span-1 md:col-span-2 lg:col-span-3">
+        <CardHeader className="mt-10 mb-4">
           <h2 className="text-2xl font-bold">👨‍💻 For Contributors</h2>
         </CardHeader>
         <CardContent>
@@ -418,20 +418,16 @@ export default function LandingPage() {
             </Card>
           </div>
         </CardContent>
-      </Card>
+      </div>
 
       {/* Behind the Scenes */}
-      <Card>
-        <CardHeader>
-          <ShieldCheckIcon />
-          <h2 className="text-xl font-semibold">Smart Contract Escrow</h2>
-        </CardHeader>
-        <CardContent>
-          <p>Pharos or  smart contracts hold and release funds securely.</p>
-        </CardContent>
-      </Card>
+     
+      
 
-      <Card>
+      
+    </div>
+    <div className="flex justify-center mx-auto gap-6">
+      <Card className="w-1/4">
         <CardHeader>
           <GitBranchIcon />
           <h2 className="text-xl font-semibold">GitHub Webhooks</h2>
@@ -441,16 +437,16 @@ export default function LandingPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card  className="w-1/4">
         <CardHeader>
           <AwardIcon />
-          <h2 className="text-xl font-semibold">NFT Badge System</h2>
+          <h2 className="text-xl font-semibold">NFT Badge System(Upcomming)</h2>
         </CardHeader>
         <CardContent>
           <p>Earn on-chain NFT badges to showcase verified contributions and reputation.</p>
         </CardContent>
       </Card>
-    </div>
+      </div>
     </div>
   
 
