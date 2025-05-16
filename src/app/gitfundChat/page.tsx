@@ -53,7 +53,7 @@ function ChatPageLayout() {
     if (!session?.user) return;
 
     // Create socket but don't connect yet
-    const newSocket = io("https://gitfund-chat-8uaxx.ondigitalocean.app/", {
+    const newSocket = io("https://octopus-app-pcmuh.ondigitalocean.app/", {
       autoConnect: false,
       reconnectionAttempts: 5,
       reconnectionDelay: 2000,
@@ -90,7 +90,7 @@ function ChatPageLayout() {
     newSocket.on("auth_error", (error) => {
       if (error === "User already connected") {
         setErrorMessage(
-          "You are already connected from another tab or device. Please close other sessions and try again.",
+          "You are already connected from another tab or device. Please close other sessions and try again."
         );
       } else {
         setErrorMessage(`Authentication error: ${error}`);
@@ -146,7 +146,7 @@ function ChatPageLayout() {
 
     newSocket.on("reconnect_failed", () => {
       setErrorMessage(
-        "Failed to reconnect to the chat server. Please refresh the page.",
+        "Failed to reconnect to the chat server. Please refresh the page."
       );
     });
 
@@ -236,7 +236,7 @@ function ChatPageLayout() {
       ((msg.from === (session?.user as any)?.username &&
         msg.to === selectedUser.id) ||
         (msg.to === (session?.user as any)?.username &&
-          msg.from === selectedUser.id)),
+          msg.from === selectedUser.id))
   );
 
   // Using filtered users from context instead of filtering locally
@@ -246,7 +246,11 @@ function ChatPageLayout() {
       <div className="flex">
         <Sidebar />
         <div
-          className={` ${isShrunk ? "ml-[4rem] w-[calc(100%_-_4rem)]" : "ml-[16rem] w-[calc(100%_-_16rem)]"}`}
+          className={` ${
+            isShrunk
+              ? "ml-[4rem] w-[calc(100%_-_4rem)]"
+              : "ml-[16rem] w-[calc(100%_-_16rem)]"
+          }`}
         >
           <Topbar />
 
@@ -348,7 +352,7 @@ function ChatPageLayout() {
                             "max-w-sm z-10 p-3 rounded-lg shadow-sm text-sm relative",
                             isSelf
                               ? "bg-primary text-primary-foreground ml-auto"
-                              : "bg-accent text-accent-foreground",
+                              : "bg-accent text-accent-foreground"
                           )}
                         >
                           {msg.text}
@@ -388,8 +392,10 @@ function ChatPageLayout() {
                         !isConnected
                           ? "Connect to send messages..."
                           : selectedUser
-                            ? `Message to ${selectedUser.name || selectedUser.id}...`
-                            : "Select a user to message..."
+                          ? `Message to ${
+                              selectedUser.name || selectedUser.id
+                            }...`
+                          : "Select a user to message..."
                       }
                       autoFocus
                       className="bg-background text-foreground placeholder-muted-foreground"

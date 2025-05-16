@@ -1,21 +1,18 @@
-
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { SessionProvider } from 'next-auth/react';
-import {Web3Provider} from "../assets/components/web3Context";
-import { SidebarProvider } from '@/assets/components/SidebarContext';
-import { ChatSidebarProvider } from '@/assets/components/chats/chatSiderbarContext';
-import { ThemeProvider } from 'next-themes';
-import Kbar from '../assets/components/kbar';
-import { SearchProvider } from '@/assets/components/SearchContext'; // Import SearchProvider
+import { SessionProvider } from "next-auth/react";
+import { Web3Provider } from "../assets/components/web3Context";
+import { SidebarProvider } from "@/assets/components/SidebarContext";
+import { ChatSidebarProvider } from "@/assets/components/chats/chatSiderbarContext";
+import { ThemeProvider } from "next-themes";
+import Kbar from "../assets/components/kbar";
+import { SearchProvider } from "@/assets/components/SearchContext"; // Import SearchProvider
 import "./globals.css";
 import ChatPage from "../assets/components/chatPage";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
 });
-
-
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -34,33 +31,28 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body
-        className={`bg-background text-foreground`}
-      >
+      <body className={`bg-background text-foreground`}>
         <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <SidebarProvider>
-              
-              <Web3Provider>
-                <SessionProvider>
-                  <SearchProvider>
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <SidebarProvider>
+            <Web3Provider>
+              <SessionProvider>
+                <SearchProvider>
                   <ChatSidebarProvider>
-
                     <Kbar />
                     {children}
                     <div className="fixed right-10 bottom-10">
-                        <ChatPage/>
+                      {/* <ChatPage /> */}
                     </div>
-                    </ChatSidebarProvider>
-
-                  </SearchProvider>
-                </SessionProvider>
-              </Web3Provider>
-              </SidebarProvider>
+                  </ChatSidebarProvider>
+                </SearchProvider>
+              </SessionProvider>
+            </Web3Provider>
+          </SidebarProvider>
         </ThemeProvider>
       </body>
     </html>
