@@ -48,7 +48,7 @@ export async function POST(request: Request) {
                         <p><strong>Project Owner:</strong> ${projectOwner}</p>
                         <p><strong>Description:</strong> ${shortdes}</p>
                         <p><strong>Difficulty:</strong> ${difficulty}</p>
-                        <p><strong>Reward Amount:</strong> ${rewardAmount} ETH</p>
+                        <p><strong>Reward Amount:</strong> ${rewardAmount} PAHROS</p>
                         <p><strong>Repository:</strong> ${project_repository}</p>
                         <hr>
                         <p>Visit GitFund to learn more and start contributing!</p>

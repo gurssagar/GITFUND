@@ -455,7 +455,7 @@ export default function Project() {
                                                             }
                                                         });
                                                         return totalReward > 0 ? (
-                                                            <div className="dark:text-gray-300 text-gray-900 text-bold">{totalReward.toFixed(4)} ETH</div>
+                                                            <div className="dark:text-gray-300 text-gray-900 text-bold">{totalReward.toFixed(4)} PHAROS</div>
                                                         ) : null;
                                                     })()}
                                                 </div>
