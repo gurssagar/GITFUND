@@ -1,6 +1,7 @@
 import { experimental_createMCPClient, streamText } from 'ai';
 import { Experimental_StdioMCPTransport } from 'ai/mcp-stdio';
 import { groq } from '@ai-sdk/groq';
+import { google } from "@ai-sdk/google"
 export async function POST(req: Request) {
   const { prompt }: { prompt: string } = await req.json();
   let collectedContent = '';
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
       };
 
     const response = await streamText({
-      model: groq('llama-3.1-8b-instant'),
+      model: google("models/gemini-2.0-flash-exp"),
       prompt,
       tools,
     });
@@ -76,7 +77,7 @@ ${collectedContent}
 Based on the above analysis, please provide a detailed summary of the changes and their potential impact.`;
     console.log('Context Prompt:', contextPrompt);
     const analysisResponse = await streamText({
-      model: groq('llama-3.1-8b-instant'),
+      model: google("models/gemini-2.0-flash-exp"),
       prompt: contextPrompt,
       // No tools needed for analysis
     });
