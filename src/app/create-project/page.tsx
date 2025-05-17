@@ -4,7 +4,9 @@ import Sidebar from "@/assets/components/sidebar";
 import Topbar from "@/assets/components/topbar";
 import { useSession } from "next-auth/react";
 import { Octokit } from "octokit"
-import { Groq } from 'groq-sdk';
+import { Groq } from 'groq-sdk'; // Removed: No longer using groq-sdk directly
+import {groq} from '@ai-sdk/groq'
+import { generateText } from 'ai'; // Added: For AI SDK text generation
 import { ethers } from 'ethers';
 import { useWeb3 } from "../../assets/components/web3Context";
 import { getContract } from "../../assets/components/contract";
@@ -119,29 +121,34 @@ export default function Project() {
     
     //ai reply
     const [aiReply, setAiReply] = useState<any>();
-    const groq = useMemo(() => new Groq({ 
-        apiKey: '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', 
-        dangerouslyAllowBrowser: true 
-    }), []);
+    // Removed useMemo for Groq client initialization, as we'll use the AI SDK's groq model provider directly.
+    // The API key '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' should now be set as an environment variable (e.g., GROQ_API_KEY).
+    // The `dangerouslyAllowBrowser: true` option is not used with the AI SDK in this manner.
 
     useEffect(() => {
         async function main() {
             if (!repoValue) return;
             
-            const chatCompletion = await groq.chat.completions.create({
-                messages: [
-                    {
-                        role: "user",
-                        content: `Read this and explain the project to a developer in 100 words ${JSON.stringify(repoValue)}`,
-                    },
-                ],
-                model: "llama-3.1-8b-instant",
-            });
-            setAiReply(chatCompletion.choices[0]?.message?.content || "");
+            try {
+                // Using generateText from the AI SDK with the imported groq model provider
+                const { text } = await generateText({
+                    model: groq('llama-3.1-8b-instant'), // Using the groq model provider from @ai-sdk/groq
+                    messages: [
+                        {
+                            role: "user",
+                            content: `Read this and explain the project to a developer in 100 words ${JSON.stringify(repoValue)}`,
+                        },
+                    ],
+                });
+                setAiReply(text);
+            } catch (error) {
+                console.error("Error generating AI reply:", error);
+                setAiReply("Failed to generate AI reply."); // Provide user feedback on error
+            }
         }
         
         main();
-    }, [repoValue, groq]);
+    }, [repoValue]); // Removed groq from dependencies as the imported `groq` function is stable
 
 
 
