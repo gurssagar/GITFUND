@@ -45,7 +45,7 @@ const { isSearchOpen, toggleSearchModal, closeSearchModal } = useSearch();
     <div className={`dark:bg-[#0a0a0a] bg-white fixed top-0 px-5 py-4 border-b-[1px] border-gray-600 ${isShrunk ? 'w-[calc(100%_-_4rem)]' : 'w-[calc(100%_-_16rem)]'} transition-all duration-400 ease-in-out` } style={{ transitionProperty: 'width, padding' }}>
         <div className='flex justify-between'>
             <div className='flex items-center'> {/* Added items-center for better vertical alignment */}
-                <div className='pr-2 border-r-1 border-gray-800' onClick={() => setIsShrunk(!isShrunk)} style={{ cursor: "pointer" }}>
+                <div className='pr-2 border-r-1 dark:border-custom-dark-gray' onClick={() => setIsShrunk(!isShrunk)} style={{ cursor: "pointer" }}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path></svg>
                 </div>
                 {/* Display breadcrumbs based on the current path */}
@@ -53,7 +53,7 @@ const { isSearchOpen, toggleSearchModal, closeSearchModal } = useSearch();
                     {pathname === '/' ? (
                         <Link href="/" className="hover:text-gray-700 dark:hover:text-gray-200">Home</Link>
                     ) : (
-                        pathname.split('/').filter(part => part.length > 0).map((part, index, arr) => (
+                        pathname?.split('/').filter(part => part.length > 0).map((part, index, arr) => (
                             <span key={part + index}> {/* Added index to key for robustness */}
                                 <Link href={`/${arr.slice(0, index + 1).join('/')}`} className="hover:text-gray-700 dark:hover:text-gray-200">
                                     {/* Capitalize first letter and replace hyphens for display */}
@@ -74,7 +74,7 @@ const { isSearchOpen, toggleSearchModal, closeSearchModal } = useSearch();
                                 </button>
                             )}
                                                         <div>
-                                <button onClick={toggleSearchModal} className="flex items-center space-x-2 dark:bg-[#1a1a1a] bg-[#dedede] dark:hover:bg-[#2a2a2a] hover:bg-[#cccccc] text-gray-900 dark:text-gray-300 px-3 py-1.5 rounded-md text-sm">
+                                <button onClick={toggleSearchModal} className="flex items-center space-x-2 border-2 border-custom-dark-gray text-gray-900 dark:text-gray-300 px-3 py-1.5 rounded-md text-sm">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <circle cx="11" cy="11" r="8"></circle>
                                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>

@@ -26,7 +26,7 @@ export default function Issue({image, Project, Fork, Stars, Contributors, shortD
 
     return (
         <>
-        <div className="p-4 rounded-xl border-1 border-gray-400 dark:border-gray-800">
+        <div className="p-4 rounded-xl border-2 border-gray-400 dark:dark:border-custom-dark-gray">
             <div className="flex">
                 <div className="mr-4">
                     <img src={image} className="rounded h-[48px]" width={48} height={48} alt="avatar" />

@@ -14,7 +14,7 @@ import MetaMaskButton from "@/assets/components/metamask";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import heroImage from "@/assets/components/bg-1.jpg";
 import MacbookScrollDemo from "@/assets/components/macbookscrool";
-import ShootingStarBorder from "@/assets/border";
+import ShootingStarBorder from "@/components/border";
 import { LampContainer } from "@/components/ui/lamp";
 import { PointerHighlight } from "@/components/ui/pointer-highlight";
 import {
@@ -188,7 +188,7 @@ export default function LandingPage() {
 
       {/* Header/Navigation */}
       <header className="fixed top-4 left-4 right-4 z-50">
-        <div className="max-w-7xl mx-auto bg-black dark:bg-[#1A1A1A]/80 backdrop-blur-md rounded-full border border-gray-800/50">
+        <div className="max-w-7xl mx-auto bg-black dark:bg-[#1A1A1A]/80 backdrop-blur-md rounded-full border dark:border-custom-dark-gray/50">
           <div className="flex justify-between items-center px-6 py-3">
             <div>
               <Image
@@ -543,7 +543,7 @@ export default function LandingPage() {
             className={`rounded-xl p-8 ${
               plan.featured 
                 ? " dark:bg-[#0a0a0a]  bg-[#ececec]  border border-gray-700 shadow-lg" 
-                : "bg-[#ececec] dark:bg-[#0a0a0a] border border-gray-800"
+                : "bg-[#ececec] dark:bg-[#0a0a0a] border dark:border-custom-dark-gray"
             }`}
           >
             {plan.featured && (
@@ -610,7 +610,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-4 md:px-8 lg:px-16 border-t border-gray-800">
+      <footer className="py-12 px-4 md:px-8 lg:px-16 border-t dark:border-custom-dark-gray">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
@@ -698,7 +698,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
+          <div className="mt-12 pt-8 border-t dark:border-custom-dark-gray flex flex-col md:flex-row justify-between items-center">
             <p className="text-sm text-gray-500">
               © 2023 GitFund. All rights reserved.
             </p>

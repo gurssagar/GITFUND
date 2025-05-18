@@ -377,12 +377,12 @@ export default function Project() {
                             </div>
                             </div>
                             
-                            <div className="border-gray-300 dark:border-gray-800 border-1 rounded-xl p-4 mt-7">
+                            <div className="border-gray-300 dark:dark:border-custom-dark-gray border-2 rounded-xl p-4 mt-7">
                                 <div>
                                     <h1 className="text-xl font-bold">Issues</h1>
                                 </div>
                                 {issues.map((issue: any) => (
-                                    <div key={issue.id} className="mt-2 p-4 border-gray-300 dark:border-gray-800 border-1 rounded-xl">
+                                    <div key={issue.id} className="mt-2 p-4 border-gray-300 dark:dark:border-custom-dark-gray border-2 rounded-xl">
                                         <div className="flex justify-between"> 
                                             <div>
                                                 <div className="flex justify-between gap-2">
@@ -465,7 +465,7 @@ export default function Project() {
                                 ))}
                             </div>
 
-                            <div className="mt-6 w-full border border-rounded-full border-gray-300 dark:border-gray-800 rounded-lg p-4">
+                            <div className="mt-6 w-full border border-rounded-full border-gray-300 dark:dark:border-custom-dark-gray rounded-lg p-4">
                                 <h2 className="text-2xl font-bold mb-4 dark:text-white text-black">Recent Activity</h2>
                                 
                                 {commitData && commitData.length > 0 ? (

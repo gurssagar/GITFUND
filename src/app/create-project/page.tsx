@@ -367,20 +367,20 @@ export default function Project() {
                             </div>
                             <div className="space-y-2">
                                 <label className="text-[14px]" htmlFor="projectName">Project name</label>
-                                <input id="projectName" name="projectName" type="text" className="w-full p-2 border-1 border-gray-800 rounded-md"/>
+                                <input id="projectName" name="projectName" type="text" className="w-full p-2 border-2 dark:border-custom-dark-gray rounded-md"/>
                             </div>
                             <div className="space-y-2">
                                 <label className="text-[14px]" htmlFor="shortDescription">Short description</label>
-                                <input id="shortDescription" name="shortDescription" type="text" className="w-full p-2 border-1 border-gray-800 rounded-md"/>
+                                <input id="shortDescription" name="shortDescription" type="text" className="w-full p-2 border-2 dark:border-custom-dark-gray rounded-md"/>
                             </div>
                             <div className="space-y-2">
                                 <label className="text-[14px]" htmlFor="longDescription">Long Description</label>
-                                <textarea id="longDescription" name="longDescription" className="w-full p-2 border-1 border-gray-800 rounded-md"/>
+                                <textarea id="longDescription" name="longDescription" className="w-full p-2 border-2 dark:border-custom-dark-gray rounded-md"/>
                             </div>
                             <div className="space-y-2 flex gap-4">
                                 <div className="w-1/3">
                                 <label className="text-[14px]" htmlFor="projectImage">Project image</label>
-                                <input id="projectImage" name="projectImage" type="file" className="w-full p-2 border-1 border-gray-800 rounded-md"/>
+                                <input id="projectImage" name="projectImage" type="file" className="w-full p-2 border-2 dark:border-custom-dark-gray rounded-md"/>
                                 </div>
                                 <div className="w-1/3">
                                 <label className="text-[14px]" htmlFor="projectImage">Reward Amount in Pharos</label>
@@ -388,7 +388,7 @@ export default function Project() {
                                     id="reward"
                                     name="reward"
                                     type="text"
-                                    className="w-full p-2 border-1 border-gray-800 rounded-md"
+                                    className="w-full p-2 border-2 dark:border-custom-dark-gray rounded-md"
                                     value={rewardAmount}
                                     onChange={e => setRewardAmount(e.target.value as any)}
                                 />
@@ -398,7 +398,7 @@ export default function Project() {
                                 <select 
                                     id="difficulty" 
                                     name="difficulty" 
-                                    className="dark:bg-[#0a0a0a] text-[14px] w-full p-2 border-1 border-gray-800 rounded-md"
+                                    className="dark:bg-[#0a0a0a] text-[14px] w-full p-2 border-2 dark:border-custom-dark-gray rounded-md"
                                     
                                 >
                                     <option value="">Select difficulty</option>
@@ -415,7 +415,7 @@ export default function Project() {
                                 <select 
                                     id="priority" 
                                     name="priority" 
-                                    className="dark:bg-[#0a0a0a] w-full p-2 border-1 border-gray-800 rounded-md"
+                                    className="dark:bg-[#0a0a0a] w-full p-2 border-2 dark:border-custom-dark-gray rounded-md"
                                     
                                 >
                                     <option value="">Select The Priority</option>
@@ -429,7 +429,7 @@ export default function Project() {
                                 <select 
                                     id="projectRepo" 
                                     name="projectRepo" 
-                                    className="dark:bg-[#0a0a0a] w-full p-2 border-1 border-gray-800 rounded-md"
+                                    className="dark:bg-[#0a0a0a] w-full p-2 border-2 dark:border-custom-dark-gray rounded-md"
                                     onChange={(e) => setSelectedRepo(e.target.value)}
                                     value={selectedRepo}
                                 >
@@ -446,7 +446,7 @@ export default function Project() {
                                 <select 
                                     id="projectIssue" 
                                     name="projectIssue" 
-                                    className="dark:bg-[#0a0a0a] w-full p-2 border-1 border-gray-800 rounded-md"
+                                    className="dark:bg-[#0a0a0a] w-full p-2 border-2 dark:border-custom-dark-gray rounded-md"
                                 >
                                     <option value="">Select an issue</option>
                                     {issues?.map((issue: any) => (

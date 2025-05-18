@@ -33,7 +33,10 @@ export default function Kbar() {
     return (
         <>
             {/* SearchModal will now get its state from the context directly */}
+            
             <SearchModal />
+
+            
         </>
     );
 }

@@ -98,7 +98,7 @@ const id = (session?.data?.user as SessionUser)?.username;
         <>
         <div>
         <div className="flex items-center justify-center min-h-screen">
-            <div className="max-w-[900px] w-[40rem] p-6 rounded-lg shadow-md border-1 border-gray-600">
+            <div className="max-w-[900px] w-[40rem] p-6 rounded-lg shadow-md border-2 border-gray-600">
                 <h1 className="text-2xl font-bold mb-6">Sorry</h1>
                 <p className="mb-4">User Already Exists</p>
                 <form className="space-y-4" >
@@ -122,7 +122,7 @@ const id = (session?.data?.user as SessionUser)?.username;
         </>:
         <>
         <div className="flex items-center justify-center min-h-screen">
-            <div className="max-w-[900px] w-[40rem] p-6 rounded-lg shadow-md border-1 border-gray-600">
+            <div className="max-w-[900px] w-[40rem] p-6 rounded-lg shadow-md border-2 border-gray-600">
                 <h1 className="text-2xl font-bold mb-6">Sign Up</h1>
                 <p className="mb-4">Fill In the Details Below to Complete The Sign up</p>
                 <form className="space-y-4" onSubmit={handleSignUp}>

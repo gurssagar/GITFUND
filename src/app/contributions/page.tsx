@@ -130,7 +130,7 @@ export default function Contributions() {
                     <Topbar />
                     <div className={`flex w-[calc(100vw_-_17em)] my-[70px] px-4 gap-4`}>
                         {/* Applied Issues Column - Filtered */}
-                        <div className='min-h-[100vh] w-1/3 py-4 px-3 rounded border border-gray-800 overflow-y-auto  text-black dark:text-gray-200'>
+                        <div className='min-h-[100vh] w-1/3 py-4 px-3 rounded border dark:border-custom-dark-gray overflow-y-auto  text-black dark:text-gray-200'>
                             <h3 className='font-bold text-lg mb-4 px-2'>My Applied Issues</h3>
                             {userAppliedOnlyIssues.length > 0 ? (
                                 userAppliedOnlyIssues.map(renderIssueCard) // Use the helper function
@@ -140,7 +140,7 @@ export default function Contributions() {
                         </div>
 
                         {/* Assigned Issue Column */}
-                        <div className='min-h-[100vh] py-4 px-3 w-1/3 rounded border border-gray-800 overflow-y-auto  text-black dark:text-gray-200'> {/* Added styles */}
+                        <div className='min-h-[100vh] py-4 px-3 w-1/3 rounded border dark:border-custom-dark-gray overflow-y-auto  text-black dark:text-gray-200'> {/* Added styles */}
                             <h3 className='font-bold text-lg mb-4 px-2'>My Assigned Issues</h3> {/* Adjusted text */}
                             {userAssignedIssues.length > 0 ? (
                                 userAssignedIssues.map(renderIssueCard) // Use the helper function
@@ -150,7 +150,7 @@ export default function Contributions() {
                         </div>
 
                         {/* Pending Review Column */}
-                        <div className='min-h-[100vh] py-4 px-3 w-1/3 rounded border border-gray-800 overflow-y-auto text-black dark:text-gray-200'> {/* Added styles */}
+                        <div className='min-h-[100vh] py-4 px-3 w-1/3 rounded border dark:border-custom-dark-gray overflow-y-auto text-black dark:text-gray-200'> {/* Added styles */}
                             <h3 className='font-bold text-lg mb-4 px-2'>Pending Review</h3> {/* Adjusted text */}
                             {/* Content for Pending Review - Add logic similar to above */}
                              <p className="text-gray-400 px-2">No issues pending review.</p> {/* Placeholder */}

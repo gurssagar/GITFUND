@@ -4,11 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useSearch } from './SearchContext'; // Import the context hook
 
-// Remove SearchModalProps as isOpen and onClose will come from context
-// interface SearchModalProps {
-//   isOpen: boolean;
-//   onClose: () => void;
-// }
+
 
 export default function SearchModal(/* Remove props: { isOpen, onClose }: SearchModalProps */) {
   const { isSearchOpen, closeSearchModal } = useSearch(); // Use the context
@@ -58,7 +54,7 @@ export default function SearchModal(/* Remove props: { isOpen, onClose }: Search
 
   return (
     <div className='z-50 fixed inset-0  bg-opacity-50 flex items-start justify-center pt-[10vh]'>
-      <div className='bg-[#eeeeee] dark:bg-black rounded-xl border border-gray-700 dark:border-[#1a1a1c] w-[60vw] max-h-[70vh] overflow-hidden flex flex-col shadow-2xl'>
+      <div className='bg-white dark:bg-black rounded-xl border border-gray-700 dark:border-[#1a1a1c] w-[50vw] max-h-[70vh] overflow-hidden flex flex-col shadow-2xl'>
         <div className="relative p-2">
           <span className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
             <Image
@@ -89,12 +85,19 @@ export default function SearchModal(/* Remove props: { isOpen, onClose }: Search
         </div>
 
         <div className='flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-transparent p-2 space-y-1'>
+          
+          <div className='text-xl px-3 font-bold flex gap-4 '>
+            Projects
+            <div className='border-2 px-3 text-custom-gray py-[2px] rounded-lg border-custom-dark-gray text-sm font-normal my-auto'>
+              {filteredRepos.length}
+            </div>
+          </div>
           {isLoading && <p className="text-center text-gray-400 py-4">Loading...</p>}
           {!isLoading && filteredRepos.length === 0 && searchTerm.length > 0 && (
-            <p className="text-center text-gray-900 py-4">No projects found for "{searchTerm}".</p>
+            <p className="text-center text-gray-200 py-4">No projects found for "{searchTerm}".</p>
           )}
           {!isLoading && filteredRepos.length === 0 && searchTerm.length === 0 && repoData.length > 0 && (
-             <p className="text-center text-gray-900 py-4">Type to search projects.</p>
+             <p className="text-center text-gray-200 py-4">Type to search projects.</p>
           )}
           {!isLoading &&
             filteredRepos.map((repo: any) => {
@@ -104,19 +107,15 @@ export default function SearchModal(/* Remove props: { isOpen, onClose }: Search
               const contributors = repo.contributors && Array.isArray(repo.contributors.collabs) ? repo.contributors.collabs.length : 0;
 
               return (
+                
                 <Link key={repo.projectName} href={`/projects/${repo.project_repository}`} passHref>
-                  <div onClick={closeSearchModal} className="block p-3 rounded-md  transition-colors duration-150"> {/* Use closeSearchModal from context */}
+                  <div onClick={closeSearchModal} className="hover:bg-custom-dark-gray block p-3 rounded-md  transition-colors duration-150"> {/* Use closeSearchModal from context */}
                     <div className="flex justify-between items-start">
                       <div>
                         <h3 className='text-lg font-semibold dark:text-white text-gray-900 mb-1'>
                           {repo.projectName}
                         </h3>
-                        {repo.shortdes && (
-                          <p className="text-sm dark:text-gray-200 text-gray-600 mb-2 line-clamp-2">
-                            {repo.shortdes}
-                          </p>
-                        )}
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-3 my-1 text-xs dark:text-custom-gray text-gray-500">
                           <div className="flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" className="mr-1" width="14" height="14" viewBox="0 0 24 24"><path fill="currentColor" d="m12 17.275l-4.15 2.5q-.275.175-.575.15t-.525-.2t-.35-.437t-.05-.588l1.1-4.725L3.775 10.8q-.25-.225-.312-.513t.037-.562t.3-.45t.55-.225l4.85-.425l1.875-4.45q.125-.3.388-.45t.537-.15t.537.15t.388.45l1.875 4.45l4.85.425q.35.05.55.225t.3.45t.038.563t-.313.512l-3.675 3.175l1.1 4.725q.075.325-.05.588t-.35.437t-.525.2t-.575-.15z" /></svg>
                             <span>{stars}</span>
@@ -130,13 +129,19 @@ export default function SearchModal(/* Remove props: { isOpen, onClose }: Search
                             <span>{contributors}</span>
                           </div>
                         </div>
+                        {repo.shortdes && (
+                          <p className="text-sm dark:text-gray-200 text-gray-600 mb-2 line-clamp-2">
+                            {repo.shortdes}
+                          </p>
+                        )}
+                        
                       </div>
                       {repo.image_url && (
                         <Image src={repo.image_url} alt={repo.projectName} width={64} height={64} className="rounded object-cover ml-4 flex-shrink-0" />
                       )}
                     </div>
                     {repo.languages && Object.keys(repo.languages).length > 0 && (
-                      <div className="mt-2 pt-2 border-t border-gray-700 dark:border-gray-800">
+                      <div className="">
                         {Object.keys(repo.languages).slice(0, 5).map((language: string) => ( // Show max 5 languages
                           <span key={language} className="inline-block bg-gray-700 dark:bg-[#2a2a2a] text-[11px] text-gray-300 dark:text-gray-400 rounded-full px-2 py-0.5 mr-1.5 mb-1">
                             {language}

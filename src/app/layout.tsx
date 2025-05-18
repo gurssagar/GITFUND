@@ -9,6 +9,9 @@ import Kbar from "../assets/components/kbar";
 import { SearchProvider } from "@/assets/components/SearchContext"; // Import SearchProvider
 import "./globals.css";
 import ChatPage from "../assets/components/chatPage";
+// import { useKBar } from "kbar"; // No longer needed directly in RootLayout
+import KbarBlurWrapper from "@/assets/components/KbarBlurWrapper"; // Import the new wrapper
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -44,10 +47,10 @@ export default function RootLayout({
                 <SearchProvider>
                   <ChatSidebarProvider>
                     <Kbar />
-                    {children}
-                    <div className="fixed right-10 bottom-10">
-                      {/* <ChatPage /> */}
-                    </div>
+                    <KbarBlurWrapper> {/* Wrap children with the new component */}
+                      {children}
+                    </KbarBlurWrapper>
+                    
                   </ChatSidebarProvider>
                 </SearchProvider>
               </SessionProvider>

@@ -85,7 +85,7 @@ const IssueCommentForm = () => {
                 <div className='flex'>
                 <div className='w-[85%]'>
                 <div className="mt-20 mx-auto w-[calc(100%_-_16rem)] justify-center">
-                    <form onSubmit={handleSubmit} className="max-w-[600px] border-1 border-gray-800 rounded-xl p-10 mx-auto space-y-4">
+                    <form onSubmit={handleSubmit} className="max-w-[600px] border-2 dark:border-custom-dark-gray rounded-xl p-10 mx-auto space-y-4">
                     <div className="text-3xl mb-6">
               Add Comment to Issue #{Issue}
                     </div>
@@ -111,7 +111,7 @@ const IssueCommentForm = () => {
                 name="comment"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                className="w-full p-2 border-1 border-gray-800 rounded-md h-32"
+                className="w-full p-2 border-2 dark:border-custom-dark-gray rounded-md h-32"
                 required
               />
             </div>

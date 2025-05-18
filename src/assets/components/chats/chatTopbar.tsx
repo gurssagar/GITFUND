@@ -42,7 +42,7 @@ const { isSearchOpen, toggleSearchModal, closeSearchModal } = useSearch();
     <div className={`dark:bg-[#0a0a0a] z-20 bg-white fixed top-0 px-5 py-4 border-b-[1px] border-gray-600 ${isShrunk ? 'w-[calc(100%_-_4rem)]' : 'w-[calc(100%_-_16rem)]'} transition-all duration-400 ease-in-out` } style={{ transitionProperty: 'width, padding' }}>
         <div className='flex justify-between'>
             <div className='flex items-center'> {/* Added items-center for better vertical alignment */}
-                <div className='pr-2 border-r-1 border-gray-800' onClick={() => setIsShrunk(!isShrunk)} style={{ cursor: "pointer" }}>
+                <div className='pr-2 border-r-1 dark:border-custom-dark-gray' onClick={() => setIsShrunk(!isShrunk)} style={{ cursor: "pointer" }}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path></svg>
                 </div>
                 {/* Display selected user or breadcrumbs */}
