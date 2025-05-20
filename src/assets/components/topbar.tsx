@@ -20,10 +20,14 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
+
 export default function Topbar(  ) {
 const { isSearchOpen, toggleSearchModal, closeSearchModal } = useSearch();
   const router = useRouter();
+  const { open } = useWeb3Modal();
+ 
   const { setTheme } = useTheme()
   const pathname = usePathname();
   console.log(pathname)
@@ -42,7 +46,7 @@ const { isSearchOpen, toggleSearchModal, closeSearchModal } = useSearch();
   return(
     <>
     <Suspense fallback={<div>Loading...</div>}>
-    <div className={`dark:bg-[#0a0a0a] bg-white fixed top-0 px-5 py-4 border-b-[1px] border-gray-600 ${isShrunk ? 'w-[calc(100%_-_4rem)]' : 'w-[calc(100%_-_16rem)]'} transition-all duration-400 ease-in-out` } style={{ transitionProperty: 'width, padding' }}>
+    <div className={`dark:bg-[#0a0a0a] bg-white border-b-2 fixed top-0 px-5 py-4 border-b-[1px] border-custom-gray dark:border-custom-dark-gray ${isShrunk ? 'w-[calc(100%_-_4rem)]' : 'w-[calc(100%_-_16rem)]'} transition-all duration-400 ease-in-out` } style={{ transitionProperty: 'width, padding' }}>
         <div className='flex justify-between'>
             <div className='flex items-center'> {/* Added items-center for better vertical alignment */}
                 <div className='pr-2 border-r-1 dark:border-custom-dark-gray' onClick={() => setIsShrunk(!isShrunk)} style={{ cursor: "pointer" }}>
@@ -66,13 +70,8 @@ const { isSearchOpen, toggleSearchModal, closeSearchModal } = useSearch();
                 </div>
             </div>
             <div className="flex space-x-4 ">
-                            {account ? (
-                                <p>Wallet Connected</p>
-                            ) : (
-                                <button onClick={connectWallet} className="px-4 text-[14px] py-1 bg-gray-900 text-white rounded">
-                                Connect Wallet
-                                </button>
-                            )}
+    
+                            
                                                         <div>
                                 <button onClick={toggleSearchModal} className="flex items-center space-x-2 border-2 border-custom-dark-gray text-gray-900 dark:text-gray-300 px-3 py-1.5 rounded-md text-sm">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -89,7 +88,7 @@ const { isSearchOpen, toggleSearchModal, closeSearchModal } = useSearch();
                                 <>
                                         <Image onClick={() =>{
                                         setVisible(!visible)
-                                    }} src={image} alt="" width={26} height={26} className='rounded'></Image>
+                                    }} src={image} alt="" width={30} height={30} className='rounded'></Image>
                                 </>:
                                 <>
                                 <Link href={`/Login`}>
@@ -122,6 +121,7 @@ const { isSearchOpen, toggleSearchModal, closeSearchModal } = useSearch();
                         </div>
                             
                         </div>
+
                         {
                             visible ? 
                             <>

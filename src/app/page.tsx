@@ -17,6 +17,7 @@ import MacbookScrollDemo from "@/assets/components/macbookscrool";
 import ShootingStarBorder from "@/components/border";
 import { LampContainer } from "@/components/ui/lamp";
 import { PointerHighlight } from "@/components/ui/pointer-highlight";
+import { useAccount, useEnsName } from 'wagmi'
 import {
   Card,
   CardContent,
@@ -42,6 +43,8 @@ import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
 import { InfiniteMovingCards } from "@/components/ui/infinite-moving-cards";
 
 export default function LandingPage() {
+  const { address, isConnected } = useAccount() // Added isConnected here
+  const { data: ensName, error, status } = useEnsName({ address })
   const { account, connectWallet } = useWeb3();
   const [billingCycle, setBillingCycle] = useState("monthly");
   const [repoData,setRepoData]=useState<any>([])
@@ -179,6 +182,8 @@ export default function LandingPage() {
       src: "https://images.unsplash.com/photo-1624561172888-ac93c696e10c?q=80&w=2592&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     },
   ];
+
+
   
   return (
     <div className="min-h-screen bg-white ">
@@ -225,9 +230,7 @@ export default function LandingPage() {
               </Link>
             </nav>
             <div className="flex items-center space-x-4">
-              <MetaMaskButton />
-              
-              <ShootingStarBorder href="/Login">Sign In</ShootingStarBorder>
+                <ShootingStarBorder href="/Login">Sign In</ShootingStarBorder>
             </div>
           </div>
         </div>

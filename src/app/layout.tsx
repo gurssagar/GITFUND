@@ -6,6 +6,10 @@ import { SidebarProvider } from "@/assets/components/SidebarContext";
 import { ChatSidebarProvider } from "@/assets/components/chats/chatSiderbarContext";
 import { ThemeProvider } from "next-themes";
 import Kbar from "../assets/components/kbar";
+import WagmiProviderComp from "../lib/wagmi-provider";
+import { cookieToInitialState } from "wagmi";
+import { config } from "@/lib/config";
+
 import { SearchProvider } from "@/assets/components/SearchContext"; // Import SearchProvider
 import "./globals.css";
 import ChatPage from "../assets/components/chatPage";
@@ -32,6 +36,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const initialState = cookieToInitialState(config, new Headers().get("cookie"));
   return (
     <html lang="en" className="dark">
       <body className={`bg-background text-foreground`}>
@@ -47,9 +52,11 @@ export default function RootLayout({
                 <SearchProvider>
                   <ChatSidebarProvider>
                     <Kbar />
+                    <WagmiProviderComp initialState={initialState}>
                     <KbarBlurWrapper> {/* Wrap children with the new component */}
                       {children}
                     </KbarBlurWrapper>
+                    </WagmiProviderComp>
                     
                   </ChatSidebarProvider>
                 </SearchProvider>
