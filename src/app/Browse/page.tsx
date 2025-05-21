@@ -1,5 +1,5 @@
 'use client'
-import { useSession } from 'next-auth/react';
+import { useSession, SessionContextValue } from 'next-auth/react'; // Added SessionContextValue
 import {useEffect, useState} from'react'
 import {useRouter} from 'next/navigation'
 import Image from 'next/image';
@@ -18,14 +18,44 @@ import {
     useMatches,
     NO_GROUP
   } from "kbar";
+
+interface Repo {
+    projectName: string;
+    shortdes?: string;
+    languages?: Record<string, number>; // e.g., { TypeScript: 12345, JavaScript: 67890 }
+    image_url?: string;
+    project_repository?: string;
+    forks?: number | string;
+    stars?: number | string;
+    contributors?: { collabs: string[] };
+    // Add other properties as needed
+}
+
+interface ProjectData {
+    projects: Repo[];
+}
+
+interface CustomSession {
+    data?: {
+        user?: {
+            id?: string;
+            image?: string;
+            usrename?: string;
+            email?: string;
+            // Add other user properties if they exist
+        };
+        // Add other session properties if they exist
+    } ;
+}
+
 export default function Home(){
-    const session=useSession();
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filteredRepos, setFilteredRepos] = useState<any>([]);
-    const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [openSearch,setSearchOpen]=useState(false)
+    const session = useSession();
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [filteredRepos, setFilteredRepos] = useState<Repo[]>([]);
+    const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
+    const [openSearch,setSearchOpen]=useState<boolean>(false)
     const {isShrunk}=useSidebarContext()
-    const [selectedLanguage, setSelectedLanguage] = useState<string>(''); // Changed from selectedLanguages
+    const [selectedLanguage, setSelectedLanguage] = useState<string>('');
     const [availableLanguages, setAvailableLanguages] = useState<string[]>([]); 
 
     useEffect(() => {
@@ -48,30 +78,29 @@ export default function Home(){
 
     
     console.log(session)
-    const id=session?.data?.user?.id
-    const [image,updateImage]=useState('')
-    const [visible,setVisible]=useState(null)
-    const [repoData,setRepoData]=useState<any>([])
-    const [projImage,setProjImage]=useState<any>(null)
-    const [isLoading, setIsLoading] = useState(false);
+    const id: string | undefined = session?.data?.user?.id;
+    const [image,updateImage]=useState<string>('')
+    const [visible,setVisible]=useState<null | any>(null) // Consider a more specific type if possible
+    const [repoData,setRepoData]=useState<Repo[]>([])
+    const [projImage,setProjImage]=useState<any>(null) // Consider a more specific type if possible
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
 
     useEffect(() => {
-        let tempFilteredRepos = repoData;
+        let tempFilteredRepos: Repo[] = repoData;
 
         // Filter by search term
         if (searchTerm.trim() !== '') {
-            tempFilteredRepos = tempFilteredRepos.filter((repo: any) => 
+            tempFilteredRepos = tempFilteredRepos.filter((repo: Repo) => 
                 repo.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 (repo.shortdes && repo.shortdes.toLowerCase().includes(searchTerm.toLowerCase()))
             );
         }
 
         // Filter by selected language
-        if (selectedLanguage) { // Updated condition
-            tempFilteredRepos = tempFilteredRepos.filter((repo: any) => {
+        if (selectedLanguage) { 
+            tempFilteredRepos = tempFilteredRepos.filter((repo: Repo) => {
                 if (repo.languages && typeof repo.languages === 'object') {
-                    // Check if the selected language is a key in the repo's languages object
                     return repo.languages.hasOwnProperty(selectedLanguage);
                 }
                 return false;
@@ -79,7 +108,7 @@ export default function Home(){
         }
 
         setFilteredRepos(tempFilteredRepos);
-    }, [searchTerm, repoData, selectedLanguage]); // Add selectedLanguage to dependencies, remove selectedLanguages
+    }, [searchTerm, repoData, selectedLanguage]); 
 
     useEffect(()=>{
         const fetchData=async()=>{
@@ -90,12 +119,11 @@ export default function Home(){
                     'Content-Type':'application/json'
                 },
             }
-           ).then((res)=>res.json())
+           ).then((res)=>res.json() as Promise<ProjectData>)
            .then((data)=>{
                 setRepoData(data.projects);
-                // Extract unique languages from projects
                 const allLangs = new Set<string>();
-                data.projects.forEach((project: any) => {
+                data.projects.forEach((project: Repo) => {
                     if (project.languages && typeof project.languages === 'object') {
                         Object.keys(project.languages).forEach(lang => allLangs.add(lang));
                     }
@@ -110,24 +138,31 @@ export default function Home(){
             
             const getImage=async()=>
                 {
+                    // Assuming you might want to fetch an image based on some criteria from repoData
+                    // This part needs more context on what `fileName={}` refers to
+                    // For now, it's a placeholder.
+                    // Example: if (repoData[0]?.image_url) { 
+                    //    await fetch(`/api/s3?fileName=${encodeURIComponent(repoData[0].image_url)}`)
+                    // } 
                     await fetch(`/api/s3?fileName={}`,{
                         
                     }
                 )
                 }
+            // Call getImage if needed, e.g., getImage();
         }
     },[])
 
     useEffect(()=>{
         if(session?.data?.user?.image){
-            updateImage(session?.data?.user?.image)
+            updateImage(session.data.user.image)
         }
     },[session?.data?.user?.image])
     console.log(repoData)
 
-    const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => { // New handler
+    const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => { 
         setSelectedLanguage(event.target.value);
-        if (isSearchOpen) { // Keep search results visible in modal when changing filter
+        if (isSearchOpen) { 
             setSearchOpen(true);
         }
     };
@@ -155,7 +190,7 @@ export default function Home(){
                                     placeholder="Search projects by name or description..."
                                     className="px-2 w-2/3 w-full bg-white border border-gray-300 dark:border-gray-600 rounded bg-[#191919] dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                                     value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)} 
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)} 
                                 />
                                 <div className=" mx-4 w-1/3">
                                     <label htmlFor="language-select-main" className="sr-only">Filter by language</label>
@@ -180,12 +215,11 @@ export default function Home(){
                             {
                                 isLoading?
                                 <>
-                                {filteredRepos.map((repo: any) => {
+                                {filteredRepos.map((repo: Repo) => {
                                     if (!repo.image_url?.trim()) return null;
-                                    // Ensure stars and forks are numbers, provide default if not
-                                    const stars = typeof repo.stars === 'number' ? repo.stars : (repo.stars ? parseInt(repo.stars, 10) : 0);
-                                    const forks = typeof repo.forks === 'number' ? repo.forks : (repo.forks ? parseInt(repo.forks, 10) : 0);
-                                    const contributors = repo.contributors && Array.isArray(repo.contributors.collabs) ? repo.contributors.collabs.length : 0;
+                                    const stars = typeof repo.stars === 'number' ? repo.stars : (repo.stars ? parseInt(String(repo.stars), 10) : 0);
+                                    const forks = typeof repo.forks === 'number' ? repo.forks : (repo.forks ? parseInt(String(repo.forks), 10) : 0);
+                                    const contributorsCount = repo.contributors && Array.isArray(repo.contributors.collabs) ? repo.contributors.collabs.length : 0;
 
 
                                     return (
@@ -194,14 +228,10 @@ export default function Home(){
                                             <Issue 
                                                 image={repo.image_url || 'back_2.jpg'}
                                                 Project={repo.projectName}
-                                                Fork={repo.forks?repo.forks:0}
-                                                Stars={repo.stars?repo.stars:0}
-                                                Contributors={
-                                                    repo.contributors && repo.contributors.collabs
-                                                        ? Object.keys(repo.contributors.collabs).length
-                                                        : 0
-                                                }
-                                                shortDescription={repo.shortdes}
+                                                Fork={forks}
+                                                Stars={stars}
+                                                Contributors={contributorsCount}
+                                                shortDescription={repo.shortdes || ''}
                                                 languages={repo.languages}
                                             />
                                             </a>

@@ -9,8 +9,9 @@ import { generateText } from 'ai';
 // import { ethers } from 'ethers'; // ethers is still used by Octokit, but not directly for wallet interactions
 // import { useWeb3 } from "../../assets/components/web3Context"; // Removed
 // import { getContract } from "../../assets/components/contract"; // Removed
-import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSimulateContract } from 'wagmi'; // Added Wagmi hooks
-import { parseEther } from 'viem'; // Added for converting string to BigInt for transaction value
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'; // Added Wagmi hooks
+import { parseEther } from 'viem'; 
+import { Session } from 'next-auth'; // Import Session type
 
 import { useSidebarContext } from '@/assets/components/SidebarContext';
 import {
@@ -179,24 +180,81 @@ const contractAbi = [
 		"type": "function"
 	}
 ] as const; // Example: [{ "inputs": [], "name": "getBalance", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "string", "name": "username", "type": "string" } ], "name": "deposit", "outputs": [], "stateMutability": "payable", "type": "function" }] as const;
-const contractAddress = "0xfeE4A793833338ff675066D75c30bE2A18036b82"; // Example: '0xYourContractAddressHere' as `0x${string}`;
+const contractAddress = "0xfeE4A793833338ff675066D75c30bE2A18036b82" as `0x${string}`;
+
+// Define a custom session type that includes accessToken and a more specific user type
+interface CustomUser {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    username?: string | null; // Assuming username might be part of the user object
+    id?: string; // Or whatever type your user ID is
+}
+
+interface CustomSession extends Session {
+    accessToken?: string;
+    user?: CustomUser;
+}
+
+// Define interfaces for better type safety with Octokit and session data
+interface GitHubUser {
+  login: string;
+  id: number;
+  // Add other relevant user properties if needed
+}
+
+interface Repo {
+  id: number;
+  name: string;
+  full_name: string;
+  owner: GitHubUser;
+  description: string | null;
+  stargazers_count: number;
+  forks_count: number;
+  // Add other relevant repo properties
+}
+
+interface Issue {
+  id: number;
+  title: string;
+  html_url: string;
+  // Add other relevant issue properties
+}
+
+interface LanguageData {
+  [language: string]: number;
+}
+
+interface Collaborator {
+  login: string;
+  id: number;
+  // Add other relevant collaborator properties
+}
+
+interface SessionData {
+  accessToken?: string;
+  user?: {
+    username?: string;
+    email?: string;
+    // Add other user properties from session if needed
+  };
+}
 
 export default function Project() {
     const session = useSession();
-    const [token, setToken] = useState('');
-    const [user, setUser] = useState<any>();
-    const [selectedRepo, setSelectedRepo] = useState<any>();
-    const [data, setData] = useState<any[]>();
-    const [issues, setIssues] = useState<any[]>();
+    const [token, setToken] = useState<string>('');
+    const [user, setUser] = useState<string | undefined>();
+    const [selectedRepo, setSelectedRepo] = useState<string | undefined>(); // Assuming selectedRepo is the repo name (string)
+    const [data, setData] = useState<Repo[]>([]); // Typed as an array of Repo objects
+    const [issues, setIssues] = useState<Issue[]>([]); // Typed as an array of Issue objects
     const { isShrunk } = useSidebarContext();
-    // const { provider, signer } = useWeb3(); // Removed
-    const { address, isConnected } = useAccount(); // Wagmi's account hook
-    const [contractBalance, setContractBalance] = useState("0");
-    const [rewardAmount, setRewardAmount] = useState<string>(""); // Ensure rewardAmount is string
+    const { address, isConnected } = useAccount();
+    const [contractBalance, setContractBalance] = useState<string>("0");
+    const [rewardAmount, setRewardAmount] = useState<string>("");
     const [alertMessage, setAlertMessage] = useState<string | null>(null);
-    const [languages,setlanguages]=useState<any>();
-    const [stars, setStars] = useState(0);
-    const [forks, setForks] = useState(0);
+    const [languages, setLanguages] = useState<LanguageData | undefined>(); // Typed as LanguageData object
+    const [stars, setStars] = useState<number>(0);
+    const [forks, setForks] = useState<number>(0);
 
     const { data: writeData, writeContract, isPending: isWritePending, error: writeError } = useWriteContract();
 
@@ -217,12 +275,13 @@ export default function Project() {
     // Set token and user from session
     useEffect(() => {
         if(session.data) {
-            setToken((session.data as any)?.accessToken);
-            setUser((session.data as any)?.user?.username);
+            const sessionInfo = session.data as SessionData;
+            setToken(sessionInfo.accessToken || '');
+            setUser(sessionInfo.user?.username);
         }
     }, [session.data]);
 
-    // Fetch repositories (no changes here)
+    // Fetch repositories
     useEffect(() => {
         if (!token) return;
         
@@ -234,7 +293,7 @@ export default function Project() {
                         'X-GitHub-Api-Version': '2022-11-28'
                     }
                 });
-                setData(response.data);
+                setData(response.data as Repo[]); // Cast to Repo[]
                 console.log(response.data,"repois")
             } catch (error) {
                 console.error('Error fetching repositories:', error);
@@ -246,18 +305,18 @@ export default function Project() {
             if (!user || !selectedRepo) return; // Add this check
             const octokit = new Octokit({ auth: token });
             try {
-                const response=await octokit.request(
+                const response = await octokit.request(
                     `GET /repos/${user}/${selectedRepo}/languages`,
                     {
-                        owner:user,
-                        repo:selectedRepo,
+                        owner: user,
+                        repo: selectedRepo,
                         headers: {
                             'X-GitHub-Api-Version': '2022-11-28'
                         }
                     }
                 )
                 console.log(response.data,'languages')
-                setlanguages(response.data)
+                setLanguages(response.data as LanguageData); // Cast to LanguageData
             } catch (error) {
                 console.error('Error fetching repo languages:', error);
             }
@@ -268,11 +327,11 @@ export default function Project() {
         }
     }, [token, user, selectedRepo]); // Added user and selectedRepo as dependencies
 
-    //fetch readme.md (no changes here)
-    const [repoValue, setRepoValue] = useState<any>();
+    //fetch readme.md
+    const [repoValue, setRepoValue] = useState<string | undefined>(); // README content is a string
     useEffect(() => {
         const fetchProjectData = async () => {
-            if (!session) return;
+            if (!session || !user || !selectedRepo || !token) return; // Added token check
             const octokit = new Octokit({ auth: token });
             try {
                 
@@ -299,8 +358,8 @@ export default function Project() {
     },[session, user, selectedRepo, token])
     console.log(repoValue,"sdiewudu")
     
-    //ai reply (no changes here)
-    const [aiReply, setAiReply] = useState<any>();
+    //ai reply
+    const [aiReply, setAiReply] = useState<string | undefined>(); // AI reply is a string
     // Removed useMemo for Groq client initialization, as we'll use the AI SDK's groq model provider directly.
     // The API key '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' should now be set as an environment variable (e.g., GROQ_API_KEY).
     // The `dangerouslyAllowBrowser: true` option is not used with the AI SDK in this manner.
@@ -344,7 +403,7 @@ export default function Project() {
                         'X-GitHub-Api-Version': '2022-11-28'
                     }
                 });
-                setIssues(response.data);
+                setIssues(response.data as Issue[]); // Cast to Issue[]
             } catch (error) {
                 console.error('Error fetching issues:', error);
             }
@@ -372,10 +431,11 @@ export default function Project() {
             // fetchBalance(); // Re-fetch balance if implemented
         }
         if (confirmationError) {
-            setAlertMessage(`Deposit failed: ${confirmationError.message}`);
+            // Type assertion for error to access message property safely
+            setAlertMessage(`Deposit failed: ${(confirmationError as Error).message}`);
         }
         if (writeError) {
-            setAlertMessage(`Transaction submission failed: ${writeError.message}`);
+            setAlertMessage(`Transaction submission failed: ${(writeError as Error).message}`);
         }
     }, [isConfirmed, confirmationError, writeError]);
 
@@ -400,7 +460,7 @@ export default function Project() {
             return;
         }
         
-        if (!contractAddress || contractAbi.length === 0) {
+        if (!contractAddress || !contractAbi || (contractAbi as readonly any[]).length === 0) {
             setAlertMessage("Contract address or ABI is not configured.");
             console.error("Contract address or ABI is not configured.");
             return;
@@ -408,7 +468,8 @@ export default function Project() {
 
         try {
             // Handle deposit with Wagmi
-            const username: string = ((session.data as any)?.user as any)?.username;
+            const currentSession = session.data as SessionData;
+            const username: string | undefined = currentSession?.user?.username;
             if (!username) {
                 setAlertMessage("User session not found.");
                 return;
@@ -480,22 +541,22 @@ export default function Project() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    contributors: {collabs},
+                    contributors: collabs, // Ensure collabs has a defined type if possible
                     aiDescription: aiReply || '',
                     projectOwner: user,
-                    projectName: formData.get('projectName'),
-                    shortdes: formData.get('shortDescription'),
-                    longdis: formData.get('longDescription'),
+                    projectName: formData.get('projectName') as string,
+                    shortdes: formData.get('shortDescription') as string,
+                    longdis: formData.get('longDescription') as string,
                     image_url: imageUrl,
                     project_repository: selectedRepo,
-                    project_issues: formData.get('projectIssue'),
-                    difficulty:formData.get('difficulty'),
-                    priority:formData.get('priority'),
+                    project_issues: formData.get('projectIssue') as string, // Assuming this is a string
+                    difficulty: formData.get('difficulty') as string, // Assuming this is a string
+                    priority: formData.get('priority') as string, // Assuming this is a string
                     rewardAmount: rewardAmount,
-                    email:(session.data as any)?.user?.email,
-                    languages:languages,
-                    stars:stars,
-                    forks:forks,
+                    email: currentSession?.user?.email,
+                    languages: languages,
+                    stars: stars,
+                    forks: forks,
                 }),
             });
             setAlertMessage("Project submitted (after deposit initiated)!"); // Update message
@@ -513,11 +574,11 @@ export default function Project() {
     }
     
 
-    //collab (no changes here)
-    const [collabs, setCollabs] = useState<any>();
+    //collab
+    const [collabs, setCollabs] = useState<Collaborator[] | undefined>(); // Typed as array of Collaborator
     useEffect(() => {
     const fetchProjectData = async () => {
-        if (!session || !user || !selectedRepo) return;
+        if (!session || !user || !selectedRepo || !token) return; // Added token check
         
         try {
             const octokit = new Octokit({ auth: token });
@@ -533,7 +594,7 @@ export default function Project() {
                 } 
             ).then(response => response.data).then(res => {
                 console.log(res,'collabs')
-                setCollabs(res) 
+                setCollabs(res as Collaborator[]); // Cast to Collaborator[]
             });
 
             const response = await octokit.request('GET /repos/{owner}/{repo}', {
@@ -558,7 +619,7 @@ export default function Project() {
                 }
             ).then(response => response.data).then(res => {
                 console.log(res,'languages')
-                setlanguages(res)
+                setLanguages(res as LanguageData); // Cast to LanguageData
             });
         } 
         catch (error) {

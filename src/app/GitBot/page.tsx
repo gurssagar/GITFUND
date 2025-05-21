@@ -1,7 +1,7 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
-import { useState, useRef, useEffect } from "react";
+import { useChat, type Message } from "@ai-sdk/react";
+import React,{ useState, useRef, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -18,16 +18,22 @@ import { useSidebarContext } from '@/assets/components/SidebarContext';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+interface UrlPreview {
+  title: string;
+  description: string;
+  image?: string;
+}
+
 export default function Page() {
   const { isShrunk } = useSidebarContext();
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
+  const { messages, input, handleInputChange, handleSubmit, isLoading } = // eslint-disable-line
     useChat({
       api: "/api/rag",
     });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [isMounted, setIsMounted] = useState(false);
-  const [urlPreviews, setUrlPreviews] = useState<Record<string, { title: string, description: string, image?: string }>>({});
+  const [isMounted, setIsMounted] = useState<boolean>(false);
+  const [urlPreviews, setUrlPreviews] = useState<Record<string, UrlPreview>>({});
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   // Enhanced emoji regex that catches common emoji patterns
   const emojiRegex = /(:[\w+-]+:|\p{Emoji}|\p{Emoji_Presentation}|\p{Emoji_Modifier_Base}|\p{Emoji_Modifier}|\p{Emoji_Component})/gu;
@@ -48,7 +54,7 @@ export default function Page() {
     }
 
     // Extract URLs from new messages to fetch previews
-    const lastMessage = messages[messages.length - 1];
+    const lastMessage: Message | undefined = messages[messages.length - 1];
     if (lastMessage && lastMessage.role === 'assistant') {
       const urlRegex = /(https?:\/\/[^\s]+)/g;
       const urls = lastMessage.content.match(urlRegex) || [];
@@ -173,13 +179,13 @@ export default function Page() {
                             <ReactMarkdown 
                               remarkPlugins={[remarkGfm]}
                               components={{
-                                h1: ({...props}: any) => <h1 className="text-xl font-bold text-primary border-b border-primary/20 pb-1" {...props} />,
-                                h2: ({...props}: any) => <h2 className="text-lg font-bold text-primary/90 border-b border-primary/10 pb-1" {...props} />,
-                                h3: ({...props}: any) => <h3 className="text-md font-bold text-primary/80" {...props} />,
-                                h4: ({...props}: any) => <h4 className="text-base font-semibold text-primary/70" {...props} />,
-                                h5: ({...props}: any) => <h5 className="text-sm font-semibold text-primary/60" {...props} />,
-                                h6: ({...props}: any) => <h6 className="text-xs font-semibold text-primary/50" {...props} />,
-                                a: ({href, children, ...props}: any) => {
+                                h1: ({...props}: React.HTMLAttributes<HTMLHeadingElement>) => <h1 className="text-xl font-bold text-primary border-b border-primary/20 pb-1" {...props} />,
+                                h2: ({...props}: React.HTMLAttributes<HTMLHeadingElement>) => <h2 className="text-lg font-bold text-primary/90 border-b border-primary/10 pb-1" {...props} />,
+                                h3: ({ ...props}: React.HTMLAttributes<HTMLHeadingElement>) => <h3 className="text-md font-bold text-primary/80" {...props} />,
+                                h4: ({ ...props}: React.HTMLAttributes<HTMLHeadingElement>) => <h4 className="text-base font-semibold text-primary/70" {...props} />,
+                                h5: ({...props}: React.HTMLAttributes<HTMLHeadingElement>) => <h5 className="text-sm font-semibold text-primary/60" {...props} />,
+                                h6: ({...props}: React.HTMLAttributes<HTMLHeadingElement>) => <h6 className="text-xs font-semibold text-primary/50" {...props} />,
+                                a: ({href, children, ...props}: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href?: string }) => {
                                   const isExternal = href?.startsWith('http');
                                   const preview = href && urlPreviews[href];
                                   
@@ -236,38 +242,47 @@ export default function Page() {
                                   if (inline) {
                                     return <code className="bg-secondary/30 px-1 py-0.5 rounded text-sm font-mono" {...props}>{children}</code>
                                   }
-                                  const codeString = String(children).replace(/\n$/, '');
-                                  const isCopied = copiedCode === codeString;
+                                  const codeElement = React.Children.toArray(children).find(
+                                    (child) => React.isValidElement(child) && child.type === 'code'
+                                  ) as React.ReactElement<React.HTMLAttributes<HTMLElement>> | undefined;
+                                  
+                                  const codeString = codeElement?.props?.children?.toString() || '';
+                                  const language = codeElement?.props?.className?.replace('language-', '') || '';
                                   
                                   const handleCopy = () => {
                                     navigator.clipboard.writeText(codeString);
-                                    setCopiedCode(codeString);
+                                    setCopiedCode(codeString); // Indicate which code block was copied
                                   };
                                   
                                   return (
-                                    <pre className="overflow-x-auto rounded bg-secondary/30 p-2 text-sm font-mono relative group">
-                                      <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button
+                                    <div className="relative group">
+                                      <pre {...props} className="bg-secondary/30 p-3 rounded-md overflow-x-auto text-sm font-mono">
+                                        {children}
+                                      </pre>
+                                      {codeString && (
+                                        <Button 
+                                          variant="ghost"
+                                          size="icon"
+                                          className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity bg-background/70 hover:bg-background text-muted-foreground hover:text-foreground"
                                           onClick={handleCopy}
-                                          className="bg-primary/10 hover:bg-primary/20 rounded p-1 transition-colors"
                                           title="Copy code"
                                         >
-                                          {isCopied ? (
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                              <path d="M20 6L9 17l-5-5" />
+                                          {copiedCode === codeString ? (
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                             </svg>
                                           ) : (
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                                              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                             </svg>
                                           )}
-                                        </button>
-                                      </div>
-                                      <code className={className} {...props}>{children}</code>
-                                    </pre>
-                                  )
-                                }
+                                        </Button>
+                                      )}
+                                      {language && <span className="absolute bottom-1 right-2 text-xs text-muted-foreground/50 select-none">{language}</span>}
+                                    </div>
+                                  );
+                                },
+                               
                               }}
                             >
                               {message.content}

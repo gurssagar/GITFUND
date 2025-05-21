@@ -1,36 +1,62 @@
 'use client'
-import {useState,useEffect} from'react'
-import Image from 'next/image'; // Use Next.js Image for optimization
-import Link from 'next/link';
+import { useState, useEffect } from 'react'
+import Image from 'next/image';
 import { useSession } from 'next-auth/react';
-import Sidebar from '@/assets/components/sidebar';
-import Topbar from '@/assets/components/topbar';
 import { Suspense } from 'react';
-// Issue component is not used in this file, can be removed if not needed elsewhere via this page
-// import Issue from '@/assets/components/issue'; 
-import {useSidebarContext} from '@/assets/components/SidebarContext'
+import { useSidebarContext } from '@/assets/components/SidebarContext';
+import Topbar from '@/assets/components/topbar';
+import Sidebar from '@/assets/components/sidebar';
+import Link from 'next/link';
+interface Contributor {
+  id: string;
+  name: string;
+  avatar_url?: string;
+  contributions?: number;
+}
 
-// Define a type for your project data for better type safety
+interface Language {
+  name: string;
+  percentage: number;
+}
+
 interface Project {
-    projectName: string;
-    projectOwner: string;
-    project_repository: string;
-    project_issues?: string; // Optional
-    image_url?: string; // Optional
-    shortdes?: string; // Optional
-    stars?: number; // Assuming these are numbers
-    forks?: number;
-    contributors?: any[]; // Or a more specific type for contributors
+  projectName: string;
+  projectOwner: string;
+  project_repository: string;
+  project_issues?: string;
+  image_url?: string;
+  shortdes?: string;
+  stars?: number;
+  forks?: number;
+  contributors?: Contributor[];
+  languages?: Language[];
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface ApiResponse {
+  projects: Project[];
+  error?: {
+    message: string;
+    status?: number;
+  };
+}
+
+interface UserSession {
+  user?: {
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    username?: string;
+  };
+  expires: string;
 }
 
 export default function MyProject() {
-    const { data: session, status } = useSession(); // Destructure session data and status
-    const {isShrunk}=useSidebarContext()
-    // const [image,updateImage]=useState('') // This state seems unused
-    // const [visible,setVisible]=useState(null) // This state seems unused
-    const [repoData,setRepoData]=useState<Project[]>([]) // Use the Project interface
-    // const [projImage,setProjImage]=useState<any>(null) // This state seems unused
-    const [isLoading, setIsLoading] = useState(true); // Set initial loading to true
+    const { data: session, status } = useSession() as { data: UserSession | null; status: string };
+    const { isShrunk } = useSidebarContext();
+    const [repoData, setRepoData] = useState<Project[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         if (status === 'loading') {

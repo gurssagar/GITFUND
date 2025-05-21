@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from 'next/link'
 export default function SignUp() {
     const session = useSession();
-    const [walletAddress, setWalletAddress] = useState<any>("");
+    const [walletAddress, setWalletAddress] = useState<string>("");
     const [isLoading, setIsLoading] = useState(false);
 
 interface SessionUser {

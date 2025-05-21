@@ -2,10 +2,26 @@
 import React, { useEffect, useState, Suspense } from 'react' // Ensure Suspense is imported
 import Sidebar from '@/assets/components/sidebar';
 import Topbar from '@/assets/components/topbar';
-import { useSession } from "next-auth/react";
+import { useSession, SessionContextValue } from "next-auth/react";
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { useSidebarContext } from '@/assets/components/SidebarContext';
+import { Session } from 'next-auth'; // Import Session type
+
+// Define a custom session type that includes potential user ID fields and username
+interface CustomUser {
+    id?: string;
+    _id?: string;
+    userId?: string;
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+    username?: string | null;
+}
+
+interface CustomSession extends Session {
+    user?: CustomUser;
+}
 
 interface UserProfile {
     name: string;
@@ -17,9 +33,16 @@ interface UserProfile {
     // Add other editable fields here if needed
 }
 
+interface SignupApiResponse {
+    success: boolean;
+    error?: string;
+    message?: string; // For success messages
+    user?: any; // Or a more specific user type if available from API
+}
+
 // This component will contain the actual content and logic of your settings page
 function SettingsContent() {
-    const { data: sessionData, status } = useSession();
+    const { data: session, status } = useSession() as { data: CustomSession | null; status: SessionContextValue['status'] };
     const { isShrunk } = useSidebarContext();
     const [profile, setProfile] = useState<UserProfile>({
         name: '',
@@ -37,43 +60,45 @@ function SettingsContent() {
         twitter: '',
         linkedin: '',
     });
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [updateStatus, setUpdateStatus] = useState<{success?: boolean; message?: string} | null>(null);
 
     useEffect(() => {
-        if (sessionData?.user) {
-            const userData = {
-                name: sessionData.user.name || '',
-                bio: '',
-                location: '',
-                telegram: '',
-                twitter: '',
-                linkedin: '',
+        if (session?.user) {
+            const userData: UserProfile = {
+                name: session.user.name || '',
+                // Assuming bio, location, etc., might come from a different source or are user-input only
+                // If they are part of the session or fetched user data, initialize them here.
+                bio: (session.user as any)?.bio || '', // Example if bio was on user object
+                location: (session.user as any)?.location || '', // Example
+                telegram: (session.user as any)?.telegram || '', // Example
+                twitter: (session.user as any)?.twitter || '', // Example
+                linkedin: (session.user as any)?.linkedin || '', // Example
             };
             setProfile(userData);
             setInitialProfile(userData);
         }
-    }, [sessionData]);
+    }, [session]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setProfile(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSaveProfile = async (e: React.FormEvent) => {
+    const handleSaveProfile = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsSubmitting(true);
         setUpdateStatus(null);
         
         try {
             // Check if user ID exists and log session data for debugging
-            console.log("Session data:", sessionData);
+            console.log("Session data:", session);
             
             // Get user ID from session data - try different possible locations
-            const userId = (sessionData?.user as any)?.id || 
-                          (sessionData?.user as any)?._id || 
-                          (sessionData?.user as any)?.userId ||
-                          sessionData?.user?.email; // Fallback to email if no ID is found
+            const userId = session?.user?.id || 
+                           session?.user?._id || 
+                           session?.user?.userId ||
+                           session?.user?.email; // Fallback to email if no ID is found
             
             if (!userId) {
                 throw new Error("User ID not found in session data");
@@ -101,15 +126,15 @@ function SettingsContent() {
                 body: JSON.stringify(updateData),
             });
             
-            const result = await response.json();
+            const result: SignupApiResponse = await response.json();
             
             if (result.success) {
                 setInitialProfile(profile);
-                setUpdateStatus({ success: true, message: 'Profile updated successfully!' });
+                setUpdateStatus({ success: true, message: result.message || 'Profile updated successfully!' });
             } else {
                 setUpdateStatus({ success: false, message: result.error || 'Failed to update profile' });
             }
-        } catch (error) {
+        } catch (error: unknown) {
             console.error('Error updating profile:', error);
             setUpdateStatus({ 
                 success: false, 
@@ -125,7 +150,7 @@ function SettingsContent() {
         setUpdateStatus(null);
     };
 
-    const hasChanges = JSON.stringify(profile) !== JSON.stringify(initialProfile);
+    const hasChanges: boolean = JSON.stringify(profile) !== JSON.stringify(initialProfile);
 
     if (status === "loading") {
         return (
@@ -141,7 +166,7 @@ function SettingsContent() {
         );
     }
 
-    if (!sessionData?.user) {
+    if (!session?.user) {
         return (
             <div>
                 <Sidebar />
@@ -177,13 +202,13 @@ function SettingsContent() {
                         
                         <div className='flex flex-col md:flex-row gap-8 items-start'>
                             <div className="flex-shrink-0">
-                                {sessionData.user.image && (
+                                {session.user.image && (
                                     <Image 
-                                        src={sessionData.user.image} 
+                                        src={session.user.image} 
                                         width={150} 
                                         height={150} 
                                         className="rounded-full object-cover border-2 border-gray-300 dark:border-gray-600" 
-                                        alt='profile'
+                                        alt={session.user.name ? `${session.user.name}'s profile picture` : 'User profile picture'}
                                     />
                                 )}
                                 {/* <Button variant="outline" className="mt-4 w-full">Change Picture</Button> */}
@@ -197,7 +222,7 @@ function SettingsContent() {
                                             id="username"
                                             type='text'
                                             className='border border-gray-300 dark:border-gray-600 px-3 dark:bg-gray-800 bg-gray-50 py-2 text-[16px] rounded-md w-full text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                                            value={(sessionData.user as any)?.username || sessionData.user.email?.split('@')[0] || "N/A"}
+                                            value={session.user?.username || session.user?.email?.split('@')[0] || "N/A"}
                                             readOnly
                                         /> 
                                     </div>
@@ -219,7 +244,7 @@ function SettingsContent() {
                                             id="email"
                                             type='email'
                                             className='border border-gray-300 dark:border-gray-600 px-3 dark:bg-gray-800 bg-gray-50 py-2 text-[16px] rounded-md w-full text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                                            value={sessionData.user.email || "N/A"}
+                                            value={session.user.email || "N/A"}
                                             readOnly
                                         /> 
                                     </div>

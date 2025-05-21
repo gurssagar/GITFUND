@@ -1,6 +1,6 @@
 'use client'
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useState, useEffect, ChangeEvent } from 'react';
+import { useSession, SessionContextValue } from 'next-auth/react';
 import Topbar from '@/assets/components/topbar';
 import Sidebar from '@/assets/components/sidebar';
 import { useSidebarContext } from '@/assets/components/SidebarContext';
@@ -13,38 +13,57 @@ import { Suspense } from 'react';
 // Define an interface for reward transaction data (adjust fields as needed)
 interface RewardTransaction {
     id: string;
-    date: string; // Or Date object
+    date: string; 
     Contributor_id: string;
     issue: string;
-    value: string; // Amount in PHAROS
+    value: string; 
     projectName: string;
 }
 
+interface RewardsApiResponse {
+    Rewards: RewardTransaction[];
+    // Add other potential properties from the API response if any
+}
+
+interface CustomUser {
+    username?: string;
+    // Add other user properties if they exist
+}
+
+interface CustomSessionData {
+    user?: CustomUser & {
+        name?: string | null;
+        email?: string | null;
+        image?: string | null;
+    };
+    // Add other session properties if they exist
+}
+
+interface CustomSession {
+    data?: CustomSessionData | null;
+}
+
 export default function Rewards() {
-    const { data: session } = useSession(); // Get session data
-    const [rewards, setRewards] = useState<RewardTransaction[]>([]); // State for reward transactions
-    const [loading, setLoading] = useState(true); // Set loading to true initially
-    const [error, setError] = useState<string | null>(null); // Example error state
-    const [searchTerm, setSearchTerm] = useState(''); // State for search input
-    const { isShrunk } = useSidebarContext(); // Assuming you have a SidebarContext
+    const { data: session }: CustomSession = useSession(); 
+    const [rewards, setRewards] = useState<RewardTransaction[]>([]); 
+    const [loading, setLoading] = useState<boolean>(true); 
+    const [error, setError] = useState<string | null>(null); 
+    const [searchTerm, setSearchTerm] = useState<string>(''); 
+    const { isShrunk } = useSidebarContext(); 
     
     useEffect(() => {
-        // For testing: add a sample reward transaction
-        
         const fetchRewards = async () => {
             setLoading(true);
             setError(null);
             try {
                 const response = await fetch('/api/rewards');
                 if (!response.ok) throw new Error('Failed to fetch rewards');
-                const data = await response.json();
-                // Combine sample data with API data for testing
+                const data: RewardsApiResponse = await response.json();
                 const allRewards = data.Rewards;
                 setRewards(allRewards);
                 console.log('Fetched rewards:', allRewards);
-            } catch (err) {
+            } catch (err: any) { // Catch block error typed as any or unknown
                 console.error('Error fetching rewards:', err);
-                // Fall back to sample data if API fails
                 setError(err instanceof Error ? err.message : 'An unknown error occurred');
             } finally {
                 setLoading(false);
@@ -52,14 +71,12 @@ export default function Rewards() {
         };
         
         fetchRewards();
-    }, [session]);
+    }, [session]); // session dependency is fine, ensures re-fetch if session changes
     
-    console.log('Rewardss:', rewards);
-    // Modified filter to correctly filter based on the logged-in user and search term
+    console.log('Rewards:', rewards); // Corrected typo from Rewardss to Rewards
+    
     const filteredRewards = rewards.filter(reward => {
-        // Ensure reward object and its properties are valid before processing
         if (!reward || typeof reward.projectName !== 'string' || typeof reward.Contributor_id !== 'string') {
-            // console.warn('Skipping invalid reward object:', reward); // Optional: for debugging
             return false;
         }
 
@@ -67,30 +84,27 @@ export default function Rewards() {
         const matchesSearch = reward.projectName.toLowerCase().includes(searchTermLower) ||
                              reward.Contributor_id.toLowerCase().includes(searchTermLower);
 
-        // If the reward doesn't match the search term, exclude it immediately.
         if (!matchesSearch) {
             return false;
         }
 
-        // If a session user exists, further filter by their username.
-        const currentUsername = (session?.user as any)?.username;
+        const currentUsername: string | undefined = session?.user?.username;
         if (currentUsername) {
-            // Only include rewards where Contributor_id matches the session username (case-insensitive).
             return reward.Contributor_id.toLowerCase() === currentUsername.toLowerCase();
         }
 
-        // If no session user (i.e., user is not logged in), and it matched the search, include it.
         return true;
     });
     console.log('Filtered rewards:', filteredRewards);
     
-    let totalRewarded = 0;
+    let totalRewarded: number = 0;
     for (let i=0; i<filteredRewards.length; i++){
         totalRewarded += parseFloat(filteredRewards[i].value);
     }
-
-    // Filtered rewards based on search term (simple example)
     
+    const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(event.target.value);
+    };
 
     return (
         <Suspense fallback={<div>Loading...</div>}>
@@ -98,54 +112,58 @@ export default function Rewards() {
             <Sidebar />
             <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
             <Topbar />
-                <main className="flex-1 overflow-x-hidden overflow-y-auto  mt-[60px]"> {/* Adjust margin based on actual Topbar height */}
+                <main className="flex-1 overflow-x-hidden overflow-y-auto  mt-[60px]"> 
                     <div className="container mx-auto px-6 py-8">
-                        {/* Top Summary Cards */}
+                        
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                            {/* Rewarded Amount Card */}
+                            
                             <div className="rounded-lg shadow-md p-6 bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 text-dark dark:text-white relative">
                                 <h3 className="text-sm font-medium text-gray-100">Rewarded amount</h3>
-                                <p className="text-3xl font-semibold text-white mt-1">{totalRewarded} PHAROS</p>
+                                <p className="text-3xl font-semibold text-white mt-1">{totalRewarded.toLocaleString()} PHAROS</p> {/* Added toLocaleString for formatting */}
                                 <button className="absolute bottom-4 right-4 hover:text-dark text-white">
-                                    {/* Placeholder for arrow icon */}
+                                    
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
                                 </button>
                             </div>
 
-                            {/* Paid Card */}
+                            
                             <div className="rounded-lg shadow-md p-6 bg-gray-50 dark:bg-gray-800  relative">
                                 <h3 className="text-sm font-medium text-gray-400">Paid</h3>
-                                <p className="text-3xl font-semibold mt-1 text-dark dark:text-dark dark:text-white">{totalRewarded} PHAROS</p>
+                                <p className="text-3xl font-semibold mt-1 text-dark dark:text-dark dark:text-white">{totalRewarded.toLocaleString()} PHAROS</p> {/* Added toLocaleString */}
                                  <button className="absolute bottom-4 right-4 text-gray-400 hover:text-dark dark:text-white">
-                                    {/* Placeholder for arrow icon */}
+                                    
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
                                 </button>
                             </div>
 
-                            {/* Rewards Charts Card */}
+                            
                             <div className="rounded-lg shadow-md p-6 bg-gray-50 dark:bg-gray-800 ">
                                 <h3 className="text-sm font-medium text-gray-400 mb-3">Rewards Charts</h3>
-                                {/* Chart based on reward dates */}
+                                
                                 <div className="flex justify-around items-end h-20">
                                     {(() => {
-                                        // Group rewards by month-year and sum values
+                                        
                                         const monthMap: { [key: string]: number } = {};
                                         let minDate: Date | null = null;
                                         let maxDate: Date | null = null;
                                         filteredRewards.forEach(reward => {
-                                            // Parse date string (assumes format "DD-MM-YYYY" or "YYYY-MM-DD")
+                                            
                                             let dateObj: Date;
                                             if (reward.date.includes("-")) {
                                                 const parts = reward.date.split("-");
                                                 if (parts[2]?.length === 4) {
-                                                    // "DD-MM-YYYY"
+                                                    
                                                     dateObj = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
                                                 } else {
-                                                    // "YYYY-MM-DD"
+                                                    
                                                     dateObj = new Date(reward.date);
                                                 }
                                             } else {
                                                 dateObj = new Date(reward.date);
+                                            }
+                                            if (isNaN(dateObj.getTime())) { // Check for invalid date
+                                                console.warn(`Invalid date string for reward: ${reward.id}, date: ${reward.date}`);
+                                                return; // Skip this reward if date is invalid
                                             }
                                             if (!minDate || dateObj < minDate) minDate = dateObj;
                                             if (!maxDate || dateObj > maxDate) maxDate = dateObj;
@@ -153,11 +171,11 @@ export default function Rewards() {
                                             monthMap[monthYear] = (monthMap[monthYear] || 0) + parseFloat(reward.value);
                                         });
                                         
-                                        // Generate all months between minDate and maxDate
+                                        
                                         const months: string[] = [];
                                         if (minDate && maxDate) {
-                                            let current = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
-                                            const end = new Date(maxDate.getFullYear(), maxDate.getMonth(), 1);
+                                            let current = new Date((minDate as any)?.getFullYear() ?? 0,(minDate as any)?.getMonth() ?? 0, 1);
+                                            const end = new Date((maxDate as any).getFullYear(), (maxDate as any).getMonth(), 1);
                                             while (current <= end) {
                                                 const monthYear = current.toLocaleString("default", { month: "short", year: "2-digit" });
                                                 months.push(monthYear);
@@ -165,7 +183,7 @@ export default function Rewards() {
                                             }
                                         }
                                         
-                                        // If no rewards, show last 6 months as default
+                                        
                                         if (months.length === 0) {
                                             const now = new Date();
                                             for (let i = 5; i >= 0; i--) {
@@ -174,14 +192,14 @@ export default function Rewards() {
                                             }
                                         }
                                         
-                                        // Find max value for scaling
+                                        
                                         const maxValue = Math.max(...months.map(m => monthMap[m] || 0), 1);
                                         return months.map((month, i) => (
                                             <div key={month + i} className="text-center">
                                                 <div
                                                     className="w-4 bg-gray-600 rounded-t mx-auto"
                                                     style={{
-                                                        height: `${((monthMap[month] || 0) / maxValue) * 60}px`, // scale to max 60px
+                                                        height: `${((monthMap[month] || 0) / maxValue) * 60}px`, 
                                                         minHeight: "8px"
                                                     }}
                                                     title={`${monthMap[month] || 0} PHAROS`}
@@ -194,7 +212,7 @@ export default function Rewards() {
                             </div>
                         </div>
 
-                        {/* Filter and Search Bar */}
+                        
                         <div className="flex items-center justify-between mb-4 bg-gray-50 dark:bg-gray-800  p-3 rounded-lg">
                             <div className="flex items-center space-x-3">
                                 <button className="p-2 rounded text-gray-400 hover:bg-gray-700 hover:text-dark dark:text-white">

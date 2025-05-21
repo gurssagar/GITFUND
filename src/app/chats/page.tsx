@@ -36,6 +36,7 @@ const ChatPage = () => {
           footer: "",
           getStarted: "New Conversation",
           inputPlaceholder: "Type your question..",
+          closeButtonTooltip: "Close",
         },
       },
     });

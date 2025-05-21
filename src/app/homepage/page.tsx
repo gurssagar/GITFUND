@@ -1,9 +1,9 @@
 'use client'
 import { useSession } from 'next-auth/react';
-import {useEffect, useState} from'react';
+import { useEffect, useState } from 'react';
 import { useSidebarContext } from '@/assets/components/SidebarContext';
 import { Suspense } from 'react';
-import {useRouter} from 'next/navigation'
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import Sidebar from '@/assets/components/sidebar';
@@ -18,24 +18,34 @@ import {
     useMatches,
     NO_GROUP
   } from "kbar";
-export default function Home(){
-    const session=useSession();
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filteredRepos, setFilteredRepos] = useState<any>([]);
-    const {isShrunk}=useSidebarContext()
-    //kbar
+interface Project {
+  projectName: string;
+  shortdes: string;
+  image_url?: string;
+  forks?: number;
+  stars?: number;
+  contributors?: {
+    collabs?: Record<string, unknown>;
+  };
+  languages?: string[];
+  project_repository: string;
+}
 
+interface ProjectsResponse {
+  projects: Project[];
+}
+
+export default function Home() {
+    const session = useSession();
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [filteredRepos, setFilteredRepos] = useState<Project[]>([]);
+    const { isShrunk } = useSidebarContext();
     
-    console.log(session)
-    const id=session?.data?.user?.id
-    const [image,updateImage]=useState('')
-    const [visible,setVisible]=useState(null)
-    const [repoData,setRepoData]=useState<any>([])
-    const [projImage,setProjImage]=useState<any>(null)
-    const [isLoading, setIsLoading] = useState(false);
-    const [isSearchOpen, setIsSearchOpen] = useState(false);
-    const [openSearch,setSearchOpen]=useState(false)
-    const router=useRouter()
+    const [image, updateImage] = useState<string>('');
+    const [repoData, setRepoData] = useState<Project[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
+    const router = useRouter();
     
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {

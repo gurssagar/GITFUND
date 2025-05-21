@@ -42,12 +42,46 @@ import { Button } from "@/components/ui/button";
 import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
 import { InfiniteMovingCards } from "@/components/ui/infinite-moving-cards";
 
+// Define interfaces for data structures
+interface RepoDataItem {
+  id: string; // Or number, depending on your data
+  title: string;
+  repositoryName: string;
+  repositoryOwner: string;
+  fundingGoal: number;
+  creatorUsername: string;
+  issueTitle?: string;
+  languages: string[];
+  // Add other properties that come from your API
+  image?: string; // Optional: if you plan to add images
+}
+
+interface Plan {
+  name: string;
+  description: string;
+  price: number;
+  features: string[];
+  featured?: boolean;
+}
+
+interface Testimonial {
+  quote: string;
+  name: string;
+  designation: string;
+  src: string;
+}
+
+interface GrowthDataPoint {
+  name: string;
+  value: number;
+}
+
 export default function LandingPage() {
   const { address, isConnected } = useAccount() // Added isConnected here
   const { data: ensName, error, status } = useEnsName({ address })
   const { account, connectWallet } = useWeb3();
-  const [billingCycle, setBillingCycle] = useState("monthly");
-  const [repoData,setRepoData]=useState<any>([])
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "annually">("monthly");
+  const [repoData,setRepoData]=useState<RepoDataItem[]>([])
   const [screen,changeScreen]=useState<number>(10)
 
   useEffect(() => {
@@ -70,32 +104,57 @@ export default function LandingPage() {
   },[]) 
   useEffect(()=>{
     const fetchData=async()=>{
-       await fetch('/api/add-issues',
-        {
-            method:'GET',
-            headers:{
-                'Content-Type':'application/json'
-            },
-        }
-       ).then((res)=>res.json())
-       .then((data)=>{
-            setRepoData(data.projects)
-       })
-       
+       try {
+         const response = await fetch('/api/add-issues',
+          {
+              method:'GET',
+              headers:{
+                  'Content-Type':'application/json'
+              },
+          }
+         );
+         if (!response.ok) {
+           throw new Error(`HTTP error! status: ${response.status}`);
+         }
+         const data: { projects: RepoDataItem[] } = await response.json();
+         setRepoData(data.projects);
+       } catch (fetchError: any) {
+         console.error("Failed to fetch projects:", fetchError);
+         // Optionally, set an error state here to display to the user
+       }
     }
     fetchData();
-    if(repoData.length>0){
-        
-        const getImage=async()=>
-            {
-                await fetch(`/api/s3?fileName={}`,{
-                    
+    // The S3 image fetching logic seems incomplete and might need rethinking.
+    // If you intend to fetch images for each repo item, it should be done after repoData is set
+    // and likely map over repoData to fetch/assign images.
+    // Example placeholder for image fetching logic:
+    /*
+    if(repoData.length > 0){
+        const fetchImagesForAllRepos = async () => {
+            const updatedRepoData = await Promise.all(repoData.map(async (repo) => {
+                try {
+                    // Assuming your API expects a query param like `fileName=repo.imageName`
+                    // and repo.imageName is a property on your RepoDataItem
+                    if (repo.imageName) { 
+                        const imgResponse = await fetch(`/api/s3?fileName=${repo.imageName}`);
+                        if (imgResponse.ok) {
+                            const imgData = await imgResponse.json(); // Or .blob() / .text() depending on response
+                            return { ...repo, imageUrl: imgData.url }; // Assuming API returns { url: '...' }
+                        }
+                    }
+                } catch (imgError) {
+                    console.error(`Failed to fetch image for ${repo.title}:`, imgError);
                 }
-            )
-            }
+                return repo; // Return original repo if image fetch fails or no imageName
+            }));
+            setRepoData(updatedRepoData);
+        };
+        // fetchImagesForAllRepos(); // Call this function
     }
-},[])
-  const plans = [
+    */
+},[]) // Consider adding repoData.length to dependencies if you implement image fetching based on it, to avoid stale closures.
+
+  const plans: Plan[] = [
     {
       name: "Contributor",
       description: "Start contributing to open-source with ease",
@@ -134,7 +193,7 @@ export default function LandingPage() {
   // Add these imports at the top
 
   // Add this data array before the Stats Section
-  const growthData = [
+  const growthData: GrowthDataPoint[] = [
     { name: "Sept 2023", value: 1000 },
     { name: "Oct 2023", value: 2000 },
     { name: "Nov 2023", value: 3000 },
@@ -145,7 +204,7 @@ export default function LandingPage() {
   ];
 
 
-  const testimonials = [
+  const testimonials: Testimonial[] = [
     {
       quote:
         "GitFund brought in top contributors within days and helped us resolve high-priority issues faster than ever—paid out automatically and securely.",
@@ -524,16 +583,16 @@ export default function LandingPage() {
           <span className={`${billingCycle === "monthly" ? "text-black dark:text-white" : "text-gray-400"}`}>Monthly</span>
           <button 
             className="relative inline-flex h-6 w-12 items-center rounded-full bg-gray-700"
-            onClick={() => setBillingCycle(billingCycle === "monthly" ? "annual" : "monthly")}
+            onClick={() => setBillingCycle(billingCycle === "monthly" ? "annually" : "monthly")}
           >
             <span className="sr-only">Toggle billing cycle</span>
             <span 
               className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${
-                billingCycle === "annual" ? "translate-x-7" : "translate-x-1"
+                billingCycle === "annually" ? "translate-x-7" : "translate-x-1"
               }`} 
             />
           </button>
-          <span className={`${billingCycle === "annual" ? "text-black dark:text-white" : "text-gray-400"}`}>
+          <span className={`${billingCycle === "annually" ? "text-black dark:text-white" : "text-gray-400"}`}>
             Annual <span className="text-emerald-400 text-sm ml-1">Save 17%</span>
           </span>
         </div>

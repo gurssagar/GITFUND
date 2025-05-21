@@ -15,8 +15,8 @@ export default function AssignIssues() {
     const { isShrunk } = useSidebarContext();
     const [assignments, setAssignments] = useState([]);
     const searchParams = useSearchParams();
-    const issueNumber = searchParams.get('issueNumber');
-    const repo = searchParams.get('repo');
+    const issueNumber = searchParams?.get('issueNumber');
+    const repo = searchParams?.get('repo');
     console.log(repo,"testa")
     console.log(issueNumber)
     useEffect(() => {
