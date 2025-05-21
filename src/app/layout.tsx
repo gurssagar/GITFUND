@@ -5,9 +5,7 @@ import { SidebarProvider } from "@/assets/components/SidebarContext";
 import { ChatSidebarProvider } from "@/assets/components/chats/chatSiderbarContext";
 import { ThemeProvider } from "next-themes";
 import Kbar from "../assets/components/kbar";
-import WagmiProviderComp from "../lib/wagmi-provider";
-import { cookieToInitialState } from "wagmi";
-import { config } from "@/lib/config";
+import ContextProvider from "../context";
 import { headers } from 'next/headers'; // Import headers for server-side cookie access
 
 import { SearchProvider } from "@/assets/components/SearchContext"; // Import SearchProvider
@@ -27,9 +25,10 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Correctly get cookie on the server side for Wagmi initial state
+  // Get cookies for Reown AppKit
   const headersList = await headers();
-  const initialState = cookieToInitialState(config, headersList?.get("cookie"));  return (
+  const cookies = headersList?.get("cookie");
+  return (
     <html lang="en" className={`dark`}>
       <body className={`bg-background text-foreground`}>
         <ThemeProvider
@@ -44,11 +43,11 @@ export default async function RootLayout({
                 <SearchProvider>
                   <ChatSidebarProvider>
                     <Kbar />
-                    <WagmiProviderComp initialState={initialState}>
+                    <ContextProvider cookies={cookies}>
                     <KbarBlurWrapper> {/* Wrap children with the new component */}
                       {children}
                     </KbarBlurWrapper>
-                    </WagmiProviderComp>
+                    </ContextProvider>
                     
                   </ChatSidebarProvider>
                 </SearchProvider>
