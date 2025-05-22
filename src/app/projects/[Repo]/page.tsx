@@ -322,6 +322,12 @@ export default function Project() {
       }
       
     }
+    const totalBytes = Object.values(languages).reduce((acc: number, bytes: any) => acc + bytes, 0);
+    const languagePercentages: { [key: string]: number } = {};
+    for (const [lang, bytes] of Object.entries(languages)) {
+      languagePercentages[lang] = parseFloat(((bytes / totalBytes) * 100).toFixed(1));
+    }
+
 
 
     return (
@@ -380,17 +386,111 @@ export default function Project() {
                             <div>
                                 <h2 className="text-xl font-bold pt-4">Languages</h2>
                                 <div className="pt-2 space-x-2">
-                                    <div className="flex ">
-                                    {Object.keys(languages).map((lang: any) => {
-                                        const icon = getLanguageIcon(lang);
-                                        if (!icon) return null;
-                                        return (
-                                            <div key={lang} className="flex ">
-                                                <div className="rounded-full -ml-1">{icon}</div>
-                                            </div>
-                                        );
-                                    })}
-                                    </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mb-2 flex">
+    {Object.entries(languagePercentages).map(([lang, percentage]: [string, number]) => {
+      let barColor;
+      switch (lang.toLowerCase()) {
+        case 'typescript':
+          barColor = 'bg-blue-600';
+          break;
+        case 'javascript':
+          barColor = 'bg-yellow-400';
+          break;
+        case 'css':
+          barColor = 'bg-purple-600';
+          break;
+        default:
+          barColor = 'bg-gray-500'; // Fallback color
+      }
+      return (
+        <div
+          key={lang}
+          className={`h-2.5 ${barColor}`}
+          style={{ width: `${percentage}%` }}
+          title={`${lang}: ${percentage}%`}
+        ></div>
+      );
+    })}
+                                </div>
+                                <div className="flex flex-wrap">
+                                  {Object.entries(languagePercentages).map(([lang, percentage]: [string, number]) => {
+                                    let textColor, dotColor;
+                                    switch (lang.toLowerCase()) {
+                                      case 'typescript':
+                                        textColor = 'text-blue-700 dark:text-blue-400';
+                                        dotColor = 'bg-blue-600';
+                                        break;
+                                      case 'javascript':
+                                        textColor = 'text-yellow-500 dark:text-yellow-300';
+                                        dotColor = 'bg-yellow-400';
+                                        break;
+                                      case 'css':
+                                        textColor = 'text-purple-700 dark:text-purple-400';
+                                        dotColor = 'bg-purple-600';
+                                        break;
+                                      case 'python':
+                                        textColor = 'text-green-600 dark:text-green-400';
+                                        dotColor = 'bg-green-500';
+                                        break;
+                                      case 'java':
+                                        textColor = 'text-red-600 dark:text-red-400';
+                                        dotColor = 'bg-red-500';
+                                        break;
+                                      case 'c++':
+                                      case 'cpp':
+                                        textColor = 'text-pink-600 dark:text-pink-400';
+                                        dotColor = 'bg-pink-500';
+                                        break;
+                                      case 'c#':
+                                      case 'csharp':
+                                        textColor = 'text-indigo-600 dark:text-indigo-400';
+                                        dotColor = 'bg-indigo-500';
+                                        break;
+                                      case 'ruby':
+                                        textColor = 'text-red-800 dark:text-red-500';
+                                        dotColor = 'bg-red-700';
+                                        break;
+                                      case 'go':
+                                        textColor = 'text-cyan-600 dark:text-cyan-400';
+                                        dotColor = 'bg-cyan-500';
+                                        break;
+                                      case 'swift':
+                                        textColor = 'text-orange-600 dark:text-orange-400';
+                                        dotColor = 'bg-orange-500';
+                                        break;
+                                      case 'kotlin':
+                                        textColor = 'text-purple-500 dark:text-purple-300';
+                                        dotColor = 'bg-purple-400';
+                                        break;
+                                      case 'html':
+                                        textColor = 'text-orange-700 dark:text-orange-500';
+                                        dotColor = 'bg-orange-600';
+                                        break;
+                                      case 'php':
+                                        textColor = 'text-indigo-500 dark:text-indigo-300';
+                                        dotColor = 'bg-indigo-400';
+                                        break;
+                                      case 'shell':
+                                      case 'bash':
+                                        textColor = 'text-lime-600 dark:text-lime-400';
+                                        dotColor = 'bg-lime-500';
+                                        break;
+                                      // Add more languages and their colors here
+                                      default:
+                                        textColor = 'text-gray-600 dark:text-gray-400';
+                                        dotColor = 'bg-gray-500'; // Fallback color for unlisted languages
+                                    }
+                                    return (
+                                      <div key={lang} className="flex items-center mr-4 mb-1">
+                                        <div className="rounded-xl">
+                                        <span className={`h-2.5 w-2.5 ${dotColor} rounded-full mr-1.5`}></span>
+                                        </div>
+                                       
+                                        <div className={`overflow-hidden text-sm rounded-full font-medium dark:text-white text-custom-gray`}><span className={`${textColor} text-xl rounded-full mr-1.5`}>•</span><span className="text-[14px]">{lang}</span> <span className="dark:text-custom-gray text-[14px] text-custom-gray">{percentage}%</span></div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
                                 </div>
                             </div>
                         </div>
@@ -403,7 +503,9 @@ export default function Project() {
                                     {projects[0]?.project_repository}
                                 </h1>
                             </div>
-                            
+                            <div>
+                                  {projects[0]?.longDescription}
+                            </div>
                             <div className={`dark:text-gray-300 text-gray-600 pt-4 h-[${width}] overflow-hidden`}>
                                 {projects[0]?.aiDescription || aiReply}                         
                             </div>

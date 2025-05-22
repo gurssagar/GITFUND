@@ -379,8 +379,15 @@ export default function Project() {
           messages: [
             {
               role: "user",
-              content: `Read this and explain the project to a developer in 100 words ${JSON.stringify(repoValue)}`,
-            },
+              content: `Analyze this project repository and create a concise developer-friendly summary (300 words max) that includes:
+                  1. Main purpose and functionality
+                  2. Key technologies used
+                  3. Project structure overview
+                  4. Setup instructions
+                  5. Contribution guidelines
+
+                  Repository details: ${JSON.stringify(repoValue)}`
+            }
           ],
         });
         setAiReply(text);
