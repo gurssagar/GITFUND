@@ -22,9 +22,9 @@ export default function Contributions() {
     const {isShrunk}=useSidebarContext()
 
     const searchParams = useSearchParams();
-    const repo = searchParams.get('repo');
-    const issueNumber = searchParams.get('issueNumber');
-    const owner=searchParams.get('owner');
+    const repo = searchParams?.get('repo');
+    const issueNumber = searchParams?.get('issueNumber');
+    const owner=searchParams?.get('owner');
     const { completion, complete } = useCompletion({
         api: '/api/completion',
       });
