@@ -50,7 +50,9 @@ export default function Project() {
     const [collabs, setCollabs] = useState<any>([]);
     const [width, setWidth] = useState('300px');
     const [isExpanded, setIsExpanded] = useState(false);
-
+    const [isIssue,setIssue]=useState<boolean>(false);
+    const [isIssueNumber,setIssueNumber]=useState<string>();
+    const [issueData,setIssueData]=useState<string>(" ");
     const octokit = new Octokit({
         auth: (session?.data as any)?.accessToken,
     });
@@ -130,7 +132,7 @@ export default function Project() {
     };
 
     const getCommitColor = (sha: any) => {
-        const colors = ['bg-green-600', 'bg-purple-600', 'bg-blue-600'];
+        const colors = ['bg-green-200', 'bg-purple-200', 'bg-blue-200'];
         return colors[sha.charCodeAt(0) % colors.length];
     };
 
@@ -287,6 +289,41 @@ export default function Project() {
         return <div>Project not found</div>;
     }
 
+    const assignIssue = async (comment:string) => {
+      const owner= projectData.projectOwner;
+      const repo=projectData.project_repository;
+      alert(`${owner},${repo},${parseInt(isIssueNumber as string)},${comment}`)
+      try{
+        await octokit.rest.issues.createComment({
+          owner,
+          repo,
+          issue_number: parseInt(isIssueNumber as string),
+          body: comment
+        }).then(response => response.data).then(data => console.log(data,'testaa'));
+      }
+      finally{
+        if(session){
+          await fetch('/api/requestIssue',{
+            method:'POST',
+            headers:{
+              'Content-Type':'application/json'
+            },
+            body:JSON.stringify({
+              projectName: repo,
+              Contributor_id: (session?.data?.user as any)?.username as string,
+              issue: isIssueNumber,
+              image_url: (session?.data?.user as any)?.image as string,
+              name: (session?.data?.user as any)?.name as string,
+              description:comment 
+            })
+          });
+        }
+        
+      }
+      
+    }
+
+
     return (
         <>
             <Suspense fallback={<div>Loading...</div>}>
@@ -300,7 +337,7 @@ export default function Project() {
             <Sidebar/>
             <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
             <Topbar/>
-                <div className="px-4 py-8 flex pt-20">
+                <div className={`px-4 py-8 flex pt-20 1 ${isIssue?`w-[calc(100%-22%)]`:``}`}>
                     <div className="w-[300px]">
                         <div>
                             <img src={projects[0]?.image_url} className="w-full rounded-xl" alt="Project" />
@@ -436,16 +473,14 @@ export default function Project() {
                                         </div>
                                         <div className="flex text-end mt-4 space-x-4 w-[100%]">
                                             <div className="flex w-full justify-between">
-                                                <Link 
-                                                    href={{
-                                                        pathname: `/projects/${projects[0]?.project_repository}/${issue.number}`,
-                                                        query: {
-                                                            collabs: JSON.stringify(projects[0]?.projectOwner)
-                                                        }
+                                                <div 
+                                                    onClick={() => {
+                                                        setIssue(true)
+                                                        setIssueNumber(issue.number)
                                                     }}
                                                 >
                                                     <button className="dark:bg-white bg-black text-white  dark:text-black  px-2 py-1 rounded">Contribute Now</button>
-                                                </Link>
+                                                </div>
                                                 <div>
                                                     {(() => {
                                                         let totalReward = 0;
@@ -495,6 +530,47 @@ export default function Project() {
                                     <p className="text-gray-400">No recent commits found</p>
                                 )}
                             </div>
+                            {
+                              isIssue?
+                              <>
+                                      <div className="dark:bg-[#0a0a0a] bg-white border-1 border-left border-custom-gray dark:border-custom-dark-gray fixed right-0 top-17 h-full w-[20%] p-6 shadow-lg">
+                                      <div className="flex justify-between items-center mb-6">
+                                          <h3 className="text-xl font-semibold text-white">Get Assigned</h3>
+                                          <button onClick={() => setIssue(false)} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                          </button>
+                                      </div>
+                                      <form className="space-y-4" onSubmit={(e) => {
+                                      e.preventDefault();
+                                      const email = (e.target as HTMLFormElement).email.value;
+                                      assignIssue(`${email}`);
+                                      }}>
+                                      <div>
+                                        <label htmlFor="Comment" className="block text-sm font-medium text-gray-300 mb-1">Comment</label>
+                                        <input 
+                                          type="textArea" 
+                                          id="email" 
+                                          name="email"
+                                          placeholder="Why Should We assign you the issue" 
+                                          className="w-full bg-[#0a0a0a] border border-gray-700 text-white rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                          required
+                                        />
+                                      </div>
+                                      <button 
+                                        type="submit" 
+                                        className="w-full bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                      >
+                                        Submit
+                                      </button>
+                                    </form>
+                                    </div>
+                              </>:
+                              <>
+                              </>
+                            }
+                           
                         </div>
                     </div>
                 </div>
@@ -502,5 +578,4 @@ export default function Project() {
             </div>
             </Suspense>
         </>
-    );
-}
+    );}
