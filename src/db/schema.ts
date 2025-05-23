@@ -68,6 +68,30 @@ export const projects = pgTable('projects', {
 
 });
 
+export const contributorRequests=pgTable('contributorRequests', {
+  projectName: varchar('projectName',{ length: 256 }),
+  Contributor_id: varchar('Contributor', { length: 256 }),
+  contributor_email: varchar('contributor_email', { length: 256 }),
+  requestDate: varchar('requestDate', { length: 256 }),
+  projectOwner: varchar('projectOwner', { length: 256 }),
+  skills:json('skills'),
+  issue: varchar('issue', { length: 256 }),
+  image_url: varchar('image_url', { length: 256 }),
+  name: varchar('name', { length: 256 }),
+  description: text('description'),
+  status:varchar('status', { length: 256 }),
+})
+
+
+export const pullRequests=pgTable('pullRequests', {
+  projectName: varchar('projectName',{ length: 256 }),
+  Contributor_id: varchar('Contributor', { length: 256 }),
+  issue: varchar('issue', { length: 256 }),
+  image_url: varchar('image_url', { length: 256 }),
+  name: varchar('name', { length: 256 }),
+  description: text('description'),
+  status:varchar('status', { length: 256 }),
+})
 export const assignIssues = pgTable('assignIssues', {
   projectName: varchar('projectName',{ length: 256 }),
   Contributor_id: varchar('Contributor', { length: 256 }),

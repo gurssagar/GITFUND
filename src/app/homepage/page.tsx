@@ -9,15 +9,7 @@ import Link from 'next/link';
 import Sidebar from '@/assets/components/sidebar';
 import Topbar from '@/assets/components/topbar';
 import Issue from '@/assets/components/issue';
-import {
-    KBarProvider,
-    KBarPortal,
-    KBarPositioner,
-    KBarAnimator,
-    KBarSearch,
-    useMatches,
-    NO_GROUP
-  } from "kbar";
+
 interface Project {
   projectName: string;
   shortdes: string;
