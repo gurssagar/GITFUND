@@ -72,7 +72,7 @@ export default function MyProject() {
         const fetchData = async () => {
             setIsLoading(true); // Start loading before fetch
             try {
-                const response = await fetch('/api/add-issues', { // Assuming this API returns all projects
+                const response = await fetch(`/api/manageProjects?projectOwner=${session?.user?.username}`, { // Assuming this API returns all projects
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
@@ -84,11 +84,12 @@ export default function MyProject() {
                 }
                 
                 const data = await response.json();
+                console.log('API Response:', data);
                 
                 // Ensure data.projects exists and is an array
-                if (data && Array.isArray(data.projects)) {
-                    const userProjects = data.projects.filter(
-                        (project: Project) => project.projectOwner === (session?.user as any)?.username
+                if (data && Array.isArray(data.project)) {
+                    const userProjects = data.project.filter(
+                        (projects: Project) => projects.projectOwner === (session?.user as any)?.username
                     );
                     setRepoData(userProjects);
                 } else {
@@ -114,8 +115,19 @@ export default function MyProject() {
             <Sidebar/>
             <div className={`flex-grow transition-all duration-300 ease-in-out ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
             <Topbar/>
-                <main className='pt-20 px-6 md:px-10 pb-10'>
-                    <h1 className="text-3xl font-semibold text-gray-800 dark:text-white mb-8">My Projects</h1>
+                <main className='pt-24 px-6 md:px-10 pb-10'>
+                    <div className='flex justify-between'>
+                    <div>
+                        <h1 className="text-2xl font-semibold text-gray-800 dark:text-white ">Projects</h1>
+                        <p className='mb-8  text-[14px] mt-2 text-custom-dark-gray dark:text-custom-gray'>Manage your GitHub projects and rewards.</p>
+                    </div>
+                    <div>
+                        <button className="bg-black dark:bg-white dark:text-black text-white rounded-lg px-4 py-2">
+                            + Add Project
+                        </button>
+                    </div>
+
+                    </div>
                     
                     {isLoading && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -172,7 +184,8 @@ export default function MyProject() {
                                 const contributorsCount = Array.isArray(repo.contributors) ? repo.contributors.length : 0;
 
                                 return (
-                                    <div key={repo.projectName} className="bg-white dark:bg-[#171717] rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">                            
+                                    <Link href={`/myProjects/${repo.project_repository}`}>
+                                    <div key={repo.projectName} className="border-white border-1 dark:border-[#171717] rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">                            
                                         <div className="p-5 flex-grow">
                                             <div className="flex items-start mb-4">
                                                 {repo.image_url ? (
@@ -203,37 +216,27 @@ export default function MyProject() {
                                                 </div>
                                             </div>
                                             {repo.shortdes && (
-                                                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2" title={repo.shortdes}>
+                                                <p className="text-sm text-gray-600 dark:text-gray-300  line-clamp-2" title={repo.shortdes}>
                                                     {repo.shortdes}
                                                 </p>
                                             )}
                                         </div>
-                                        <div className='flex gap-3 px-5 pb-5 border-t border-gray-200 dark:border-gray-700/50 pt-4 mt-auto'>
-                                            <Link href={{
-                                                pathname: `/myProjects/${repo.project_repository}/assignIssues`,
-                                                query: {
-                                                    owner:repo.projectOwner,
-                                                    repo: repo.project_repository,
-                                                    issueNumber: repo.project_issues || '1'
-                                                }
-                                            }} passHref>
-                                                <div className='flex-1 text-center bg-[#3d3d3d] hover:bg-[#3d3d3d] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150'>Issues</div>
-                                            </Link>
-                                            <Link href={{
-                                                pathname: `/myProjects/${repo.project_repository}/Contributions`,
-                                                query: {
-                                                    owner:repo.projectOwner,
-                                                    repo: repo.project_repository,
-                                                    // issueNumber: repo.project_issues || '1' // This query param might not be needed for contributions page
-                                                }
-                                            }} passHref>
-                                                <div className='flex-1 text-center bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-150'>Contributions</div>
-                                            </Link>
-                                        </div>  
+                                        <div className='px-4 pb-4'>
+                                        {
+                                            repo?.languages &&
+                                            Object.keys(repo.languages).map((lang) => (
+                                                <span key={lang} className="mr-2 px-3 py-2 pb-1 bg-custom-gray text-white dark:text-black dark:bg-custom-dark-gray rounded-full text-xs">
+                                                    {lang}
+                                                </span>
+                                            ))
+                                        }
+                                        </div>
                                     </div>
+                                    </Link>
                                 );
                             })}
                         </div>
+                        
                     )}
                 </main>
             </div>

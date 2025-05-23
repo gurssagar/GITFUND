@@ -32,7 +32,7 @@ interface Repo {
 }
 
 interface ProjectData {
-    projects: Repo[];
+    project: Repo[];
 }
 
 interface CustomSession {
@@ -112,7 +112,7 @@ export default function Home(){
 
     useEffect(()=>{
         const fetchData=async()=>{
-           await fetch('/api/add-issues',
+           await fetch('/api/add-projects',
             {
                 method:'GET',
                 headers:{
@@ -121,36 +121,22 @@ export default function Home(){
             }
            ).then((res)=>res.json() as Promise<ProjectData>)
            .then((data)=>{
-                setRepoData(data.projects);
+                setRepoData(data.project);
+                console.log(data.project,"pewiedajsdja")
                 const allLangs = new Set<string>();
-                data.projects.forEach((project: Repo) => {
-                    if (project.languages && typeof project.languages === 'object') {
-                        Object.keys(project.languages).forEach(lang => allLangs.add(lang));
+                data.project.forEach((projects: Repo) => {
+                    if (projects.languages && typeof projects.languages === 'object') {
+                        Object.keys(projects.languages).forEach(lang => allLangs.add(lang));
                     }
                 });
+                console.log(allLangs,"all langs")
                 setAvailableLanguages(Array.from(allLangs));
+                console.log(availableLanguages,"available languages")
                 setIsLoading(true);
            })
            
         }
         fetchData();
-        if(repoData.length>0){
-            
-            const getImage=async()=>
-                {
-                    // Assuming you might want to fetch an image based on some criteria from repoData
-                    // This part needs more context on what `fileName={}` refers to
-                    // For now, it's a placeholder.
-                    // Example: if (repoData[0]?.image_url) { 
-                    //    await fetch(`/api/s3?fileName=${encodeURIComponent(repoData[0].image_url)}`)
-                    // } 
-                    await fetch(`/api/s3?fileName={}`,{
-                        
-                    }
-                )
-                }
-            // Call getImage if needed, e.g., getImage();
-        }
     },[])
 
     useEffect(()=>{
@@ -188,7 +174,7 @@ export default function Home(){
                                 <input
                                     type="text"
                                     placeholder="Search projects by name or description..."
-                                    className="px-2 w-2/3 w-full bg-white border border-gray-300 dark:border-gray-600 rounded bg-[#191919] dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                    className="px-2 w-2/3 w-full bg-white dark:bg-custom-dark-gray border border-gray-300 dark:border-gray-600 rounded bg-[#191919] dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                                     value={searchTerm}
                                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)} 
                                 />

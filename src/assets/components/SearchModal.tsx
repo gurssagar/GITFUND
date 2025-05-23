@@ -18,9 +18,14 @@ export default function SearchModal(/* Remove props: { isOpen, onClose }: Search
       const findRecords = async () => {
         setIsLoading(true);
         try {
-          const response = await fetch('/api/add-issues');
+          const response = await fetch('/api/add-projects',{
+            method:'GET',
+            headers:{
+                'Content-Type':'application/json'
+            },
+          });
           const data = await response.json();
-          setRepoData(data.projects || []);
+          setRepoData(data.project || []);
         } catch (error) {
           console.error("Failed to fetch projects:", error);
           setRepoData([]);

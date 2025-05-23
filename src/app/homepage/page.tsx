@@ -32,7 +32,7 @@ interface Project {
 }
 
 interface ProjectsResponse {
-  projects: Project[];
+  project: Project[];
 }
 
 export default function Home() {
@@ -76,7 +76,7 @@ export default function Home() {
     }, [searchTerm, repoData]);
     useEffect(()=>{
         const fetchData=async()=>{
-           await fetch('/api/add-issues',
+           await fetch('/api/add-projects',
             {
                 method:'GET',
                 headers:{
@@ -85,22 +85,12 @@ export default function Home() {
             }
            ).then((res)=>res.json())
            .then((data)=>{
-                setRepoData(data.projects)
+                setRepoData(data.project)
                 setIsLoading(true);
            })
            
         }
         fetchData();
-        if(repoData.length>0){
-            
-            const getImage=async()=>
-                {
-                    await fetch(`/api/s3?fileName={}`,{
-                        
-                    }
-                )
-                }
-        }
     },[])
 
     useEffect(()=>{

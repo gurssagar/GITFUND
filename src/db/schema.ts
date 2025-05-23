@@ -13,6 +13,17 @@ export const messages = pgTable("messages", {
   chatData: text("chat_data"),
 });
 
+export const issues=pgTable("issues", {
+  issue_name: varchar('issue_name',{ length: 256 }),
+  issue_description: text('issue_description'),
+  issue_date: varchar('issue_date', { length: 256 }),
+  Difficulty: varchar('Difficulty',{ length: 256 }),
+  priority: varchar('Priority', { length: 256 }),
+  project_repository: varchar('Repository', { length: 256 }),
+  project_issues:varchar('issues', { length: 256 }),
+  rewardAmount: varchar('rewardAmount', { length: 256 }),
+  
+})
 export const users = pgTable('users', {
   id: varchar('id',{ length: 256 }).primaryKey(),
   fullName: text('full_name'),
@@ -27,6 +38,19 @@ export const users = pgTable('users', {
   
 });
 
+export const project=pgTable('project', {
+  projectName: varchar('id',{ length: 256 }).primaryKey(),
+  aiDescription: text('AI Description'),
+  projectOwner: varchar('ProjectOwner', { length: 256 }),
+  shortdes: text('Short Description'),
+  longdis: text('Long Description'),
+  image_url: varchar('image_url', { length: 256 }),
+  project_repository: varchar('Repository', { length: 256 }),
+  contributors:json('maintainers'),
+  languages:json('languages'),
+  stars:varchar('stars'),
+  forks:varchar('forks'),
+})
 export const projects = pgTable('projects', {
   projectName: varchar('id',{ length: 256 }).primaryKey(),
   aiDescription: text('AI Description'),
@@ -38,8 +62,6 @@ export const projects = pgTable('projects', {
   project_issues:varchar('issues', { length: 256 }),
   contributors:json('maintainers'),
   rewardAmount: varchar('rewardAmount', { length: 256 }),
-  Difficulty: varchar('Difficulty', { length: 256 }),
-  priority: varchar('priority', { length: 256 }),
   languages:json('languages'),
   stars:varchar('stars'),
   forks:varchar('forks'),

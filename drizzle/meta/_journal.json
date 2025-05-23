@@ -120,6 +120,27 @@
       "when": 1747397016650,
       "tag": "0016_previous_gideon",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1747916815825,
+      "tag": "0017_wide_bloodstrike",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1747923932090,
+      "tag": "0018_typical_sugar_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1747959797486,
+      "tag": "0019_abnormal_oracle",
+      "breakpoints": true
     }
   ]
 }
