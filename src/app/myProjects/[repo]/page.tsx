@@ -8,7 +8,7 @@ import { useSidebarContext } from "@/assets/components/SidebarContext";
 import Topbar from "@/assets/components/topbar";
 import Sidebar from "@/assets/components/sidebar";
 import { usePathname } from "next/navigation";
-
+import Link from "next/link";
 interface Project {
   projectName: string;
   aiDescription: string;
@@ -158,12 +158,14 @@ export default function Proj() {
                         </div>
                         <div>
                           <div className="flex gap-3 mt-6">
-                            <button className="flex items-center px-5 py-2 bg-black text-white rounded-md font-medium dark:bg-white dark:text-black  hover:bg-gray-800 transition">
-                              <span className="mr-2 text-lg">+</span>
-                              Add Issue
-                            </button>
+                            <a href={`/create-issues`} target="_blank" rel="">
+                              <button className="flex items-center px-5 py-2 bg-black text-white rounded-md font-medium dark:bg-white dark:text-black  hover:bg-gray-800 transition">
+                                <span className="mr-2 text-lg">+</span>
+                                Add Issue
+                              </button>
+                            </a>
                             <a
-                              href={`https://github.com/${repo.owner}/${repo.project_repository}`}
+                              href={`https://github.com/${repo.projectOwner}/${repo.project_repository}`}
                               target="_blank"
                               rel=""
                               className="flex items-center px-5 py-2 border border-gray-300 rounded-md font-medium hover:dark:text-black hover:dark:bg-white  transition"
@@ -402,10 +404,10 @@ export default function Proj() {
                                   <div className="font-semibold text-lg mb-2">
                                     {contributor.login}
                                   </div>
-                                  <div className="text-sm text-gray-700">
+                                  <div className="text-sm dark:text-gray-100 text-gray-700">
                                     Contributions: {contributor.contributions}
                                   </div>
-                                  <div className="text-sm text-gray-700">
+                                  <div className="text-sm dark:text-gray-100 text-gray-700">
                                     Issues solved: {contributor.issuesSolved}
                                   </div>
                                 </div>
