@@ -1,18 +1,16 @@
 "use client";
 import Sidebar from "@/assets/components/sidebar";
 import Topbar from "@/assets/components/topbar";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Octokit } from "octokit";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkHtml from "remark-html";
-import { Groq } from "groq-sdk";
 import Link from "next/link";
-import { format } from "date-fns"; // Add import for format
+import { format } from "date-fns";
 import { useSidebarContext } from "@/assets/components/SidebarContext";
-import { isShrunk } from "@/assets/components/SidebarContext";
 import { Suspense } from "react";
 import {
   FaJs,
@@ -96,68 +94,67 @@ export default function Project() {
   const [isIssueNumber, setIssueNumber] = useState<string>();
   const [issueData, setIssueData] = useState<string>(" ");
   const [status, setStatus] = useState<string>();
+  
+  // Create octokit instance with timeout
   const octokit = new Octokit({
     auth: (session?.data as any)?.accessToken,
+    request: {
+      timeout: 10000, // 10 seconds timeout for requests
+    },
   });
 
+  // Fetch repo data
   useEffect(() => {
     const fetchRepoData = async () => {
       if (!Repo) return; // Don't fetch if Repo is not available
+      
+      setIsLoading(true);
+      
       try {
-        // Corrected: project_repository is sent as a URL query parameter
-        const response = await fetch(
-          `/api/specific-repo?project_repository=${Repo}`,
-          {
+        // Create an AbortController to cancel requests if needed
+        const controller = new AbortController();
+        const signal = controller.signal;
+        
+        // Fetch repo data and issues in parallel
+        const [repoResponse, issuesResponse] = await Promise.all([
+          fetch(`/api/specific-repo?project_repository=${Repo}`, {
             method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          },
-        );
+            headers: { "Content-Type": "application/json" },
+            signal,
+          }),
+          fetch(`/api/add-issues?project_repository=${Repo}`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            signal,
+          })
+        ]);
 
-        if (!response.ok) {
-          // It's good practice to check if the response was successful
-          throw new Error(`HTTP error! status: ${response.status}`);
+        if (!repoResponse.ok) {
+          throw new Error(`HTTP error! status: ${repoResponse.status}`);
         }
 
-        const data = await response.json();
-        setRepoData(
-          data.project && data.project.length > 0
-            ? data.project[0]
-            : data.project || null,
-        ); // Adjust based on actual API response
-      } catch (error) {
-        setRepoData(null); // Handle error state appropriately
+        const repoData = await repoResponse.json();
+        const issuesData = await issuesResponse.json();
+        
+        // Set repo data
+        const processedRepoData = repoData.project && repoData.project.length > 0
+          ? repoData.project[0]
+          : repoData.project || null;
+        
+        setRepoData(processedRepoData);
+        setIssues(issuesData.projects || []);
+      } catch (error: any) {
+        if (error.name !== 'AbortError') {
+          setRepoData(null);
+          setIssues([]);
+        }
+      } finally {
+        setIsLoading(false);
       }
     };
+    
     fetchRepoData();
   }, [Repo]);
-
-  useEffect(() => {
-    if (!repoData || !Repo) {
-      setIssues([]); // Reset issues if repoData is not available
-      return;
-    }
-    const fetchIssues = async () => {
-      try {
-        const response = await fetch(
-          `/api/add-issues?project_repository=${Repo}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          },
-        );
-        const data = await response.json();
-        setIssues(data.projects || []);
-        console.log(data.projects, "issuess");
-      } catch (error) {
-        setIssues([]); // Reset issues on error
-      }
-    };
-    fetchIssues();
-  }, [repoData, Repo]);
   // Helper Functions
 
   const fetchWithRetry = useCallback(
@@ -221,7 +218,7 @@ export default function Project() {
       kubernetes: "logos:kubernetes",
       terraform: "logos:terraform-icon",
     };
-    const iconName = iconMap[lowerLang] || null;
+    const iconName = iconMap[lowerLang] || "logos:javascript";
     return (
       <Icon
         icon={iconName}
@@ -251,38 +248,21 @@ export default function Project() {
     return colors[sha.charCodeAt(0) % colors.length];
   };
 
-  // Fetch project data and project details in one useEffect
+  // Fetch project data
+  // Use repoData to set project data
   useEffect(() => {
-    const fetchInitialData = async () => {
-      if (!Repo) return;
-
-      try {
-        setIsLoading(true);
-        const response = await fetch("/api/add-issues");
-        const data = await response.json();
-
-        // Find the current project
-        const filteredProjects = data.projects.filter(
-          (project: any) => project.project_repository === Repo,
-        );
-
-        setProjects(filteredProjects);
-
-        // Set project data for the first matching project
-        if (filteredProjects.length > 0) {
-          setProjectData({
-            projectOwner: filteredProjects[0].projectOwner,
-            project_repository: filteredProjects[0].project_repository,
-          });
-        }
-      } catch (error) {
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchInitialData();
-  }, [Repo]);
+    if (!repoData) return;
+    
+    // Set the project from repoData
+    setProjects([repoData]);
+    
+    // Set project data directly from repoData
+    setProjectData({
+      projectOwner: repoData.projectOwner,
+      project_repository: repoData.project_repository,
+    });
+    
+  }, [repoData]);
 
   // Fetch repository details, contributors, languages, readme, and commits in one useEffect
   useEffect(() => {
@@ -292,143 +272,97 @@ export default function Project() {
       try {
         // Check authentication status first
         try {
-          const authRes = await octokit.rest.users.getAuthenticated();
+          await octokit.rest.users.getAuthenticated();
         } catch (error: any) {
-          return; // Exit if not authenticated
+          // Exit if not authenticated
+          return;
         }
 
+        // Common request headers
+        const headers = { "X-GitHub-Api-Version": "2022-11-28" };
+        const baseParams = {
+          owner: repoData.projectOwner,
+          repo: repoData.project_repository,
+          headers
+        };
+
         // Create promise array for parallel requests
-        const promises = [
-          // 1. Fetch contributors
-          octokit
-            .request(
-              `GET /repos/${repoData.projectOwner}/${repoData.project_repository}/collaborators`,
-              {
-                owner: repoData.projectOwner,
-                repo: repoData.project_repository,
-                headers: { "X-GitHub-Api-Version": "2022-11-28" },
-              },
-            )
-            .then((response) => setContributors(response.data)),
-
+        const [
+          contributorsResponse,
+          languagesResponse,
+          readmeResponse,
+          commitsResponse
+        ] = await Promise.all([
+          // 1. Fetch collaborators
+          octokit.request(
+            `GET /repos/${repoData.projectOwner}/${repoData.project_repository}/collaborators`,
+            baseParams
+          ),
+          
           // 2. Fetch languages
-          octokit
-            .request(
-              `/repos/${repoData.projectOwner}/${repoData.project_repository}/languages`,
-              {
-                owner: repoData.projectOwner,
-                repo: repoData.project_repository,
-                headers: { "X-GitHub-Api-Version": "2022-11-28" },
-              },
-            )
-            .then((response) => setLanguages(response.data)),
-
+          octokit.request(
+            `/repos/${repoData.projectOwner}/${repoData.project_repository}/languages`,
+            baseParams
+          ),
+          
           // 3. Fetch README
-          octokit
-            .request(
-              `GET /repos/${repoData.projectOwner}/${repoData.project_repository}/readme`,
-              {
-                owner: repoData.projectOwner,
-                repo: repoData.project_repository,
-                headers: { "X-GitHub-Api-Version": "2022-11-28" },
-              },
-            )
-            .then((response) => {
-              const content = Buffer.from(
-                response.data.content,
-                "base64",
-              ).toString("utf-8");
-              setRepoValue([
-                {
-                  ...response.data,
-                  content: content,
-                  __html: content,
-                },
-              ]);
-            }),
-
-          // 4. Fetch collaborators
-          octokit
-            .request(
-              `GET /repos/${repoData.projectOwner}/${repoData.project_repository}/collaborators`,
-              {
-                owner: repoData.projectOwner,
-                repo: repoData.project_repository,
-                headers: { "X-GitHub-Api-Version": "2022-11-28" },
-              },
-            )
-            .then((response) =>
-              setCollabs(
-                response.data.filter(
-                  (collab: any) =>
-                    collab.permissions?.admin === true ||
-                    collab.permissions?.maintain === true,
-                ),
-              ),
-            ),
-
-          // 5. Fetch commits
-          octokit
-            .request(
-              `/repos/${repoData.projectOwner}/${repoData.project_repository}/commits`,
-              {
-                owner: repoData.projectOwner,
-                repo: repoData.project_repository,
-                headers: { "X-GitHub-Api-Version": "2022-11-28" },
-              },
-            )
-            .then((response) => setCommitData(response.data)),
-        ];
-
-        // Execute all promises in parallel
-        await Promise.allSettled(promises);
-      } catch (error) {
-        console.error("Error fetching repository details:", error);
+          octokit.request(
+            `GET /repos/${repoData.projectOwner}/${repoData.project_repository}/readme`,
+            baseParams
+          ),
+          
+          // 4. Fetch commits (limited to 10)
+          octokit.request(
+            `/repos/${repoData.projectOwner}/${repoData.project_repository}/commits`,
+            { ...baseParams, per_page: 10 }
+          )
+        ]);
+        
+        // Set contributors and filter for collabs
+        setContributors(contributorsResponse.data);
+        setCollabs(
+          contributorsResponse.data.filter(
+            (collab: any) =>
+              collab.permissions?.admin === true ||
+              collab.permissions?.maintain === true
+          )
+        );
+        
+        // Set languages
+        setLanguages(languagesResponse.data);
+        
+        // Process README
+        const readmeContent = Buffer.from(
+          readmeResponse.data.content,
+          "base64"
+        ).toString("utf-8");
+        
+        setRepoValue([
+          {
+            ...readmeResponse.data,
+            content: readmeContent,
+            __html: readmeContent
+          }
+        ]);
+        
+        // Set commits
+        setCommitData(commitsResponse.data);
+        
+      } catch (error: any) {
+        if (error.status === 429) {
+          setRateLimitExceeded(true);
+          const retry = error.response?.headers?.['retry-after'] || 60;
+          setRetryAfter(parseInt(retry, 10));
+        }
       }
     };
 
     fetchRepositoryDetails();
   }, [repoData, octokit]);
 
-  // Fetch issues once projects are loaded
-  useEffect(() => {
-    const fetchIssues = async () => {
-      if (!projects.length || !projectData || !octokit) return;
-
-      try {
-        await fetchWithRetry(async () => {
-          const response = await octokit.request(
-            `GET /repos/${projectData.projectOwner}/${projectData.project_repository}/issues`,
-            {
-              owner: projectData.projectOwner,
-              repo: projectData.project_repository,
-              headers: {
-                "X-GitHub-Api-Version": "2022-11-28",
-              },
-            },
-          );
-
-          // Filter issues that match the current repository
-          const filteredIssues = response.data.filter((issue: any) => {
-            return projects.some(
-              (project: any) =>
-                project.project_issues &&
-                project.project_issues.includes(issue.number.toString()),
-            );
-          });
-
-          setIssues(filteredIssues);
-        });
-      } catch (error) {
-        console.error("GitHub API Error:", error);
-        if ((error as any).status === 429) {
-          setRateLimitExceeded(true);
-        }
-      }
-    };
-
-    fetchIssues();
-  }, [projects, projectData, octokit, fetchWithRetry]);
+  // Fetch issues from GitHub API
+  // We already fetch issues in the first useEffect, so we don't need this one
+  // This removes one API request
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -450,8 +384,7 @@ export default function Project() {
           issue_number: parseInt(isIssueNumber as string),
           body: comment,
         })
-        .then((response) => response.data)
-        .then((data) => console.log(data, "testaa"));
+        .then((response) => response.data);
     } finally {
       if (session) {
         alert(`Request Details:
@@ -486,21 +419,23 @@ export default function Project() {
             name: repoData.projectName,
             description: comment,
           }),
-        }).then((response) => console.log(response, "response"));
+        });
       }
     }
   };
+  // Calculate total bytes and percentages
   const totalBytes = languages
     ? Object.values(languages).reduce(
-        (acc: number, bytes: any) => acc + bytes,
+        (acc: number, bytes) => acc + (typeof bytes === 'number' ? bytes : Number(bytes) || 0),
         0,
       )
     : 0;
   const languagePercentages: { [key: string]: number } = {};
   if (languages && Object.keys(languages).length > 0) {
     for (const [lang, bytes] of Object.entries(languages)) {
+      const byteValue = typeof bytes === 'number' ? bytes : Number(bytes) || 0;
       languagePercentages[lang] = parseFloat(
-        ((bytes / totalBytes) * 100).toFixed(1),
+        ((byteValue / totalBytes) * 100).toFixed(1),
       );
     }
   }
@@ -541,7 +476,7 @@ export default function Project() {
                             alt={collab.login}
                             className="w-7 h-7 rounded-full"
                           />
-                          <p className="px-3">{collab.login}</p>
+                          <span className="px-3">{collab.login}</span>
                         </div>
                       ))}
                     </div>
@@ -754,7 +689,7 @@ export default function Project() {
                       <div className="text-center">
                         <button
                           onClick={handleResize}
-                          className="text-center dark:bg-white text-white dark:text-black bg-black text-black rounded px-2 py-1 "
+                          className="text-center dark:bg-white bg-black text-white dark:text-gray-900 rounded px-2 py-1 "
                         >
                           {isExpanded ? "Show Less" : "Show More"}
                         </button>
@@ -881,7 +816,7 @@ export default function Project() {
                                     setIssueNumber(issue.project_issues);
                                   }}
                                 >
-                                  <button className="dark:bg-white bg-black text-white  dark:text-black  px-2 py-1 rounded">
+                                  <button className="bg-black dark:bg-white text-white dark:text-gray-900 px-2 py-1 rounded">
                                     Contribute Now
                                   </button>
                                 </div>
