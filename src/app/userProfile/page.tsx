@@ -195,7 +195,7 @@ const UserProfilePage: NextPage = () => {
   }, [userFromQuery]);
   
   console.log(userFromQuery, "userFromQuery");
-  conosole.log(TotalEarnings, "TotalEarnings");
+  console.log(TotalEarnings, "TotalEarnings");
 
   // Fetch GitHub contributions and stats
   const fetchGitHubData = async (username: string, accessToken?: string) => {
@@ -283,34 +283,40 @@ const UserProfilePage: NextPage = () => {
   };
 
   useEffect(() => {
-    const users = async () => {
-      await fetch(`/api/signup`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setUsers(data);
-          if (userFromQuery && data) {
-            const filteredUser = data.users.find(
-              (user: any) => user.id === userFromQuery,
-            );
-            setCurrentUser(filteredUser || null);
-            
-            // Fetch GitHub data if user found
-            if (filteredUser?.userName) {
-              fetchGitHubData(filteredUser.userName, (session as any)?.accessToken);
-            }
-          }
+    const fetchEarnings = async () => {
+      try {
+        const res = await fetch("/api/signup", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
         });
+        
+        if (res.ok) {
+          const data = await res.json();
+          
+          // Filter and map rewards where Contributor_id matches userFromQuery
+          const userRewards = data.Rewards
+            .filter((reward: any) => reward.Contributor_id === userFromQuery)
+            .map((reward: any) => parseFloat(reward.value));
+          
+          // Calculate total earnings from filtered rewards
+          const totalEarnings = userRewards.reduce((sum: number, value: number) => sum + value, 0);
+          
+          updateEarnings(totalEarnings);
+        } else {
+          console.error('Failed to fetch earnings:', res.statusText);
+        }
+      } catch (error) {
+        console.error('Error fetching earnings:', error);
+      }
     };
+    
     if (userFromQuery) {
-      users();
+      fetchEarnings();
     }
-  }, [userFromQuery, session]);
-
+  }, [userFromQuery]);
+  console.log(TotalEarnings, "Earnings");
   console.log(currentUser, "users");
   console.log(users, "test users");
   
@@ -634,7 +640,7 @@ const UserProfilePage: NextPage = () => {
                 {
                   icon: <DollarSign className="w-6 h-6 text-green-500" />,
                   label: "Total Earnings",
-                  value: `$${userData.totalEarnings.toLocaleString()}`,
+                  value: `tBNB ${TotalEarnings}`,
                   subtext: "From completed pull requests",
                 },
                 {
