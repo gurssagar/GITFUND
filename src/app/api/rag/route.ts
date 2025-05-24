@@ -4,6 +4,7 @@ import { projects } from '../../../db/schema';
 import { Pinecone } from '@pinecone-database/pinecone';
 import { InferenceClient } from '@huggingface/inference';
 import {groq} from "@ai-sdk/groq"
+import {google} from "@ai-sdk/google"
 import { streamText } from 'ai';
 
 // Initialize Pinecone directly with configuration
@@ -119,7 +120,7 @@ IMPORTANT INSTRUCTIONS:
         
         // Stream the response with the enhanced context
         const result = streamText({
-            model: groq('llama-3.1-8b-instant'),
+            model: google('models/gemini-2.0-flash'),
             system: enhancedSystemMessage,
             messages,
         });

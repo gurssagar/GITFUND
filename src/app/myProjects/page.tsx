@@ -122,9 +122,11 @@ export default function MyProject() {
                         <p className='mb-8  text-[14px] mt-2 text-custom-dark-gray dark:text-custom-gray'>Manage your GitHub projects and rewards.</p>
                     </div>
                     <div>
+                        <Link href="/create-project">
                         <button className="bg-black dark:bg-white dark:text-black text-white rounded-lg px-4 py-2">
                             + Add Project
                         </button>
+                        </Link>
                     </div>
 
                     </div>
@@ -225,7 +227,7 @@ export default function MyProject() {
                                         {
                                             repo?.languages &&
                                             Object.keys(repo.languages).map((lang) => (
-                                                <span key={lang} className="mr-2 px-3 py-2 pb-1 bg-custom-gray text-white dark:text-black dark:bg-custom-dark-gray rounded-full text-xs">
+                                                <span key={lang} className="mr-2 px-3 py-2 pb-1 bg-custom-gray text-white dark:text-white dark:bg-custom-dark-gray rounded-full text-xs">
                                                     {lang}
                                                 </span>
                                             ))

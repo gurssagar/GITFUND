@@ -26,10 +26,10 @@ const pharosDevnet = {
 const BnbTestnet = {
   id: 97,
   name: 'BNB Smart Chain Testnet',
-  nativeCurrency: { name: 'TBNB', symbol: 'TBNB', decimals: 18 }, // Adjust if necessary
+  nativeCurrency: { name: 'tBNB', symbol: 'tBNB', decimals: 18 }, // Adjust if necessary
   rpcUrls: {
-    default: { http: ['https://bsc-testnet.drpc.org'] },
-    public: { http: ['https://bsc-testnet.drpc.org'] },
+    default: { http: ['https://bsc-testnet.bnbchain.org/'] },
+    public: { http: ['https://bsc-testnet.bnbchain.org/'] },
   },
   blockExplorers: {
     default: { name: 'Binance Smart Chain Testnet', url: 'https://testnet.bscscan.com' },

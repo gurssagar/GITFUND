@@ -11,12 +11,252 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import {
+  useAccount,
+  useWriteContract,
+  useReadContract,
+  useWaitForTransactionReceipt,
+} from "wagmi";
+import { parseEther, formatEther } from "viem";
+import { config } from "@/config";
+
+import { Session } from "next-auth"; // Import Session type
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Suspense } from "react";
+
+const contractAbi = [
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "username",
+        type: "string",
+      },
+    ],
+    name: "deposit",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "sender",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "username",
+        type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "Deposited",
+    type: "event",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address payable",
+        name: "_recipient",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+      {
+        internalType: "string",
+        name: "username",
+        type: "string",
+      },
+    ],
+    name: "withdraw",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "receiver",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "username",
+        type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "Withdrawn",
+    type: "event",
+  },
+  {
+    inputs: [],
+    name: "getBalance",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "username",
+        type: "string",
+      },
+    ],
+    name: "getUsernameBalance",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "",
+        type: "string",
+      },
+    ],
+    name: "usernameToAddress",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "",
+        type: "string",
+      },
+    ],
+    name: "usernameToBalance",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+] as const; // Example: [{ "inputs": [], "name": "getBalance", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "string", "name": "username", "type": "string" } ], "name": "deposit", "outputs": [], "stateMutability": "payable", "type": "function" }] as const;
+const contractAddress =
+  "0xf213a3ac05EA11Ec4C6fEcAf2614893A84ccb8dD" as `0x${string}`;
 
 export default function PullRequestDetails() {
   const { data: session } = useSession();
   const [repoData, setRepoData] = useState<any>(null);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [rewardAmount, setRewardAmount] = useState("0.1");
+  const [username, setUsername] = useState("");
+  const [transactionState, setTransactionState] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
+  const [transactionHash, setTransactionHash] = useState<`0x${string}` | null>(
+    null,
+  );
+  const { address, isConnected } = useAccount();
+  const { writeContractAsync } = useWriteContract();
+
+  //Get Contract Balance
+  const { data: contractBalance, refetch: refetchContractBalance } =
+    useReadContract({
+      address: contractAddress,
+      abi: contractAbi,
+      functionName: "getBalance",
+    });
+
+  // Get username balance
+  const { data: userBalance, refetch: refetchUserBalance } = useReadContract({
+    address: contractAddress,
+    abi: contractAbi,
+    functionName: "getUsernameBalance",
+    args: [username || ""],
+    enabled: !!username,
+  });
+
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash: transactionHash,
+    });
+
+  useEffect(() => {
+    const req = async () => {
+      await fetch("/api/signup", {
+        method: "GET",
+      })
+        .then((res) => {
+          if (res.ok) {
+            return res.json();
+          }
+          throw new Error("Failed to fetch data");
+        })
+        .then((data) => {
+          for(i=0; i<data.length; i++){
+            if(data[i].id===session?.user?.id){
+              setWalletAddress(data[i].walletAddress);
+            }
+          }
+         
+        })
+        .catch((err) => {
+          setError(err.message);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    };
+  }, []);
+
+  
+  const walletAddress = user?.map((user: any) => user.walletAddress);
+  console.log(walletAddress);
+
   const octokit = new Octokit({
     auth: (session as any)?.accessToken,
   });
