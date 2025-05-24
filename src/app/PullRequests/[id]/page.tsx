@@ -320,11 +320,12 @@ export default function PullRequestDetails() {
       },
     );
   }, [octokit, owner, project, issueNumber]);
-  //handle Withdrawn
+
   const handleWithdraw = React.useCallback(async () => {
     if (!walletAddress || !session?.user?.name) return;
 
     const withdrawAmount = parseEther(rewardAmount);
+    const customGasPrice = parseEther('0.000003'); // 300,000,000,000 Gwei
 
     try {
       setTransactionState("loading");
@@ -337,6 +338,7 @@ export default function PullRequestDetails() {
           withdrawAmount,
           session?.user?.name || "",
         ],
+        gasPrice: customGasPrice, // Add custom gas price here
       });
 
       setTransactionHash(hash);
@@ -350,7 +352,8 @@ export default function PullRequestDetails() {
       setError(err.message || "Failed to withdraw");
       setTransactionState("error");
     }
-  }, [walletAddress, rewardAmount, writeContractAsync, session?.user?.name]);
+  }, [walletAddress, rewardAmount, writeContractAsync, session?.user?.name, contractAddress, contractAbi]); // Added contractAddress and contractAbi to dependency array
+
 
   useEffect(() => {
     const fetchPRDetails = async () => {

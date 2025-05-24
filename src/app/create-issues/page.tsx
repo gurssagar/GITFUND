@@ -21,7 +21,6 @@ import { useSidebarContext } from "@/assets/components/SidebarContext";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Suspense } from "react";
 
-// !!! IMPORTANT: Define your contract ABI and address here !!!
 const contractAbi = [
   {
     inputs: [
