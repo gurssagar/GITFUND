@@ -322,7 +322,7 @@ export default function LandingPage() {
                        Fuel Open Source Innovation
                   </p>
                   <p className="mx-auto max-w-[60vw] text-center">
-                  GitFund seamlessly bridges the gap between open-source development and decentralized finance by integrating GitHub repositories with blockchain smart contracts. This allows project maintainers to post issues with pre-funded bounties and enables developers to earn cryptocurrency—such as Pharos—automatically upon successful code contributions, like merged pull requests. By removing intermediaries and ensuring instant, transparent payouts, GitFund creates a sustainable, trustless incentive system that rewards real coding impact.
+                  GitFund seamlessly bridges the gap between open-source development and decentralized finance by integrating GitHub repositories with blockchain smart contracts. This allows project maintainers to post issues with pre-funded bounties and enables developers to earn cryptocurrency—such as BNB upon successful code contributions, like merged pull requests. By removing intermediaries and ensuring instant, transparent payouts, GitFund creates a sustainable, trustless incentive system that rewards real coding impact.
                   </p>
 
                   <div className="mt-50 mx-auto">
@@ -389,8 +389,8 @@ export default function LandingPage() {
                 <h3 className="text-lg font-semibold">List Issue & Set Bounty</h3>
               </CardHeader>
               <CardContent>
-                <p>Choose an open issue and lock your bounty in Pharos/ via smart contract escrow.</p>
-                <Badge className="mt-2">Pharos </Badge>
+                <p>Choose an open issue and lock your bounty in BNB/ via smart contract escrow.</p>
+                <Badge className="mt-2">BNB </Badge>
               </CardContent>
             </Card>
 

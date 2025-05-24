@@ -378,7 +378,7 @@ export default function Proj() {
                                   })}
                                 </td>
                                 <td className="py-3 px-4 font-bold">
-                                  {issue.rewardAmount} PHAROS
+                                  {issue.rewardAmount} BNB
                                 </td>
                                 <td className="py-3 px-4 text-right">...</td>
                               </tr>

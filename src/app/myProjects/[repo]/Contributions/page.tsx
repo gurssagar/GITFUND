@@ -81,17 +81,17 @@ export default function Contributions() {
               // *** Check Contract Balance Before Attempting Withdrawal ***
               console.log("Checking contract balance...");
               const currentContractBalanceWei = await contractWithProvider.getBalance();
-              console.log(`Contract Balance: ${ethers.formatEther(currentContractBalanceWei)} PHAROS`);
-              console.log(`Required Amount:  ${rewardAmount} PHAROS`);
+              console.log(`Contract Balance: ${ethers.formatEther(currentContractBalanceWei)} BNB`);
+              console.log(`Required Amount:  ${rewardAmount} BNB`);
 
               if (currentContractBalanceWei < amountInWei) {
-                  alert(`Withdrawal failed: Insufficient funds in the contract. Balance: ${ethers.formatEther(currentContractBalanceWei)} PHAROS, Required: ${rewardAmount} PHAROS`);
+                  alert(`Withdrawal failed: Insufficient funds in the contract. Balance: ${ethers.formatEther(currentContractBalanceWei)} BNB, Required: ${rewardAmount} BNB`);
                   console.error(`Insufficient contract balance. Has ${currentContractBalanceWei.toString()} wei, needs ${amountInWei.toString()} wei.`);
                   return false;
               }
               // *** End Balance Check ***
 
-              console.log(`Attempting to withdraw ${rewardAmount} PHAROS (${amountInWei.toString()} wei) to recipient: ${account}`);
+              console.log(`Attempting to withdraw ${rewardAmount} BNB (${amountInWei.toString()} wei) to recipient: ${account}`);
 
               // *** Estimate Gas ***
               console.log("Estimating gas for withdrawal...");
@@ -113,7 +113,7 @@ export default function Contributions() {
 
               console.log("Withdraw transaction confirmed.");
               // Use rewardAmount for the alert to show the intended amount
-              alert(`Successfully withdrawn ${rewardAmount} PHAROS to ${account}`);
+              alert(`Successfully withdrawn ${rewardAmount} BNB to ${account}`);
               fetchBalance(); // Refresh balance after successful withdrawal
               return true; // Indicate success
           } catch (error: any) { // Catch specific error type if possible
@@ -130,7 +130,7 @@ export default function Contributions() {
                  alert(`Withdraw failed!`);
               }
               // Log the arguments again in case of failure
-              console.error(`Failed withdrawal attempt: Recipient=${account}, Amount=${rewardAmount} PHAROS`);
+              console.error(`Failed withdrawal attempt: Recipient=${account}, Amount=${rewardAmount} BNB`);
               return false; // Indicate failure
           }
       };
@@ -173,7 +173,7 @@ export default function Contributions() {
                   return;
               }
 
-              console.log(`Starting process for PR #${pullNumber} with reward ${rewardAmount} PHAROS`);
+              console.log(`Starting process for PR #${pullNumber} with reward ${rewardAmount} BNB`);
 
               // Step 1: Attempt Withdrawal
               const withdrawSuccess = await handleWithdraw(rewardAmount);
@@ -340,7 +340,7 @@ export default function Contributions() {
                                             <div>
                                               {pr.rewardAmount && (
                                                   <span className="text-xl font-bold text-black-400 dark:text-white">
-                                                     {pr.rewardAmount} PHAROS
+                                                     {pr.rewardAmount} BNB
                                                   </span>
                                               )}
                                          

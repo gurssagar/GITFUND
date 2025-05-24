@@ -119,7 +119,7 @@ export default function Rewards() {
                             
                             <div className="rounded-lg shadow-md p-6 bg-gradient-to-r from-purple-600 via-pink-500 to-red-500 text-dark dark:text-white relative">
                                 <h3 className="text-sm font-medium text-gray-100">Rewarded amount</h3>
-                                <p className="text-3xl font-semibold text-white mt-1">{totalRewarded.toLocaleString()} PHAROS</p> {/* Added toLocaleString for formatting */}
+                                <p className="text-3xl font-semibold text-white mt-1">{totalRewarded.toLocaleString()} BNB</p> {/* Added toLocaleString for formatting */}
                                 <button className="absolute bottom-4 right-4 hover:text-dark text-white">
                                     
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
@@ -129,7 +129,7 @@ export default function Rewards() {
                             
                             <div className="rounded-lg shadow-md p-6 bg-gray-50 dark:bg-gray-800  relative">
                                 <h3 className="text-sm font-medium text-gray-400">Paid</h3>
-                                <p className="text-3xl font-semibold mt-1 text-dark dark:text-dark dark:text-white">{totalRewarded.toLocaleString()} PHAROS</p> {/* Added toLocaleString */}
+                                <p className="text-3xl font-semibold mt-1 text-dark dark:text-dark dark:text-white">{totalRewarded.toLocaleString()} BNB</p> {/* Added toLocaleString */}
                                  <button className="absolute bottom-4 right-4 text-gray-400 hover:text-dark dark:text-white">
                                     
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>
@@ -202,7 +202,7 @@ export default function Rewards() {
                                                         height: `${((monthMap[month] || 0) / maxValue) * 60}px`, 
                                                         minHeight: "8px"
                                                     }}
-                                                    title={`${monthMap[month] || 0} PHAROS`}
+                                                    title={`${monthMap[month] || 0} BNB`}
                                                 ></div>
                                                 <span className="text-xs text-gray-500 mt-1 block">{month}</span>
                                             </div>
@@ -269,7 +269,7 @@ export default function Rewards() {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-dark dark:text-white">{reward.projectName}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-dark dark:text-white">{reward.Contributor_id}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-dark dark:text-white">{reward.issue}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-dark dark:text-gray-300">{reward.value} PHAROS</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-dark dark:text-gray-300">{reward.value} BNB</td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 Complete
                                             </td>
