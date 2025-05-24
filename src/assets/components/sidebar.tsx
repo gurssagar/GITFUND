@@ -4,10 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSidebarContext } from "./SidebarContext";
 import { useAppKit } from "@reown/appkit/react";
-import { useAccount, useBalance } from "wagmi"; // Added useAccount and useBalance
+import { useAccount, useBalance } from "wagmi";
+import { useSession } from "next-auth/react";
 
 export default function Sidebar() {
   const { open } = useAppKit();
+  const { data: session } = useSession(); // Added useAccount and useBalance
   const { isShrunk } = useSidebarContext();
   const { address, isConnected } = useAccount(); // Get account status and address
   const {
@@ -163,6 +165,33 @@ export default function Sidebar() {
                       />
                     </svg>
                     {!isShrunk && "Contributions"}
+                  </div>
+                </Link>
+                <Link href={{
+                  pathname: '/userProfile',
+                  query: {
+                    user: (session?.user as any)?.username,
+                  },
+                }}>
+                  <div className="rounded-lg text-sm focus:bg-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a] px-2 py-2 flex">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      className="my-auto mr-2"
+                      height="20"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.5"
+                        d="M8 12h.009m3.986 0h.01m3.986 0H16m2 9c1.232 0 2.231-1.151 2.231-2.571c0-2.248-.1-3.742 1.442-5.52c.436-.502.436-1.316 0-1.818c-1.542-1.777-1.442-3.272-1.442-5.52C20.231 4.151 19.232 3 18 3M6 21c-1.232 0-2.231-1.151-2.231-2.571c0-2.248.1-3.742-1.442-5.52c-.436-.502-.436-1.316 0-1.818C3.835 9.353 3.769 7.84 3.769 5.57C3.769 4.151 4.768 3 6 3"
+                        color="currentColor"
+                      />
+                    </svg>
+                    {!isShrunk && "User Profile"}
                   </div>
                 </Link>
                 <Link href="/assignedProjects" className="">
