@@ -641,7 +641,7 @@ export default function PullRequestDetails() {
             {
               ai ? 
               <>
-              <div className="min-h-10">
+              <div className="min-h-80 p-10">
                 {completion && (
                   <div className="mt-4 prose dark:prose-invert max-w-none overflow-auto">
                     <ReactMarkdown>{completion}</ReactMarkdown> {/* Use ReactMarkdown here */}

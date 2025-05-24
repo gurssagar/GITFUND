@@ -242,7 +242,7 @@ export default function PullRequestsPage() {
                                   href={{
                                     pathname: `/PullRequests/${pr.issue_number}`,
                                     query: {
-                                      rewardAmount: pr.rewardAmount,
+                                      rewardAmount: issue.rewardAmount,
                                       issueNumber: pr.issue_number,
                                       project: pr.repo,
                                       owner: pr.user,
