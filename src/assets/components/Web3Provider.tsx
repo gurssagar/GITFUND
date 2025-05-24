@@ -1,6 +1,6 @@
 "use client"
 import { WagmiProvider, createConfig, http } from "wagmi";
-import { mainnet } from "wagmi/chains"; // Keep mainnet or remove if only Pharos is needed
+import { mainnet } from "wagmi/chains"; // Keep mainnet or remove if only BNB is needed
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 

@@ -6,6 +6,7 @@ import Topbar from "@/assets/components/topbar";
 import { useSidebarContext } from "@/assets/components/SidebarContext";
 import { useSearchParams } from "next/navigation";
 import { Octokit } from "octokit";
+import { useCompletion } from "@ai-sdk/react";
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -186,14 +187,26 @@ const contractAddress =
   "0xf213a3ac05EA11Ec4C6fEcAf2614893A84ccb8dD" as `0x${string}`;
 
 export default function PullRequestDetails() {
+  const { completion, complete } = useCompletion({
+    api: "/api/completion",
+  });
   const { data: session } = useSession();
   const [repoData, setRepoData] = useState<any>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
+  const octokit = new Octokit({
+    auth: (session as any)?.accessToken,
+  });
+  const { isShrunk } = useSidebarContext();
+  const searchParams = useSearchParams();
+  const RewardAmount = searchParams?.get("RewardAmount");
+  const issueNumber = searchParams?.get("issueNumber");
+  const project = searchParams?.get("project");
+  const owner = searchParams?.get("owner");
+
   const [rewardAmount, setRewardAmount] = useState("0.1");
-  const [username, setUsername] = useState("");
   const [transactionState, setTransactionState] = useState<
     "idle" | "loading" | "success" | "error"
   >("idle");
@@ -211,61 +224,110 @@ export default function PullRequestDetails() {
       functionName: "getBalance",
     });
 
-  // Get username balance
-  const { data: userBalance, refetch: refetchUserBalance } = useReadContract({
-    address: contractAddress,
-    abi: contractAbi,
-    functionName: "getUsernameBalance",
-    args: [username || ""],
-    enabled: !!username,
-  });
-
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
       hash: transactionHash,
     });
 
   useEffect(() => {
-    const req = async () => {
-      await fetch("/api/signup", {
-        method: "GET",
-      })
-        .then((res) => {
-          if (res.ok) {
-            return res.json();
+    const fetchWalletAddress = async () => {
+      try {
+        const response = await fetch("/api/signup", { method: "GET" });
+
+        if (!response.ok) {
+          // Attempt to get more error details from the response body if possible
+          let errorDetails = "Failed to fetch user data";
+          try {
+            const errorData = await response.json();
+            errorDetails = errorData.message || errorDetails;
+          } catch (e) {
+            // Ignore if parsing error body fails, stick to generic message
           }
-          throw new Error("Failed to fetch data");
-        })
-        .then((data) => {
-          for(i=0; i<data.length; i++){
-            if(data[i].id===session?.user?.id){
-              setWalletAddress(data[i].walletAddress);
-            }
-          }
-         
-        })
-        .catch((err) => {
-          setError(err.message);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+          throw new Error(errorDetails);
+        }
+
+        const fetchedData = await response.json(); // Correctly parse JSON data
+
+        // Assuming fetchedData has a structure like { users: [...] } or is the array itself
+        // Adjust 'fetchedData.users' if the structure is different (e.g., just 'fetchedData')
+        const usersArray = fetchedData.users;
+
+        if (!Array.isArray(usersArray)) {
+          console.warn(
+            "/api/signup did not return a valid users array. Data:",
+            fetchedData,
+          );
+          setWalletAddress(null);
+          setError("Invalid data format from server.");
+          return;
+        }
+
+        const currentUser = usersArray.find(
+          (user: any) => user.id == (session?.user as any)?.username,
+        );
+
+        if (currentUser && currentUser.metaMask) {
+          setWalletAddress(currentUser.metaMask);
+          setError(null); // Clear any previous error
+        } else {
+          console.warn(
+            "Logged-in user's wallet address not found in /api/signup response, user ID mismatch, or walletAddress is missing.",
+          );
+          setWalletAddress(null); // Explicitly set to null if not found or no walletAddress
+          // Optionally set an error message if this is an unexpected state
+          // setError("User wallet address not found.");
+        }
+      } catch (err) {
+        console.error("Error in fetchWalletAddress:", err);
+        setError(err instanceof Error ? err.message : "Unknown error occurred");
+        setWalletAddress(null); // Ensure walletAddress is reset on error
+      }
     };
-  }, []);
 
-  
-  const walletAddress = user?.map((user: any) => user.walletAddress);
-  console.log(walletAddress);
+    if (session?.user) {
+      // Only fetch if there's a session and user
+      fetchWalletAddress();
+    }
+  }, [session]);
 
-  const octokit = new Octokit({
-    auth: (session as any)?.accessToken,
-  });
-  const { isShrunk } = useSidebarContext();
-  const searchParams = useSearchParams();
-  const issueNumber = searchParams?.get("issueNumber");
-  const project = searchParams?.get("project");
-  const owner = searchParams?.get("owner");
-  console.log(issueNumber);
+  console.log("Wallet Address:", walletAddress);
+
+  const handlePRMerge = async () => {
+    await octokit.request(
+      "PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge",
+      {
+        owner: owner as string,
+        repo: project as string,
+        pull_number: parseInt(issueNumber as string),
+      },
+    );
+  };
+  //handle Withdrawn
+  const handleWithdraw = async () => {
+    const withdrawAmount = parseEther(rewardAmount);
+
+    try {
+      setTransactionState("loading");
+      const hash = await writeContractAsync({
+        address: contractAddress,
+        abi: contractAbi,
+        functionName: "withdraw",
+        args: [
+          walletAddress as `0x${string}`,
+          withdrawAmount,
+          session?.user?.username,
+        ],
+      });
+
+      setTransactionHash(hash);
+      setTransactionState("success");
+      console.log("Transaction Hash:", hash);
+    } catch (err: any) {
+      console.error("Error withdrawing:", err);
+      setError(err.message || "Failed to withdraw");
+      setTransactionState("error");
+    }
+  };
 
   useEffect(() => {
     const fetchPRDetails = async () => {
@@ -282,7 +344,6 @@ export default function PullRequestDetails() {
 
         const response = await request;
         setRepoData(response.data);
-        console.log(response.data, "whdashdhas");
       } catch (err) {
         console.error("Error fetching PR details:", err);
         setError("Failed to load pull request details");
@@ -420,10 +481,11 @@ export default function PullRequestDetails() {
                 <div className="bg-white border border-gray-200 rounded-xl p-5 mb-4">
                   <div className="font-semibold mb-3">Review Actions</div>
                   <div className="flex flex-col gap-2 mb-4">
-                    <a
-                      href={`${repoData?.html_url}#submit-review`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <div
+                      onClick={() => {
+                        handleWithdraw();
+                        handlePRMerge();
+                      }}
                       className="w-full bg-black text-white py-2 rounded-lg flex items-center justify-center gap-2 font-medium dark:bg-white dark:text-black"
                     >
                       <svg
@@ -437,7 +499,7 @@ export default function PullRequestDetails() {
                         <path d="M5 13l4 4L19 7" />
                       </svg>
                       Approve
-                    </a>
+                    </div>
                     <a
                       href={`${repoData?.html_url}#submit-review`}
                       target="_blank"
@@ -558,6 +620,18 @@ export default function PullRequestDetails() {
                 )}
               </div>
             </div>
+          </div>
+          <div>
+            <div
+              onClick={async () => {
+                await complete(
+                  `Analyze the changes made in a pull request https://github.com/${owner}/${project}/pull/${issueNumber}. Focus on a technical review: explain the purpose of the changes, evaluate the code quality, identify any potential issues or improvements, and assess if the modifications align with best coding practices. Assume the reader is familiar with programming concepts.`,
+                );
+              }}
+            >
+              Schedule a call
+            </div>
+            {completion}
           </div>
         </div>
       </div>

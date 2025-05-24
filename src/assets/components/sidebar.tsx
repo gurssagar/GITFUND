@@ -230,7 +230,7 @@ export default function Sidebar() {
                     Maintainer
                   </div>
                 )}
-                <Link href="/ContributorRequests">
+                <Link href="/contributorRequests">
                   <div className="rounded-lg text-sm focus:bg-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a] px-2 py-2 flex">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -278,7 +278,7 @@ export default function Sidebar() {
                     {!isShrunk && "My Projects"}
                   </div>
                 </Link>
-                <Link href="/myProjects">
+                <Link href="/PullRequests">
                   <div className="rounded-lg text-sm focus:bg-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a] px-2 py-2 flex">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

@@ -63,6 +63,7 @@ export default function PullRequestsPage() {
         });
         const issuesData = await issuesResponse.json();
         setIssues(issuesData.projects);
+        console.log("Issues:", issuesData.projects);
 
         const prsMap: Record<string, any> = {};
         await Promise.all(
@@ -241,6 +242,7 @@ export default function PullRequestsPage() {
                                   href={{
                                     pathname: `/PullRequests/${pr.issue_number}`,
                                     query: {
+                                      rewardAmount: pr.rewardAmount,
                                       issueNumber: pr.issue_number,
                                       project: pr.repo,
                                       owner: pr.user,
