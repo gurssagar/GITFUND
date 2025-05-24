@@ -23,162 +23,162 @@ import { Suspense } from "react";
 
 // !!! IMPORTANT: Define your contract ABI and address here !!!
 const contractAbi = [
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "username",
-				"type": "string"
-			}
-		],
-		"name": "deposit",
-		"outputs": [],
-		"stateMutability": "payable",
-		"type": "function"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "sender",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "username",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			}
-		],
-		"name": "Deposited",
-		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address payable",
-				"name": "_recipient",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_amount",
-				"type": "uint256"
-			},
-			{
-				"internalType": "string",
-				"name": "username",
-				"type": "string"
-			}
-		],
-		"name": "withdraw",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "receiver",
-				"type": "address"
-			},
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "username",
-				"type": "string"
-			},
-			{
-				"indexed": false,
-				"internalType": "uint256",
-				"name": "amount",
-				"type": "uint256"
-			}
-		],
-		"name": "Withdrawn",
-		"type": "event"
-	},
-	{
-		"inputs": [],
-		"name": "getBalance",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "username",
-				"type": "string"
-			}
-		],
-		"name": "getUsernameBalance",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			}
-		],
-		"name": "usernameToAddress",
-		"outputs": [
-			{
-				"internalType": "address",
-				"name": "",
-				"type": "address"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "",
-				"type": "string"
-			}
-		],
-		"name": "usernameToBalance",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	}
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "username",
+        type: "string",
+      },
+    ],
+    name: "deposit",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "sender",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "username",
+        type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "Deposited",
+    type: "event",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address payable",
+        name: "_recipient",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+      {
+        internalType: "string",
+        name: "username",
+        type: "string",
+      },
+    ],
+    name: "withdraw",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "receiver",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "username",
+        type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "Withdrawn",
+    type: "event",
+  },
+  {
+    inputs: [],
+    name: "getBalance",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "username",
+        type: "string",
+      },
+    ],
+    name: "getUsernameBalance",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "",
+        type: "string",
+      },
+    ],
+    name: "usernameToAddress",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "",
+        type: "string",
+      },
+    ],
+    name: "usernameToBalance",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
 ] as const; // Example: [{ "inputs": [], "name": "getBalance", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "string", "name": "username", "type": "string" } ], "name": "deposit", "outputs": [], "stateMutability": "payable", "type": "function" }] as const;
 const contractAddress =
   "0xf213a3ac05EA11Ec4C6fEcAf2614893A84ccb8dD" as `0x${string}`;
@@ -248,7 +248,7 @@ export default function Project() {
   const [selectedRepo, setSelectedRepo] = useState<string | undefined>(); // Changed from any to string | undefined
   const [data, setData] = useState<Repo[]>([]); // Typed as an array of Repo objects
   const [issues, setIssues] = useState<Issue[]>([]);
-  const [selectedissue,setSelectedIssue]=useState<string| null>(); // Typed as an array of Issue objects
+  const [selectedissue, setSelectedIssue] = useState<string | null>(); // Typed as an array of Issue objects
   const { isShrunk } = useSidebarContext();
   const { address, isConnected } = useAccount();
   const [issueTitle, setIssueTitle] = useState<string>(""); // Unused
@@ -305,7 +305,8 @@ export default function Project() {
     const fetchRepos = async () => {
       try {
         // const octokit = new Octokit({ auth: token }); // Octokit not needed if fetching from own API
-        const response = await fetch("/api/add-projects", { // Removed leading space
+        const response = await fetch("/api/add-projects", {
+          // Removed leading space
           method: "GET",
         });
 
@@ -314,7 +315,10 @@ export default function Project() {
           setData(responseData.project as Repo[]); // Cast to Repo[]
           console.log(responseData.project, "repos"); // Corrected log key
         } else {
-          console.error("Error fetching repositories:", responseData.error || response.statusText);
+          console.error(
+            "Error fetching repositories:",
+            responseData.error || response.statusText,
+          );
           setData([]); // Set to empty array on error
         }
       } catch (error) {
@@ -328,7 +332,7 @@ export default function Project() {
   }, [token]); // Removed user and selectedRepo as dependencies as they are not used in this specific fetchRepos
 
   //fetch readme.md - REMOVED
-  // const [repoValue, setRepoValue] = useState<string | undefined>(); 
+  // const [repoValue, setRepoValue] = useState<string | undefined>();
   // useEffect(() => { ... });
 
   //ai reply - REMOVED
@@ -361,23 +365,24 @@ export default function Project() {
     fetchIssues();
   }, [token, user, selectedRepo]);
 
- 
-  useEffect(()=> {
+  useEffect(() => {
     const fetchIssueData = async () => {
-      const response = await octokit.request(`GET /repos/${user}/${selectedRepo}/issues/${selectedissue}`, {
-        owner:user,
-        repo:selectedRepo,
-        issue_number: selectedissue,
-      });
+      const response = await octokit.request(
+        `GET /repos/${user}/${selectedRepo}/issues/${selectedissue}`,
+        {
+          owner: user,
+          repo: selectedRepo,
+          issue_number: selectedissue,
+        },
+      );
       const issue = response.data;
       setIssueTitle(issue.title);
       setIssueDescription(issue.body);
       setIssueCreatedAt(issue.created_at);
       console.log("Issue Data:", issue);
-      
-    }
+    };
     fetchIssueData();
-  },[selectedissue])
+  }, [selectedissue]);
   console.log("Issue Title:", issueTitle);
   console.log("Issue Description:", issueDescription);
   console.log("Issue Created At:", issueCreatedAt);
@@ -461,9 +466,6 @@ export default function Project() {
         setAlertMessage("Processing deposit...");
       }
 
-      
-
-
       await fetch("/api/add-issues", {
         method: "POST",
         headers: {
@@ -514,7 +516,6 @@ export default function Project() {
   return (
     <>
       <Suspense>
-        
         <div className="fixed bottom-20 right-10 z-[100]">
           {" "}
           {/* Ensure alert is on top */}
@@ -556,11 +557,11 @@ export default function Project() {
             className={`transition-all duration-300 ease-in-out ${isShrunk ? "ml-[4rem] w-[calc(100%_-_4rem)]" : "ml-[16rem] w-[calc(100%_-_16rem)]"}`}
           >
             <Topbar />
-            
+
             <div className="mt-20 justify-center">
-            <form onSubmit={addProject} className="p-10 mx-auto space-y-4">
+              <form onSubmit={addProject} className="p-10 mx-auto space-y-4">
                 <div className="text-3xl mb-6">Issue Information</div>
-                
+
                 <div className="space-y-2 flex gap-4">
                   <div className="space-y-2 w-1/3">
                     <label className="text-[14px]" htmlFor="difficulty">
@@ -591,7 +592,7 @@ export default function Project() {
                       <option value="">Select The Priority</option>
                       <option value="low">Low</option>
                       <option value="medium">Medium</option>
-                      <option value="hard">Hard</option>
+                      <option value="hard">High</option>
                     </select>
                   </div>
                   <div className="w-1/3">
@@ -610,12 +611,9 @@ export default function Project() {
                       required
                     />
                   </div>
-
-                  
                 </div>
 
                 <div className="flex gap-4 ">
-                  
                   <div className="space-y-2  w-1/3">
                     <label className="text-[14px]" htmlFor="projectRepo">
                       Project Repository
@@ -629,11 +627,15 @@ export default function Project() {
                       required
                     >
                       <option value="">Select a repository</option>
-                      {data?.map((repo: any) => ( // data here refers to the list of projects/repos fetched from /api/add-projects
-                        <option value={repo.name} key={repo.id}> 
-                          {repo.project_repository} 
-                        </option>
-                      ))}
+                      {data?.map(
+                        (
+                          repo: any, // data here refers to the list of projects/repos fetched from /api/add-projects
+                        ) => (
+                          <option value={repo.name} key={repo.id}>
+                            {repo.project_repository}
+                          </option>
+                        ),
+                      )}
                     </select>
                   </div>
                   <div className="space-y-2  w-1/3">
@@ -671,7 +673,6 @@ export default function Project() {
             </div>
           </div>
         </div>
-        
       </Suspense>
     </>
   );
