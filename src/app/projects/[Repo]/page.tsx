@@ -75,7 +75,6 @@ export default function Project() {
   const session = useSession();
   const Repo = params?.Repo as string;
   const { isShrunk } = useSidebarContext();
-  console.log(Repo);
   // State declarations
   const [aiReply, setAiReply] = useState("");
   const [projectData, setProjectData] = useState<ProjectData | null>(null);
@@ -127,9 +126,7 @@ export default function Project() {
             ? data.project[0]
             : data.project || null,
         ); // Adjust based on actual API response
-        console.log(data.project, "reposs"); // console.log(data, "repos") is better for seeing the direct API response
       } catch (error) {
-        console.error("Error fetching project data:", error);
         setRepoData(null); // Handle error state appropriately
       }
     };
@@ -154,9 +151,8 @@ export default function Project() {
         );
         const data = await response.json();
         setIssues(data.projects || []);
-        console.log(data, "`issuess`");
+        console.log(data.projects,"issuess");
       } catch (error) {
-        console.error("Error fetching project data:", error);
         setIssues([]); // Reset issues on error
       }
     };
@@ -280,7 +276,6 @@ export default function Project() {
           });
         }
       } catch (error) {
-        console.error("Error fetching project data:", error);
       } finally {
         setIsLoading(false);
       }
@@ -298,9 +293,7 @@ export default function Project() {
         // Check authentication status first
         try {
           const authRes = await octokit.rest.users.getAuthenticated();
-          console.log("✅ Authenticated as:", authRes.data.login);
         } catch (error: any) {
-          console.error("❌ Not authenticated:", error.message);
           return; // Exit if not authenticated
         }
 
@@ -445,10 +438,10 @@ export default function Project() {
     return <div>Project not found</div>;
   }
 
-  const assignIssue = async (comment: string) => {
+  const assignIssue = async (comment: string,skills:string) => {
     const owner = repoData?.projectOwner;
     const repo = repoData?.project_repository;
-    alert(`${owner},${repo},${parseInt(isIssueNumber as string)},${comment}`);
+    alert(`${owner},${repo},${skills},${comment}`);
     try {
       await octokit.rest.issues
         .createComment({
@@ -461,6 +454,20 @@ export default function Project() {
         .then((data) => console.log(data, "testaa"));
     } finally {
       if (session) {
+       alert(`Request Details:
+
+            • Repository: ${repo}
+            • Username: ${(session?.data?.user as any)?.username}
+            • Issue Number: ${isIssueNumber}
+            • Status: pending
+            • Skills: ${JSON.stringify(skills)}
+            • Project Owner: ${repoData?.projectOwner}
+            • Email: ${(session?.data?.user as any)?.email}
+            • Request Date: ${new Date().toISOString()}
+            • Avatar: ${(session?.data?.user as any)?.image}
+            • Project Name: ${repoData.projectName}
+            • Comment: ${comment}
+            • Test: TESTING`);
         await fetch("/api/contributorRequests", {
           method: "POST",
           headers: {
@@ -471,14 +478,15 @@ export default function Project() {
             Contributor_id: (session?.data?.user as any)?.username as string,
             issue: isIssueNumber,
             status: "pending",
+            skills:skills,
             projectOwner: repoData?.projectOwner,
             contributor_email: (session?.data?.user as any)?.email as string, // Assuming email is available in the session data
             requestDate: new Date().toISOString(),
             image_url: (session?.data?.user as any)?.image as string,
-            name: (session?.data?.user as any)?.name as string,
+            name: repoData.projectName,
             description: comment,
           }),
-        });
+        }).then((response) => console.log(response, "response"));
       }
     }
   };
@@ -870,7 +878,7 @@ export default function Project() {
                                 <div
                                   onClick={() => {
                                     setIssue(true);
-                                    setIssueNumber(issue.number);
+                                    setIssueNumber(issue.project_issues);
                                   }}
                                 >
                                   <button className="dark:bg-white bg-black text-white  dark:text-black  px-2 py-1 rounded">

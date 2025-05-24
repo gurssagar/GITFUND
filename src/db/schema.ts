@@ -1,5 +1,6 @@
 
 import { pgTable,json, text, varchar ,timestamp} from "drizzle-orm/pg-core";
+import { sql } from 'drizzle-orm';
 
 export const messages = pgTable("messages", {
   id: varchar("id", { length: 256 }).primaryKey(),
@@ -14,6 +15,7 @@ export const messages = pgTable("messages", {
 });
 
 export const issues=pgTable("issues", {
+  id: varchar('id', { length: 256 }).primaryKey().default(sql`gen_random_uuid()`),
   issue_name: varchar('issue_name',{ length: 256 }),
   issue_description: text('issue_description'),
   issue_date: varchar('issue_date', { length: 256 }),
@@ -69,6 +71,7 @@ export const projects = pgTable('projects', {
 });
 
 export const contributorRequests=pgTable('contributorRequests', {
+  id: varchar('id', { length: 256 }).primaryKey().default(sql`gen_random_uuid()`),
   projectName: varchar('projectName',{ length: 256 }),
   Contributor_id: varchar('Contributor', { length: 256 }),
   contributor_email: varchar('contributor_email', { length: 256 }),
