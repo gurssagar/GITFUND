@@ -42,7 +42,7 @@
     yarn install
     ```
 3.  **Set up environment variables:** Create a `.env.local` file and add necessary variables (GitHub credentials, S3 keys, Groq API key, Smart Contract address, Network details, etc. - *Specific variables need documentation*).
-4.  **Run the development server:**
+4.  **Run the development server once**
     ```bash
     bun run dev
     # or
