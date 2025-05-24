@@ -7,7 +7,7 @@
 *   **Web3 Wallet Connection:** Integrates with browser wallets like MetaMask for seamless deposit and withdrawal operations.
 *   **Project & Issue Management:** Create detailed project listings, link them to GitHub repositories and specific issues, and track contributions.
 *   **AI-Powered Descriptions:** Automatically generates project descriptions using AI based on the repository's README content.
-*   **S3 Image Storage:** Project images are uploaded and stored securely using AWS S3.
+*   **S3 Image Storage:** Project images are uploaded and stored securely using AWS S3 and other s3 providers.
 
 ## How It Works
 
