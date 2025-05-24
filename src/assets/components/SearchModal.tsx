@@ -114,7 +114,7 @@ export default function SearchModal(/* Remove props: { isOpen, onClose }: Search
               return (
                 
                 <Link key={repo.projectName} href={`/projects/${repo.project_repository}`} passHref>
-                  <div onClick={closeSearchModal} className="hover:bg-custom-dark-gray block p-3 rounded-md  transition-colors duration-150"> {/* Use closeSearchModal from context */}
+                  <div onClick={closeSearchModal} className="hover:bg-custom-dark-gray hover:drak:bg-custom-gray-100 block p-3 rounded-md  transition-colors duration-150"> {/* Use closeSearchModal from context */}
                     <div className="flex justify-between items-start">
                       <div>
                         <h3 className='text-lg font-semibold dark:text-white text-gray-900 mb-1'>
