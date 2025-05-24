@@ -317,9 +317,12 @@ export default function Proj() {
                             Manage issues and rewards for this project
                           </p>
                         </div>
+                        <a href={`/create-issues`} target="_blank" rel="">
+
                         <button className="flex items-center px-4 py-2 bg-black text-white rounded-md font-medium hover:bg-custom-dark-gray transition">
                           <span className="mr-2 text-lg">+</span> Add Issue
                         </button>
+                        </a>
                       </div>
                       <div className="overflow-x-auto">
                         <table className="min-w-full text-sm">

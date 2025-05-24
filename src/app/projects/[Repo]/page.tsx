@@ -151,7 +151,7 @@ export default function Project() {
         );
         const data = await response.json();
         setIssues(data.projects || []);
-        console.log(data.projects,"issuess");
+        console.log(data.projects, "issuess");
       } catch (error) {
         setIssues([]); // Reset issues on error
       }
@@ -438,7 +438,7 @@ export default function Project() {
     return <div>Project not found</div>;
   }
 
-  const assignIssue = async (comment: string,skills:string) => {
+  const assignIssue = async (comment: string, skills: string) => {
     const owner = repoData?.projectOwner;
     const repo = repoData?.project_repository;
     alert(`${owner},${repo},${skills},${comment}`);
@@ -454,7 +454,7 @@ export default function Project() {
         .then((data) => console.log(data, "testaa"));
     } finally {
       if (session) {
-       alert(`Request Details:
+        alert(`Request Details:
 
             • Repository: ${repo}
             • Username: ${(session?.data?.user as any)?.username}
@@ -478,7 +478,7 @@ export default function Project() {
             Contributor_id: (session?.data?.user as any)?.username as string,
             issue: isIssueNumber,
             status: "pending",
-            skills:skills,
+            skills: skills,
             projectOwner: repoData?.projectOwner,
             contributor_email: (session?.data?.user as any)?.email as string, // Assuming email is available in the session data
             requestDate: new Date().toISOString(),
@@ -887,7 +887,7 @@ export default function Project() {
                                 </div>
                                 <div>
                                   <div className="dark:text-gray-300 text-gray-900 text-bold">
-                                    {issue.rewardAmount} PHAROS
+                                    {issue.rewardAmount} BNB
                                   </div>
                                 </div>
                               </div>
@@ -952,12 +952,12 @@ export default function Project() {
                     <>
                       <div className="dark:bg-[#0a0a0a] bg-white border-1 border-left border-custom-gray dark:border-custom-dark-gray fixed right-0 top-17 h-full w-[20%] p-6 shadow-lg">
                         <div className="flex justify-between items-center mb-6">
-                          <h3 className="text-xl font-semibold text-white">
+                          <h3 className="text-xl font-semibold dark:text-white">
                             Get Assigned
                           </h3>
                           <button
                             onClick={() => setIssue(false)}
-                            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
+                            className="text-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -975,70 +975,93 @@ export default function Project() {
                             </svg>
                           </button>
                         </div>
-                        <form className="space-y-4" onSubmit={(e) => {
-                                      e.preventDefault();
-                                      const email = (e.target as HTMLFormElement).email.value;
-                                      // Get skills from state and convert to JSON
-                                      const skillsJson = JSON.stringify(skills);
-                                      // You will need to update the assignIssue function to accept skillsJson
-                                      assignIssue(`${email}`, skillsJson);
-                                      }}>
-                                      <div>
-                                        <label htmlFor="Comment" className="block text-sm font-medium text-gray-300 mb-1">Comment</label>
-                                        <input 
-                                          type="textArea" 
-                                          id="email" 
-                                          name="email"
-                                          placeholder="Why Should We assign you the issue" 
-                                          className="w-full bg-[#0a0a0a] border border-gray-700 text-white rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                          required
-                                        />
-                                      </div>
-                                      <div>
-                                        <label htmlFor="skills" className="block text-sm font-medium text-gray-300 mb-1">Skills</label>
-                                        <div className="flex items-center space-x-2">
-                                          <input
-                                            type="text"
-                                            id="skillInput"
-                                            placeholder="Add a skill"
-                                            className="w-full bg-[#0a0a0a] border border-gray-700 text-white rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                          />
-                                          <button
-                                            type="button"
-                                            onClick={() => {
-                                              const skillInput = document.getElementById('skillInput') as HTMLInputElement;
-                                              if (skillInput.value) {
-                                                setSkills([...skills, skillInput.value]);
-                                                skillInput.value = '';
-                                              }
-                                            }}
-                                            className="bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                                          >
-                                            +
-                                          </button>
-                                        </div>
-                                        <div className="mt-2 flex flex-wrap gap-2">
-                                          {skills.map((skill, index) => (
-                                            <span key={index} className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-sm flex items-center">
-                                              {skill}
-                                              <button
-                                                type="button"
-                                                onClick={() => setSkills(skills.filter((_, i) => i !== index))}
-                                                className="ml-1 text-gray-400 hover:text-white focus:outline-none"
-                                              >
-                                                ×
-                                              </button>
-                                            </span>
-                                          ))}
-                                        </div>
-                                      </div>
-                                      <button 
-                                        type="submit" 
-                                        className="w-full bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                      >
-                                        Submit
-                                      </button>
-                                    </form>
+                        <form
+                          className="space-y-4"
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            const email = (e.target as HTMLFormElement).email
+                              .value;
+                            // Get skills from state and convert to JSON
+                            const skillsJson = JSON.stringify(skills);
+                            // You will need to update the assignIssue function to accept skillsJson
+                            assignIssue(`${email}`, skillsJson);
+                          }}
+                        >
+                          <div>
+                            <label
+                              htmlFor="Comment"
+                              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                            >
+                              Comment
+                            </label>
+                            <input
+                              type="textArea"
+                              id="email"
+                              name="email"
+                              placeholder="Why Should We assign you the issue"
+                              className="w-full bg-gray-200 dark:bg-[#0a0a0a] text-black dark:text-white border border-gray-700 rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="skills"
+                              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                            >
+                              Skills
+                            </label>
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="text"
+                                id="skillInput"
+                                placeholder="Add a skill"
+                                className="w-full bg-gray-200 dark:bg-[#0a0a0a] border border-gray-700 text-black dark:text-white rounded-md px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const skillInput = document.getElementById(
+                                    "skillInput",
+                                  ) as HTMLInputElement;
+                                  if (skillInput.value) {
+                                    setSkills([...skills, skillInput.value]);
+                                    skillInput.value = "";
+                                  }
+                                }}
+                                className="bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                              >
+                                +
+                              </button>
+                            </div>
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {skills.map((skill, index) => (
+                                <span
+                                  key={index}
+                                  className="bg-gray-700 text-gray-300 px-2 py-1 rounded-full text-sm flex items-center"
+                                >
+                                  {skill}
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setSkills(
+                                        skills.filter((_, i) => i !== index),
+                                      )
+                                    }
+                                    className="ml-1 text-gray-400 hover:text-white focus:outline-none"
+                                  >
+                                    ×
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <button
+                            type="submit"
+                            className="w-full bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                          >
+                            Submit
+                          </button>
+                        </form>
                       </div>
                     </>
                   ) : (
