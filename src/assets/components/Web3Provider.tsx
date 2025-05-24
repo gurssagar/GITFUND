@@ -21,6 +21,21 @@ const pharosDevnet = {
   // testnet: true, 
 };
 
+const BnbTestnet = {
+  id: 97,
+  name: 'BNB Smart Chain Testnet',
+  nativeCurrency: { name: 'TBNB', symbol: 'TBNB', decimals: 18 }, // Adjust if necessary
+  rpcUrls: {
+    default: { http: ['https://bsc-testnet.drpc.org'] },
+    public: { http: ['https://bsc-testnet.drpc.org'] },
+  },
+  blockExplorers: {
+    default: { name: 'Binance Smart Chain Testnet', url: 'https://testnet.bscscan.com' },
+  },
+  // You can add testnet: true if appropriate, though not explicitly stated
+  // testnet: true, 
+};
+
 const config = createConfig(
   getDefaultConfig({
     // Your dApps chains - add Pharos Devnet

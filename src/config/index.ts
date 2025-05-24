@@ -23,6 +23,21 @@ const pharosDevnet = {
   },
 }
 
+const BnbTestnet = {
+  id: 97,
+  name: 'BNB Smart Chain Testnet',
+  nativeCurrency: { name: 'TBNB', symbol: 'TBNB', decimals: 18 }, // Adjust if necessary
+  rpcUrls: {
+    default: { http: ['https://bsc-testnet.drpc.org'] },
+    public: { http: ['https://bsc-testnet.drpc.org'] },
+  },
+  blockExplorers: {
+    default: { name: 'Binance Smart Chain Testnet', url: 'https://testnet.bscscan.com' },
+  },
+  // You can add testnet: true if appropriate, though not explicitly stated
+  // testnet: true, 
+};
+
 const pharosTestnet = {
   id: 688688,
   name: 'Pharos Testnet',
@@ -36,7 +51,7 @@ const pharosTestnet = {
   }
 }
 
-export const networks = [sepolia, pharosDevnet, pharosTestnet]
+export const networks = [sepolia, pharosDevnet, pharosTestnet,BnbTestnet]
 
 // Set up the Wagmi Adapter (Config)
 export const wagmiAdapter = new WagmiAdapter({

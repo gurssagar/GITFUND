@@ -41,9 +41,9 @@ export default function PullRequestsPage() {
         user: event.source.issue.user.login,
         date: event.source.issue.updated_at,
         repo: event.source.issue.repository.name,
-        issue_number: event.source.issue.number,
         user_image: event.source.issue.user.avatar_url,
         number: event.source.issue.number,
+        issue_number: event.source.issue.number,
         title: event.source.issue.title,
         url: event.source.issue.html_url,
       }));
@@ -55,6 +55,7 @@ export default function PullRequestsPage() {
   useEffect(() => {
     const fetchIssuesAndPRs = async () => {
       try {
+        setLoading(true);
         if (!session?.user) return; // Add null check
 
         const issuesResponse = await fetch("/api/fetchPullRequests", {
@@ -78,67 +79,15 @@ export default function PullRequestsPage() {
         setLinkedPRs(prsMap);
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchIssuesAndPRs();
   }, [session]);
-  console.log(linkedPRs, "hellosjdh");
   const [change, setChange] = useState<number>(0);
-  const pullRequests = [
-    {
-      id: 1234,
-      title: "Fix SSR hydration mismatch in dynamic routes",
-      project: "next.js",
-      author: {
-        name: "sarahdev",
-        avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      },
-      status: "Changes Requested",
-      statusColor: "bg-yellow-100 text-yellow-800",
-      reward: 500,
-      updated: "2023-06-20",
-    },
-    {
-      id: 1235,
-      title: "Improve error handling in API routes",
-      project: "next.js",
-      author: {
-        name: "devmike",
-        avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-      },
-      status: "Approved",
-      statusColor: "bg-green-100 text-green-800",
-      reward: 300,
-      updated: "2023-05-21",
-    },
-    {
-      id: 1236,
-      title: "Add examples for server components",
-      project: "react",
-      author: {
-        name: "coderalex",
-        avatar: "https://randomuser.me/api/portraits/men/45.jpg",
-      },
-      status: "Pending Review",
-      statusColor: "bg-blue-100 text-blue-800",
-      reward: 400,
-      updated: "2023-05-19",
-    },
-    {
-      id: 1237,
-      title: "Fix memory leak in useEffect cleanup",
-      project: "react",
-      author: {
-        name: "techguru",
-        avatar: "https://randomuser.me/api/portraits/men/46.jpg",
-      },
-      status: "Approved",
-      statusColor: "bg-green-100 text-green-800",
-      reward: 600,
-      updated: "2023-05-18",
-    },
-  ];
+  const [loading, setLoading] = useState(true);
   return (
     <>
       <div className="flex">
@@ -156,24 +105,34 @@ export default function PullRequestsPage() {
             <div className="py-4">
               <div className="grid grid-cols-3 gap-4 space-4">
                 <div className="rounded-lg border-1 border-gray-100 dark:border-custom-dark-gray p-5">
-                  <h1>Pending Reviews</h1>
-                  <div className="text-xl ">1</div>
-                  <div className="text-sm text-custom-gray  dark:text-custom-gray">
-                    Pull requests awaiting review
+                  <h1>Open PRs</h1>
+                  <div className="text-xl">
+                    {Object.values(linkedPRs).flat().length}
                   </div>
-                </div>
-                <div className="rounded-lg border-1 border-gray-100 dark:border-custom-dark-gray p-5">
-                  <h1>Pending Reviews</h1>
-                  <div className="text-xl ">1</div>
-                  <div className="text-sm text-custom-gray  dark:text-custom-gray">
-                    Pull requests awaiting review
-                  </div>
-                </div>
-                <div className="rounded-lg border-1 border-gray-100 dark:border-custom-dark-gray p-5">
-                  <h1>Pending Reviews</h1>
-                  <div className="text-xl ">1</div>
                   <div className="text-sm text-custom-gray dark:text-custom-gray">
-                    Pull requests awaiting review
+                    Total open pull requests
+                  </div>
+                </div>
+                <div className="rounded-lg border-1 border-gray-100 dark:border-custom-dark-gray p-5">
+                  <h1>Projects</h1>
+                  <div className="text-xl">{issues.length}</div>
+                  <div className="text-sm text-custom-gray dark:text-custom-gray">
+                    Projects with open issues
+                  </div>
+                </div>
+                <div className="rounded-lg border-1 border-gray-100 dark:border-custom-dark-gray p-5">
+                  <h1>Contributors</h1>
+                  <div className="text-xl">
+                    {
+                      new Set(
+                        Object.values(linkedPRs)
+                          .flat()
+                          .map((pr: any) => pr?.user),
+                      ).size
+                    }
+                  </div>
+                  <div className="text-sm text-custom-gray dark:text-custom-gray">
+                    Unique PR contributors
                   </div>
                 </div>
               </div>
@@ -214,76 +173,98 @@ export default function PullRequestsPage() {
                 <p className="text-sm text-gray-500 mb-4">
                   View and manage all pull requests across your projects
                 </p>
-                <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
-                  <table className="min-w-full bg-white dark:bg-custom-dark-gray">
-                    <thead>
-                      <tr className="text-xs text-gray-500 uppercase bg-gray-50 dark:bg-gray-800">
-                        <th className="px-4 py-3 text-left">Pull Request</th>
-                        <th className="px-4 py-3 text-left">Project</th>
-                        <th className="px-4 py-3 text-left">Author</th>
-                        <th className="px-4 py-3 text-left">Status</th>
-                        <th className="px-4 py-3 text-left">Reward</th>
-                        <th className="px-4 py-3 text-left">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                      {issues.map((issue) => {
-                        const prs = linkedPRs[issue.id] || [];
-                        return prs.map((pr: any) => (
-                          <tr
-                            key={`${issue.id}-${pr.number}`}
-                            className="hover:bg-gray-50 dark:hover:bg-gray-800"
-                          >
-                            <td className="px-4 py-3">
-                              <div className="font-medium text-gray-900 dark:text-white">
-                                {pr.title}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                Updated {new Date(pr.date).toLocaleDateString()}
-                              </div>
-                            </td>
-                            <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
-                              {pr.repo}
-                            </td>
-                            <td className="px-4 py-3 flex items-center gap-2">
-                              <img
-                                src={pr.user_image}
-                                alt={pr.user}
-                                className="w-6 h-6 rounded-full"
-                              />
-                              <span className="text-gray-900 dark:text-white text-sm">
-                                {pr.user}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3">
-                              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
-                                Open
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">
-                              -
-                            </td>
-                            <td className="px-4 py-3 flex gap-4">
-                              <a
-                                href={pr.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                              >
-                                View PR
-                              </a>
-                              <Link href={`PullRequests/${pr.issue_number}`}>
-                                <button className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                                  Review PR
-                                </button>
-                              </Link>
-                            </td>
-                          </tr>
-                        ));
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                {loading ? (
+                  <div className="py-8 text-center text-gray-500">
+                    Loading pull requests...
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-800">
+                    <table className="min-w-full bg-white dark:bg-custom-dark-gray">
+                      <thead>
+                        <tr className="text-xs text-gray-500 uppercase bg-gray-50 dark:bg-gray-800">
+                          <th className="px-4 py-3 text-left">Pull Request</th>
+                          <th className="px-4 py-3 text-left">Project</th>
+                          <th className="px-4 py-3 text-left">Author</th>
+                          <th className="px-4 py-3 text-left">Status</th>
+                          <th className="px-4 py-3 text-left">Reward</th>
+                          <th className="px-4 py-3 text-left">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                        {issues.map((issue) => {
+                          const prs = linkedPRs[issue.id] || [];
+                          return prs.map((pr: any) => (
+                            <tr
+                              key={`${issue.id}-${pr.number}`}
+                              className="hover:bg-gray-50 dark:hover:bg-gray-800"
+                            >
+                              <td className="px-4 py-3">
+                                <div className="font-medium text-gray-900 dark:text-white">
+                                  {pr.title}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  Updated{" "}
+                                  {new Date(pr.date).toLocaleDateString()}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 text-gray-700 dark:text-gray-300">
+                                {pr.repo}
+                              </td>
+                              <td className="px-4 py-3 flex items-center gap-2">
+                                <img
+                                  src={pr.user_image}
+                                  alt={pr.user}
+                                  className="w-6 h-6 rounded-full"
+                                />
+                                <span className="text-gray-900 dark:text-white text-sm">
+                                  {pr.user}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                                  Open
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">
+                                -
+                              </td>
+                              <td className="px-4 py-3 flex gap-4">
+                                <a
+                                  href={pr.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                                >
+                                  View PR
+                                </a>
+                                <Link
+                                  href={{
+                                    pathname: `/PullRequests/${pr.issue_number}`,
+                                    query: {
+                                      issueNumber: pr.issue_number,
+                                      project: pr.repo,
+                                      owner: pr.user,
+                                    },
+                                  }}
+                                >
+                                  <button className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                                    Review PR
+                                  </button>
+                                </Link>
+                              </td>
+                            </tr>
+                          ));
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                {!loading && Object.values(linkedPRs).flat().length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    No pull requests found. Create some issues on GitHub and
+                    link them to PRs to see them here.
+                  </div>
+                )}
               </div>
             </div>
           </div>
