@@ -44,9 +44,17 @@ function ChatPageLayout() {
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [messageInput, setMessageInput] = useState<string>("");
-  const { isShrunk, setIsShrunk, selectedUser, filteredUsers, refreshUsers, isLoadingUsers } = usechatSidebarContext();
+  const {
+    isShrunk,
+    setIsShrunk,
+    selectedUser,
+    filteredUsers,
+    refreshUsers,
+    isLoadingUsers,
+  } = usechatSidebarContext();
   // Using context for user data instead of local state
-  const [usernameAlreadySelected, setUsernameAlreadySelected] = useState<boolean>(false);
+  const [usernameAlreadySelected, setUsernameAlreadySelected] =
+    useState<boolean>(false);
   const [connectionStatus, setConnectionStatus] = useState<
     "disconnected" | "connecting" | "connected"
   >("disconnected");
@@ -79,7 +87,7 @@ function ChatPageLayout() {
       setConnectionStatus("connected");
       setErrorMessage(null);
       console.log("Socket connected");
-      
+
       // Refresh users after connection
       refreshUsers();
     });
@@ -100,11 +108,13 @@ function ChatPageLayout() {
       setErrorMessage(null);
     });
 
-    newSocket.on("auth_error", (error: { message: string } | string) => { // More specific error type
-      const errorMessageText = typeof error === 'string' ? error : error.message;
+    newSocket.on("auth_error", (error: { message: string } | string) => {
+      // More specific error type
+      const errorMessageText =
+        typeof error === "string" ? error : error.message;
       if (errorMessageText === "User already connected") {
         setErrorMessage(
-          "You are already connected from another tab or device. Please close other sessions and try again."
+          "You are already connected from another tab or device. Please close other sessions and try again.",
         );
       } else {
         setErrorMessage(`Authentication error: ${errorMessageText}`);
@@ -113,8 +123,10 @@ function ChatPageLayout() {
       setConnectionStatus("disconnected");
     });
 
-    newSocket.on("error", (error: { message: string } | string) => { // More specific error type
-      const errorMessageText = typeof error === 'string' ? error : error.message;
+    newSocket.on("error", (error: { message: string } | string) => {
+      // More specific error type
+      const errorMessageText =
+        typeof error === "string" ? error : error.message;
       if (errorMessageText === "Recipient not available") {
         setErrorMessage("The user you are trying to message is not online.");
       } else if (errorMessageText === "Unauthorized message attempt") {
@@ -131,11 +143,14 @@ function ChatPageLayout() {
       setMessages((prev) => [...prev, msg]);
     });
 
-    newSocket.on("messageDelivered", (data: { to: string; timestamp: string }) => {
-      console.log(`Message delivered to ${data.to} at ${data.timestamp}`);
-      // You could update the message state to show "delivered" status
-      // or add a visual indicator next to messages that have been delivered
-    });
+    newSocket.on(
+      "messageDelivered",
+      (data: { to: string; timestamp: string }) => {
+        console.log(`Message delivered to ${data.to} at ${data.timestamp}`);
+        // You could update the message state to show "delivered" status
+        // or add a visual indicator next to messages that have been delivered
+      },
+    );
 
     newSocket.on("disconnect", (reason: Socket.DisconnectReason) => {
       console.log(`Socket disconnected: ${reason}`);
@@ -161,7 +176,7 @@ function ChatPageLayout() {
 
     newSocket.on("reconnect_failed", () => {
       setErrorMessage(
-        "Failed to reconnect to the chat server. Please refresh the page."
+        "Failed to reconnect to the chat server. Please refresh the page.",
       );
     });
 
@@ -204,7 +219,13 @@ function ChatPageLayout() {
   }, [session, socket, usernameAlreadySelected]); // Removed onUsernameSelection from deps as it's stable
 
   const sendMessage = () => {
-    if (!socket || !selectedUser || !messageInput.trim() || !session?.user?.username) return;
+    if (
+      !socket ||
+      !selectedUser ||
+      !messageInput.trim() ||
+      !session?.user?.username
+    )
+      return;
 
     const localMsg: ChatMessage = {
       text: messageInput,
@@ -228,21 +249,24 @@ function ChatPageLayout() {
             prevMessages.map((msg) =>
               msg.timestamp === localMsg.timestamp
                 ? { ...msg, pending: false, error: ack.error } // Add error to message
-                : msg
-            )
+                : msg,
+            ),
           );
           setErrorMessage(`Failed to send message: ${ack.error}`);
         } else {
-          console.log("Message sent and acknowledged by server, id:", ack.messageId);
+          console.log(
+            "Message sent and acknowledged by server, id:",
+            ack.messageId,
+          );
           setMessages((prevMessages) =>
             prevMessages.map((msg) =>
               msg.timestamp === localMsg.timestamp
                 ? { ...msg, pending: false, id: ack.messageId } // Add server ID, remove pending
-                : msg
-            )
+                : msg,
+            ),
           );
         }
-      }
+      },
     );
     setMessageInput("");
   };
@@ -263,7 +287,10 @@ function ChatPageLayout() {
         <p className="mb-4 text-lg text-gray-700 dark:text-gray-300">
           Please sign in to access the chat.
         </p>
-        <Button onClick={() => signIn("github")} className="bg-blue-500 hover:bg-blue-600">
+        <Button
+          onClick={() => signIn("github")}
+          className="bg-blue-500 hover:bg-blue-600"
+        >
           Sign in with GitHub
         </Button>
       </div>
@@ -276,7 +303,9 @@ function ChatPageLayout() {
       <div
         className={cn(
           "flex-1 flex flex-col transition-all duration-300 ease-in-out",
-          isShrunk ? "ml-[5rem] w-[calc(100%_-_5rem)]" : "ml-[16rem] w-[calc(100%_-_16rem)]"
+          isShrunk
+            ? "ml-[5rem] w-[calc(100%_-_5rem)]"
+            : "ml-[16rem] w-[calc(100%_-_16rem)]",
         )}
       >
         <Topbar />
@@ -303,7 +332,11 @@ function ChatPageLayout() {
               <p className="text-lg text-gray-600 dark:text-gray-400">
                 Select a user from the sidebar to start a conversation.
               </p>
-              {isLoadingUsers && <p className="mt-2 text-sm text-gray-500 dark:text-gray-500">Loading users...</p>}
+              {isLoadingUsers && (
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-500">
+                  Loading users...
+                </p>
+              )}
             </div>
           ) : (
             <Card className="flex-1 flex flex-col bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
@@ -324,8 +357,10 @@ function ChatPageLayout() {
                   {messages
                     .filter(
                       (msg) =>
-                        (msg.from === session?.user?.username && msg.to === selectedUser.username) ||
-                        (msg.from === selectedUser.username && msg.to === session?.user?.username)
+                        (msg.from === session?.user?.username &&
+                          msg.to === selectedUser.username) ||
+                        (msg.from === selectedUser.username &&
+                          msg.to === session?.user?.username),
                     )
                     .map((msg, index) => (
                       <div
@@ -334,18 +369,26 @@ function ChatPageLayout() {
                           "flex flex-col max-w-[75%] p-3 rounded-lg shadow",
                           msg.from === session?.user?.username
                             ? "ml-auto bg-blue-500 text-white dark:bg-blue-600"
-                            : "mr-auto bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                            : "mr-auto bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
                         )}
                       >
                         <p className="text-sm">{msg.text}</p>
                         <span className="mt-1 text-xs opacity-75 self-end">
-                          {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          {msg.pending && <span className="ml-1">(sending...)</span>}
-                          {'error' in msg && <span className="ml-1 text-red-300">(failed)</span>} {/* Display error status */}
+                          {new Date(msg.timestamp).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                          {msg.pending && (
+                            <span className="ml-1">(sending...)</span>
+                          )}
+                          {"error" in msg && (
+                            <span className="ml-1 text-red-300">(failed)</span>
+                          )}{" "}
+                          {/* Display error status */}
                         </span>
                       </div>
                     ))}
-                    <div ref={messagesEndRef} /> {/* For auto-scrolling */}
+                  <div ref={messagesEndRef} /> {/* For auto-scrolling */}
                 </div>
                 <Separator className="my-0" />
                 <div className="p-4 bg-gray-50 dark:bg-gray-850 border-t border-gray-200 dark:border-gray-700">
@@ -361,14 +404,21 @@ function ChatPageLayout() {
                     />
                     <Button
                       onClick={sendMessage}
-                      disabled={!isConnected || !messageInput.trim() || !selectedUser.isOnline}
+                      disabled={
+                        !isConnected ||
+                        !messageInput.trim() ||
+                        !selectedUser.isOnline
+                      }
                       className="bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-600 dark:hover:bg-blue-700"
                     >
                       Send
                     </Button>
                   </div>
                   {!selectedUser.isOnline && isConnected && (
-                     <p className="text-xs text-red-500 mt-1">{selectedUser.username} is currently offline. Messages will not be delivered.</p>
+                    <p className="text-xs text-red-500 mt-1">
+                      {selectedUser.username} is currently offline. Messages
+                      will not be delivered.
+                    </p>
                   )}
                 </div>
               </CardContent>
@@ -383,7 +433,9 @@ function ChatPageLayout() {
 // Main page component that wraps the layout with Suspense
 export default function GitFundChatPage() {
   return (
-    <Suspense fallback={<div>Loading Chat...</div>}> {/* Ensure fallback UI is meaningful */}
+    <Suspense fallback={<div>Loading Chat...</div>}>
+      {" "}
+      {/* Ensure fallback UI is meaningful */}
       <ChatPageLayout />
     </Suspense>
   );

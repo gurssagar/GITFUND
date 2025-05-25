@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NextPage } from "next";
 import {
   BarChart,
@@ -20,16 +20,27 @@ import Sidebar from "@/assets/components/sidebar";
 import Topbar from "@/assets/components/topbar";
 import { useSidebarContext } from "@/assets/components/SidebarContext";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useParams, useSearchParams } from 'next/navigation';
 import { Octokit } from 'octokit';
+
+// Add custom CSS for the contribution grid
+import '@/app/userProfile/userProfile.css';
 
 // GitHub contribution data interface
 interface GitHubContribution {
   date: string;
   count: number;
   level: number;
+  type?: string;
+  repo?: string;
+  description?: string;
+  contributions?: Array<{
+    type: string;
+    repo: string;
+    description: string;
+    url?: string;
+  }>;
 }
 
 interface GitHubStats {
@@ -129,11 +140,18 @@ const achievementsData = [
 
 // Example data for contribution activity chart (replace with actual chart implementation)
 const contributionActivityData = [
-  { month: "Jan", contributions: 10 },
-  { month: "Feb", contributions: 12 },
-  { month: "Mar", contributions: 15 },
-  { month: "Apr", contributions: 18 },
-  { month: "May", contributions: 22 },
+  { month: "Jan", contributions: 10, prs: 2, issues: 4, commits: 4 },
+  { month: "Feb", contributions: 12, prs: 3, issues: 3, commits: 6 },
+  { month: "Mar", contributions: 15, prs: 5, issues: 2, commits: 8 },
+  { month: "Apr", contributions: 18, prs: 4, issues: 6, commits: 8 },
+  { month: "May", contributions: 22, prs: 7, issues: 5, commits: 10 },
+  { month: "Jun", contributions: 19, prs: 6, issues: 4, commits: 9 },
+  { month: "Jul", contributions: 24, prs: 8, issues: 6, commits: 10 },
+  { month: "Aug", contributions: 28, prs: 9, issues: 7, commits: 12 },
+  { month: "Sep", contributions: 26, prs: 8, issues: 8, commits: 10 },
+  { month: "Oct", contributions: 30, prs: 10, issues: 8, commits: 12 },
+  { month: "Nov", contributions: 27, prs: 9, issues: 7, commits: 11 },
+  { month: "Dec", contributions: 32, prs: 11, issues: 9, commits: 12 },
 ];
 
 type TabName = "Overview" | "Pull Requests" | "Achievements" | "Activity";
@@ -141,11 +159,27 @@ type TabName = "Overview" | "Pull Requests" | "Achievements" | "Activity";
 const UserProfilePage: NextPage = () => {
   const router = useRouter();
   const { data: session } = useSession();
-  const [users, setUsers] = useState([]);
-  const [currentUser, setCurrentUser] = useState(null);
+  // Define User interface to avoid type errors
+  interface User {
+    _id: string;
+    fullName: string;
+    username: string;
+    email: string;
+    image_url?: string;
+    Bio?: string;
+    Location?: string;
+    userName?: string;
+    Linkedin?: string;
+    Telegram?: string;
+    Twitter?: string;
+    [key: string]: any; // Allow for any additional properties
+  }
+  
+  const [users, setUsers] = useState<User[]>([]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [activeTab, setActiveTab] = useState<TabName>("Overview");
   const [contributionData, setContributionData] = useState<GitHubContribution[]>([]);
-  const [TotalEarnings,updateEarnings]=useState()
+  const [TotalEarnings, updateEarnings] = useState<number | undefined>(undefined);
 
   
   const [githubStats, setGithubStats] = useState<GitHubStats>({
@@ -161,6 +195,8 @@ const UserProfilePage: NextPage = () => {
 
   useEffect(() => {
     const fetchEarnings = async () => {
+      if (!userFromQuery) return;
+      
       try {
         const res = await fetch("/api/rewards", {
           method: "GET",
@@ -172,15 +208,17 @@ const UserProfilePage: NextPage = () => {
         if (res.ok) {
           const data = await res.json();
           
-          // Filter and map rewards where Contributor_id matches userFromQuery
-          const userRewards = data.Rewards
-            .filter((reward: any) => reward.Contributor_id === userFromQuery)
-            .map((reward: any) => reward.value);
-          
-          // Calculate total earnings from filtered rewards
-          const totalEarnings = userRewards.reduce((sum: number, value: number) => sum + value, 0);
-          
-          updateEarnings(totalEarnings);
+          if (data.Rewards && Array.isArray(data.Rewards)) {
+            // Filter and map rewards where Contributor_id matches userFromQuery
+            const userRewards = data.Rewards
+              .filter((reward: any) => reward.Contributor_id === userFromQuery)
+              .map((reward: any) => Number(reward.value));
+            
+            // Calculate total earnings from filtered rewards
+            const totalEarnings = userRewards.reduce((sum: number, value: number) => sum + value, 0);
+            
+            updateEarnings(totalEarnings);
+          }
         } else {
           console.error('Failed to fetch earnings:', res.statusText);
         }
@@ -189,13 +227,11 @@ const UserProfilePage: NextPage = () => {
       }
     };
     
-    if (userFromQuery) {
-      fetchEarnings();
-    }
+    fetchEarnings();
   }, [userFromQuery]);
   
-  console.log(userFromQuery, "userFromQuery");
-  console.log(TotalEarnings, "TotalEarnings");
+  // console.log(userFromQuery, "userFromQuery");
+  // console.log(TotalEarnings, "TotalEarnings");
 
   // Fetch GitHub contributions and stats
   const fetchGitHubData = async (username: string, accessToken?: string) => {
@@ -207,7 +243,7 @@ const UserProfilePage: NextPage = () => {
         auth: accessToken || undefined
       });
       
-      // Fetch user's events for contribution activity
+      // Fetch user's events for contribution activity - get more items
       const { data: events } = await octokit.request('GET /users/{username}/events', {
         username: username,
         per_page: 100,
@@ -225,39 +261,97 @@ const UserProfilePage: NextPage = () => {
         }
       });
       
-      // Process events to create contribution data for the last 30 days
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      // Try to fetch contributor stats if available
+      const contributorStats = [];
+      try {
+        // Get commit activity for user's owned repos
+        for (const repo of repos.slice(0, 5)) { // Limit to first 5 repos to avoid rate limiting
+          const { data: stats } = await octokit.request('GET /repos/{owner}/{repo}/stats/contributors', {
+            owner: username,
+            repo: repo.name,
+            headers: {
+              'X-GitHub-Api-Version': '2022-11-28'
+            }
+          });
+          contributorStats.push({ repo: repo.name, stats });
+        }
+      } catch (error) {
+        console.warn('Could not fetch contributor stats:', error);
+      }
       
-      const contributionMap = new Map<string, number>();
+      // Process events to create contribution data for the last 365 days (full year)
+      const yearAgo = new Date();
+      yearAgo.setDate(yearAgo.getDate() - 365);
       
-      // Initialize all days in the last 30 days with 0 contributions
-      for (let i = 0; i < 30; i++) {
+      const contributionMap = new Map<string, {count: number, contributions: any[]}>();
+      
+      // Initialize all days in the last 365 days with 0 contributions
+      for (let i = 0; i < 365; i++) {
         const date = new Date();
         date.setDate(date.getDate() - i);
         const dateStr = date.toISOString().split('T')[0];
-        contributionMap.set(dateStr, 0);
+        contributionMap.set(dateStr, {count: 0, contributions: []});
       }
       
-      // Count contributions from events
-      const relevantEvents = events.filter(event => 
-        ['PushEvent', 'PullRequestEvent', 'IssuesEvent', 'CreateEvent'].includes(event.type) &&
-        new Date(event.created_at) >= thirtyDaysAgo
+      // Count contributions from events and store detailed information
+      const relevantEvents = events.filter((event: any) => 
+        ['PushEvent', 'PullRequestEvent', 'IssuesEvent', 'CreateEvent', 'CommitCommentEvent', 'ReleaseEvent'].includes(event.type) &&
+        new Date(event.created_at) >= yearAgo
       );
       
-      relevantEvents.forEach(event => {
+      relevantEvents.forEach((event: any) => {
         const date = new Date(event.created_at).toISOString().split('T')[0];
         if (contributionMap.has(date)) {
-          contributionMap.set(date, contributionMap.get(date)! + 1);
+          const current = contributionMap.get(date)!;
+          current.count += 1;
+          
+          // Add detailed event information
+          let description = '';
+          const repo = event.repo?.name || '';
+          
+          switch (event.type) {
+            case 'PushEvent':
+              description = `Pushed ${event.payload?.commits?.length || 0} commit(s)`;
+              break;
+            case 'PullRequestEvent':
+              description = `${event.payload?.action || ''} pull request: ${event.payload?.pull_request?.title || ''}`;
+              break;
+            case 'IssuesEvent':
+              description = `${event.payload?.action || ''} issue: ${event.payload?.issue?.title || ''}`;
+              break;
+            case 'CreateEvent':
+              description = `Created ${event.payload?.ref_type || ''}: ${event.payload?.ref || ''}`;
+              break;
+            case 'CommitCommentEvent':
+              description = 'Commented on a commit';
+              break;
+            case 'ReleaseEvent':
+              description = `Released ${event.payload?.release?.tag_name || ''}`;
+              break;
+            default:
+              description = event.type;
+          }
+          
+          current.contributions.push({
+            type: event.type,
+            repo,
+            description,
+            url: event.payload?.pull_request?.html_url || 
+                 event.payload?.issue?.html_url || 
+                 `https://github.com/${repo}`
+          });
+          
+          contributionMap.set(date, current);
         }
       });
       
       // Convert to array and calculate levels
       const contributions: GitHubContribution[] = Array.from(contributionMap.entries())
-        .map(([date, count]) => ({
+        .map(([date, data]) => ({
           date,
-          count,
-          level: count === 0 ? 0 : count <= 2 ? 1 : count <= 5 ? 2 : count <= 10 ? 3 : 4
+          count: data.count,
+          level: data.count === 0 ? 0 : data.count <= 2 ? 1 : data.count <= 5 ? 2 : data.count <= 10 ? 3 : 4,
+          contributions: data.contributions
         }))
         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
       
@@ -282,8 +376,9 @@ const UserProfilePage: NextPage = () => {
     }
   };
 
+  // Add an effect to fetch users
   useEffect(() => {
-    const fetchEarnings = async () => {
+    const fetchUsers = async () => {
       try {
         const res = await fetch("/api/signup", {
           method: "GET",
@@ -294,31 +389,33 @@ const UserProfilePage: NextPage = () => {
         
         if (res.ok) {
           const data = await res.json();
+          setUsers(data.users || []);
           
-          // Filter and map rewards where Contributor_id matches userFromQuery
-          const userRewards = data.Rewards
-            .filter((reward: any) => reward.Contributor_id === userFromQuery)
-            .map((reward: any) => parseFloat(reward.value));
-          
-          // Calculate total earnings from filtered rewards
-          const totalEarnings = userRewards.reduce((sum: number, value: number) => sum + value, 0);
-          
-          updateEarnings(totalEarnings);
+          // Find the current user from the query parameter
+          if (userFromQuery && data.users) {
+            const user = data.users.find((u: any) => u._id === userFromQuery);
+            setCurrentUser(user as User || null);
+          }
         } else {
-          console.error('Failed to fetch earnings:', res.statusText);
+          console.error('Failed to fetch users:', res.statusText);
         }
       } catch (error) {
-        console.error('Error fetching earnings:', error);
+        console.error('Error fetching users:', error);
       }
     };
     
-    if (userFromQuery) {
-      fetchEarnings();
-    }
+    fetchUsers();
   }, [userFromQuery]);
-  console.log(TotalEarnings, "Earnings");
-  console.log(currentUser, "users");
-  console.log(users, "test users");
+  
+  // Effect for fetching GitHub data
+  useEffect(() => {
+    if (currentUser?.userName) {
+      fetchGitHubData(currentUser.userName as string);
+    }
+  }, [currentUser]);
+  // console.log(TotalEarnings, "Earnings");
+  // console.log(currentUser, "users");
+  // console.log(users, "test users");
   
   const renderTabContent = () => {
     switch (activeTab) {
@@ -327,7 +424,7 @@ const UserProfilePage: NextPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
             <div className="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
-                GitHub Contributions (Last 30 Days)
+                GitHub Contributions (Last Year)
               </h2>
               {loadingContributions ? (
                 <div className="h-64 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center">
@@ -337,7 +434,7 @@ const UserProfilePage: NextPage = () => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {githubStats.totalContributions} contributions in the last 30 days
+                      {githubStats.totalContributions} contributions in the last year
                     </p>
                     <div className="flex items-center space-x-2 text-xs text-gray-500">
                       <span>Less</span>
@@ -351,26 +448,63 @@ const UserProfilePage: NextPage = () => {
                       <span>More</span>
                     </div>
                   </div>
-                  <div className="grid grid-cols-7 gap-1 p-4 bg-gray-50 dark:bg-gray-700 rounded">
-                    {contributionData.map((day, index) => {
-                      const levelColors = [
-                        'bg-gray-200 dark:bg-gray-600',
-                        'bg-green-200 dark:bg-green-800',
-                        'bg-green-300 dark:bg-green-600',
-                        'bg-green-400 dark:bg-green-500',
-                        'bg-green-500 dark:bg-green-400'
-                      ];
-                      
-                      return (
-                        <div
-                          key={index}
-                          className={`w-3 h-3 rounded-sm ${levelColors[day.level]} hover:ring-2 hover:ring-gray-400 cursor-pointer transition-all`}
-                          title={`${day.date}: ${day.count} contributions`}
-                        />
-                      );
-                    })}
+                  <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded">
+                    <div className="flex flex-wrap mb-2">
+                      {Array.from({ length: 12 }, (_, i) => {
+                        const date = new Date();
+                        date.setMonth(date.getMonth() - i);
+                        return date.toLocaleString('default', { month: 'short' });
+                      }).reverse().map((month, idx) => (
+                        <div key={idx} className="text-xs text-gray-500 dark:text-gray-400 w-[8.33%] text-center">
+                          {month}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="contribution-grid gap-1">
+                      {Array.from({ length: 7 }, (_, weekday) => (
+                        <div key={weekday} className="flex flex-col gap-1">
+                          {contributionData
+                            .filter((_, idx) => idx % 7 === weekday)
+                            .map((day, index) => {
+                              const levelColors = [
+                                'bg-gray-200 dark:bg-gray-600',
+                                'bg-green-200 dark:bg-green-800',
+                                'bg-green-300 dark:bg-green-600',
+                                'bg-green-400 dark:bg-green-500',
+                                'bg-green-500 dark:bg-green-400'
+                              ];
+                              
+                              return (
+                                <div
+                                  key={index}
+                                  className={`w-3 h-3 rounded-sm ${levelColors[day.level]} hover:ring-2 hover:ring-gray-400 cursor-pointer transition-all group relative`}
+                                  title={`${day.date}: ${day.count} contributions`}
+                                  onClick={() => {
+                                    // Create tooltip content with details
+                                    alert(`${day.date}: ${day.count} contributions`);
+                                  }}
+                                >
+                                  {day.contributions && day.contributions.length > 0 && (
+                                    <div className="hidden group-hover:block absolute z-10 w-64 bg-white dark:bg-gray-800 shadow-lg rounded-md p-2 text-xs left-full ml-2 -top-2">
+                                      <div className="font-semibold">{day.date}: {day.count} contributions</div>
+                                      {day.contributions.slice(0, 3).map((contrib, i) => (
+                                        <div key={i} className="mt-1 text-gray-600 dark:text-gray-400">
+                                          • {contrib.description} <span className="text-gray-500">({contrib.repo})</span>
+                                        </div>
+                                      ))}
+                                      {day.contributions.length > 3 && (
+                                        <div className="mt-1 text-gray-500">+ {day.contributions.length - 3} more</div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-4 mt-4">
+                  <div className="grid grid-cols-4 gap-4 mt-4">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-gray-900 dark:text-white">{githubStats.pullRequests}</div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">Pull Requests</div>
@@ -382,6 +516,36 @@ const UserProfilePage: NextPage = () => {
                     <div className="text-center">
                       <div className="text-2xl font-bold text-gray-900 dark:text-white">{githubStats.repositories}</div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">Repositories</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                        {contributionData.filter(day => day.count > 0).length}
+                      </div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">Active Days</div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Recent Activity</h3>
+                    <div className="space-y-3 max-h-60 overflow-y-auto">
+                      {contributionData
+                        .filter(day => day.contributions && day.contributions.length > 0)
+                        .slice(0, 5)
+                        .map((day, idx) => (
+                          <div key={idx} className="border-l-2 border-green-400 dark:border-green-600 pl-3">
+                            <div className="text-sm font-medium">{new Date(day.date).toLocaleDateString()}</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              {day.count} contributions
+                            </div>
+                            <div className="mt-1 space-y-1">
+                              {day.contributions && day.contributions.slice(0, 3).map((contrib, i) => (
+                                <div key={i} className="text-xs text-gray-600 dark:text-gray-400">
+                                  • {contrib.description} <span className="text-gray-500">({contrib.repo})</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
                     </div>
                   </div>
                 </div>
@@ -524,22 +688,128 @@ const UserProfilePage: NextPage = () => {
           </div>
         );
       case "Activity":
-        return (
-          <div className="mt-6 bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
-              Contribution Activity
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-              Your contribution history over time
-            </p>
-            {/* Placeholder for Contribution Activity Chart */}
-            <div className="h-96 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center">
-              <p className="text-gray-500 dark:text-gray-400">
-                Contribution Activity Chart Placeholder
-              </p>
-            </div>
-          </div>
-        );
+              return (
+                <div className="mt-6 bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                  <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+                    Contribution Activity
+                  </h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                    Your contribution history over time
+                  </p>
+            
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                      <h3 className="text-md font-semibold mb-3 text-gray-900 dark:text-white">
+                        Monthly Contribution Breakdown
+                      </h3>
+                      <div className="h-80">
+                        <div className="w-full h-full">
+                          <div className="flex h-full items-end">
+                            {contributionActivityData.map((month, index) => (
+                              <div key={index} className="flex-1 flex flex-col items-center mx-0.5">
+                                <div className="w-full flex flex-col-reverse h-[80%]">
+                                  <div 
+                                    className="w-full bg-blue-500 dark:bg-blue-600 rounded-t" 
+                                    style={{ height: `${(month.prs / 12) * 100}%` }} 
+                                    title={`${month.prs} PRs`}
+                                  ></div>
+                                  <div 
+                                    className="w-full bg-yellow-500 dark:bg-yellow-600 rounded-t" 
+                                    style={{ height: `${(month.issues / 12) * 100}%` }} 
+                                    title={`${month.issues} Issues`}
+                                  ></div>
+                                  <div 
+                                    className="w-full bg-green-500 dark:bg-green-600 rounded-t" 
+                                    style={{ height: `${(month.commits / 15) * 100}%` }} 
+                                    title={`${month.commits} Commits`}
+                                  ></div>
+                                </div>
+                                <div className="text-xs mt-1 text-gray-600 dark:text-gray-400">{month.month}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-500">{month.contributions}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-center mt-2 space-x-4">
+                        <div className="flex items-center">
+                          <div className="w-3 h-3 bg-green-500 dark:bg-green-600 rounded-sm mr-1"></div>
+                          <span className="text-xs text-gray-600 dark:text-gray-400">Commits</span>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="w-3 h-3 bg-yellow-500 dark:bg-yellow-600 rounded-sm mr-1"></div>
+                          <span className="text-xs text-gray-600 dark:text-gray-400">Issues</span>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="w-3 h-3 bg-blue-500 dark:bg-blue-600 rounded-sm mr-1"></div>
+                          <span className="text-xs text-gray-600 dark:text-gray-400">Pull Requests</span>
+                        </div>
+                      </div>
+                    </div>
+              
+                    <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                      <h3 className="text-md font-semibold mb-3 text-gray-900 dark:text-white">
+                        Contribution Timeline
+                      </h3>
+                      <div className="space-y-4 max-h-[350px] overflow-y-auto">
+                        {contributionData
+                          .filter(day => day.contributions && day.contributions.length > 0)
+                          .slice(0, 20)
+                          .map((day, idx) => (
+                            <div key={idx} className="border-l-2 border-green-400 dark:border-green-600 pl-3">
+                              <div className="text-sm font-medium">{new Date(day.date).toLocaleDateString()}</div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                                {day.count} contributions
+                              </div>
+                              <div className="space-y-1">
+                                {day.contributions && day.contributions.slice(0, 4).map((contrib, i) => (
+                                  <div key={i} className="text-xs text-gray-600 dark:text-gray-400">
+                                    • {contrib.description} <span className="text-gray-500">({contrib.repo})</span>
+                                  </div>
+                                ))}
+                                {day.contributions && day.contributions.length > 4 && (
+                                  <div className="text-xs text-gray-500">+ {day.contributions.length - 4} more</div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  </div>
+            
+                  <div className="mt-6 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                    <h3 className="text-md font-semibold mb-3 text-gray-900 dark:text-white">
+                      Contribution Summary
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="bg-white dark:bg-gray-800 p-3 rounded-lg text-center">
+                        <div className="text-3xl font-bold text-gray-900 dark:text-white">
+                          {githubStats.totalContributions}
+                        </div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">Total Contributions</div>
+                      </div>
+                      <div className="bg-white dark:bg-gray-800 p-3 rounded-lg text-center">
+                        <div className="text-3xl font-bold text-blue-500 dark:text-blue-400">
+                          {githubStats.pullRequests}
+                        </div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">Pull Requests</div>
+                      </div>
+                      <div className="bg-white dark:bg-gray-800 p-3 rounded-lg text-center">
+                        <div className="text-3xl font-bold text-yellow-500 dark:text-yellow-400">
+                          {githubStats.issues}
+                        </div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">Issues</div>
+                      </div>
+                      <div className="bg-white dark:bg-gray-800 p-3 rounded-lg text-center">
+                        <div className="text-3xl font-bold text-green-500 dark:text-green-400">
+                          {contributionData.filter(day => day.count > 0).length}
+                        </div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">Active Days</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
       default:
         return null;
     }
@@ -558,56 +828,62 @@ const UserProfilePage: NextPage = () => {
             <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
               <div className="flex flex-col sm:flex-row items-center">
                 <img
-                  className="w-24 h-24 sm:w-32 sm:h-32 rounded-full mr-0 sm:mr-6 mb-4 sm:mb-0 border-4 border-gray-200 dark:border-gray-700"
-                  src={currentUser?.image_url}
-                  alt={currentUser?.fullName}
-                />
+                    className="w-24 h-24 sm:w-32 sm:h-32 rounded-full mr-0 sm:mr-6 mb-4 sm:mb-0 border-4 border-gray-200 dark:border-gray-700"
+                    src={(currentUser?.image_url as string) || userData.avatarUrl}
+                    alt={(currentUser?.fullName as string) || userData.name}
+                  />
                 <div className="text-center sm:text-left">
                   <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                    {currentUser?.fullName}
+                    {(currentUser?.fullName as string) || userData.name}
                   </h1>
                   <p className="text-md text-gray-600 dark:text-gray-400">
-                    {currentUser?.username}
+                    {(currentUser?.username as string) || userData.username}
                   </p>
                   <p className="mt-2 text-sm text-gray-700 dark:text-gray-300 max-w-xl">
-                    {currentUser?.Bio}
+                    {(currentUser?.Bio as string) || userData.bio}
                   </p>
                   <div className="mt-3 flex flex-wrap justify-center sm:justify-start items-center gap-x-4 gap-y-2 text-xs text-gray-500 dark:text-gray-400">
                     <span className="flex items-center">
-                      <User className="w-3 h-3 mr-1" /> {currentUser?.email}
+                      <User className="w-3 h-3 mr-1" /> {(currentUser?.email as string) || userData.email}
                     </span>
                     <span className="flex items-center">
                       <MapPin className="w-3 h-3 mr-1" />{" "}
-                      {currentUser?.Location}
+                      {(currentUser?.Location as string) || userData.location}
                     </span>
                     <span className="flex items-center">
                       <CalendarDays className="w-3 h-3 mr-1" /> Joined{" "}
                       {userData.joinedDate}
                     </span>
                     <a
-                      href={`https://github.com/${currentUser?.userName}`}
+                      href={currentUser?.userName ? `https://github.com/${currentUser.userName as string}` : userData.githubProfileUrl}
                       className="flex items-center hover:text-blue-600 dark:hover:text-blue-400"
                     >
                       <LinkIcon className="w-3 h-3 mr-1" /> GitHub Profile
                     </a>
-                    <a
-                      href={`${currentUser?.Linkedin}`}
-                      className="flex items-center hover:text-blue-600 dark:hover:text-blue-400"
-                    >
-                      <LinkIcon className="w-3 h-3 mr-1" /> Linkedin Profile
-                    </a>
-                    <a
-                      href={`https://telegram.com/${currentUser?.Telegram}`}
-                      className="flex items-center hover:text-blue-600 dark:hover:text-blue-400"
-                    >
-                      <LinkIcon className="w-3 h-3 mr-1" /> Telegram
-                    </a>
-                    <a
-                      href={`https://github.com/${currentUser?.Twitter}`}
-                      className="flex items-center hover:text-blue-600 dark:hover:text-blue-400"
-                    >
-                      <LinkIcon className="w-3 h-3 mr-1" /> Twitter
-                    </a>
+                    {currentUser?.Linkedin && (
+                      <a
+                        href={currentUser.Linkedin as string}
+                        className="flex items-center hover:text-blue-600 dark:hover:text-blue-400"
+                      >
+                        <LinkIcon className="w-3 h-3 mr-1" /> Linkedin Profile
+                      </a>
+                    )}
+                    {currentUser?.Telegram && (
+                      <a
+                        href={`https://telegram.com/${currentUser.Telegram as string}`}
+                        className="flex items-center hover:text-blue-600 dark:hover:text-blue-400"
+                      >
+                        <LinkIcon className="w-3 h-3 mr-1" /> Telegram
+                      </a>
+                    )}
+                    {currentUser?.Twitter && (
+                      <a
+                        href={`https://twitter.com/${currentUser.Twitter as string}`}
+                        className="flex items-center hover:text-blue-600 dark:hover:text-blue-400"
+                      >
+                        <LinkIcon className="w-3 h-3 mr-1" /> Twitter
+                      </a>
+                    )}
                   </div>
                   <div className="mt-3 flex items-center justify-center sm:justify-start">
                     <Star className="w-4 h-4 text-yellow-400 mr-1" />
@@ -640,7 +916,7 @@ const UserProfilePage: NextPage = () => {
                 {
                   icon: <DollarSign className="w-6 h-6 text-green-500" />,
                   label: "Total Earnings",
-                  value: `tBNB ${TotalEarnings}`,
+                  value: `tBNB ${TotalEarnings || 0}`,
                   subtext: "From completed pull requests",
                 },
                 {

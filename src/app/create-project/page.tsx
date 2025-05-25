@@ -29,6 +29,7 @@ export default function CreateProjects() {
     const [languages, setLanguages] = useState<any>([]);
     const [stars, setStars] = useState<number>(0);
     const [forks, setForks] = useState<number>(0);
+    const [contributors, setContributors] = useState<any>([]);
     // Initialize Octokit once or when the access token changes
     const octokit = useMemo(() => {
         if ((sessionData as any)?.accessToken) {
@@ -55,8 +56,46 @@ export default function CreateProjects() {
             }
         };
 
+        const fetchRepoMaintainers=async () => {
+            if (!octokit) return; // Don't fetch if octokit is not initialized
+            try {
+                const response = await octokit.request("GET /repos/{owner}/{repo}/contributors", {
+                    owner: (sessionData as any)?.username,
+                    repo: selectedRepo,
+                    headers: {
+                        "X-GitHub-Api-Version": "2022-11-28",
+                    },
+                }).then((response) => response.data)
+                .then((data) => setContributors(data));
+            }
+            catch(e){
+              console.error("Error fetching repo maintainers:", e);
+            }
+        }
+        const languages=async () => {
+            if (!octokit) return; // Don't fetch if octokit is not initialized
+            try {
+               await octokit.request('GET /repos/{owner}/{repo}/languages', {
+                    owner: (sessionData as any)?.username,
+                    repo: selectedRepo,
+                    headers: {
+                        "X-GitHub-Api-Version": "2022-11-28",
+                    }
+                }).then((response) => response.data)
+               .then((data) => setLanguages(data))
+            }
+            catch(e){
+              console.error("Error fetching repo languages:", e);
+            }
+        }
+
+        languages();
+        fetchRepoMaintainers();
         fetchRepos();
     }, [octokit]); // Dependency: octokit
+
+
+
 
     // Fetch README when selectedRepo changes and octokit/session is available
     useEffect(() => {
@@ -97,9 +136,7 @@ export default function CreateProjects() {
     // Generate AI reply when repoValue changes
     useEffect(() => {
         async function generateAiSummary() {
-            if (!repoValue) { // Only run if repoValue has content
-                // Optionally clear aiReply if repoValue is empty
-                // if (aiReply) setAiReply(undefined); 
+            if (!repoValue) {  
                 return;
             }
 
@@ -235,6 +272,7 @@ export default function CreateProjects() {
                     project_repository: selectedRepo,         
                     email: sessionData?.user?.email,
                     languages:languages,
+                    maintainers:contributors,
                     stars:stars,
                     forks:forks
                 }),

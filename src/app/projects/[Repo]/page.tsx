@@ -98,9 +98,6 @@ export default function Project() {
   // Create octokit instance with timeout
   const octokit = new Octokit({
     auth: (session?.data as any)?.accessToken,
-    request: {
-      timeout: 10000, // 10 seconds timeout for requests
-    },
   });
 
   // Fetch repo data
@@ -272,7 +269,7 @@ export default function Project() {
       try {
         // Check authentication status first
         try {
-          await octokit.rest.users.getAuthenticated();
+          await octokit.request("GET /user");
         } catch (error: any) {
           // Exit if not authenticated
           return;
@@ -296,25 +293,38 @@ export default function Project() {
           // 1. Fetch collaborators
           octokit.request(
             `GET /repos/${repoData.projectOwner}/${repoData.project_repository}/collaborators`,
-            baseParams
+            {
+              owner: repoData.projectOwner,
+              repo: repoData.project_repository,
+            }
           ),
           
           // 2. Fetch languages
           octokit.request(
             `/repos/${repoData.projectOwner}/${repoData.project_repository}/languages`,
-            baseParams
+            {
+              owner: repoData.projectOwner,
+              repo: repoData.project_repository,
+            }
+            
           ),
           
           // 3. Fetch README
           octokit.request(
             `GET /repos/${repoData.projectOwner}/${repoData.project_repository}/readme`,
-            baseParams
+            {
+              owner: repoData.projectOwner,
+              repo: repoData.project_repository,
+            }
           ),
           
           // 4. Fetch commits (limited to 10)
           octokit.request(
             `/repos/${repoData.projectOwner}/${repoData.project_repository}/commits`,
-            { ...baseParams, per_page: 10 }
+            {
+              owner: repoData.projectOwner,
+              repo: repoData.project_repository,
+            }
           )
         ]);
         
@@ -377,14 +387,15 @@ export default function Project() {
     const repo = repoData?.project_repository;
     alert(`${owner},${repo},${skills},${comment}`);
     try {
-      await octokit.rest.issues
-        .createComment({
-          owner,
-          repo,
-          issue_number: parseInt(isIssueNumber as string),
-          body: comment,
-        })
-        .then((response) => response.data);
+      await octokit.request(`POST /repos/${owner}/${repo}/issues/${isIssueNumber}/comments`, { // NEW WAY
+        owner,
+        repo,
+        issue_number: parseInt(isIssueNumber as string),
+        body: comment,
+        headers: {
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
+      });
     } finally {
       if (session) {
         alert(`Request Details:
