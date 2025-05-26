@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '../../../db/index';
-import { projects } from '../../../db/schema';
+import { project } from '../../../db/schema';
 import { Pinecone } from '@pinecone-database/pinecone';
 import { InferenceClient } from '@huggingface/inference';
 import {groq} from "@ai-sdk/groq"
@@ -29,7 +29,7 @@ async function getEmbedding(text: string): Promise<number[]> {
 export async function GET() {
     try {
         const index = pinecone.index('gitfund');
-        const query = db.select().from(projects);
+        const query = db.select().from(project);
         const projectData = await query.execute();
 
         // Generate real embeddings for each project

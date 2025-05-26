@@ -1,5 +1,5 @@
 
-import { pgTable,json, text, varchar ,timestamp} from "drizzle-orm/pg-core";
+import { pgTable,json, text, varchar ,timestamp,integer} from "drizzle-orm/pg-core";
 import { sql } from 'drizzle-orm';
 
 export const messages = pgTable("messages", {
@@ -52,6 +52,9 @@ export const project=pgTable('project', {
   languages:json('languages'),
   stars:varchar('stars'),
   forks:varchar('forks'),
+  likes:integer('likes'),
+  owner:json('owner'),
+  language:json('language'),
 })
 export const projects = pgTable('projects', {
   projectName: varchar('id',{ length: 256 }).primaryKey(),
@@ -83,6 +86,7 @@ export const contributorRequests=pgTable('contributorRequests', {
   name: varchar('name', { length: 256 }),
   description: text('description'),
   status:varchar('status', { length: 256 }),
+  
 })
 
 
