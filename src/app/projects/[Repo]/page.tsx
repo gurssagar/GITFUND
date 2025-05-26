@@ -6,58 +6,12 @@ import { Octokit } from "octokit";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import remarkHtml from "remark-html";
+
 import Link from "next/link";
 import { format } from "date-fns";
 import { useSidebarContext } from "@/assets/components/SidebarContext";
 import { Suspense } from "react";
-import {
-  FaJs,
-  FaPython,
-  FaHtml5,
-  FaCss3Alt,
-  FaReact,
-  FaNodeJs,
-  FaJava,
-  FaPhp,
-  FaRust,
-  FaSwift,
-  FaDocker,
-  FaGitAlt,
-  FaSass,
-  FaVuejs,
-  FaAngular,
-  FaDatabase,
-  FaLinux,
-  FaApple,
-  FaWindows,
-  FaAndroid,
-  FaCode,
-  FaTerminal,
-  FaMarkdown,
-} from "react-icons/fa";
-import {
-  SiTypescript,
-  SiSolidity,
-  SiCplusplus,
-  SiGo,
-  SiKotlin,
-  SiRuby,
-  SiPerl,
-  SiScala,
-  SiLua,
-  SiDart,
-  SiElixir,
-  SiClojure,
-  SiR,
-  SiAssemblyscript,
-  SiGnubash,
-  SiGraphql,
-  SiKubernetes,
-  SiTerraform,
-  SiSwift,
-} from "react-icons/si";
+
 import { Icon } from "@iconify/react";
 import { project } from "@/db/schema";
 // Remove all react-icons imports
@@ -140,6 +94,7 @@ export default function Project() {
         
         setRepoData(processedRepoData);
         setIssues(issuesData.projects || []);
+    
       } catch (error: any) {
         if (error.name !== 'AbortError') {
           setRepoData(null);
@@ -173,58 +128,6 @@ export default function Project() {
     },
     [],
   );
-
-  const getLanguageIcon = (lang: string) => {
-    const lowerLang = lang.toLowerCase();
-    const iconMap: Record<string, string> = {
-      javascript: "logos:javascript",
-      typescript: "logos:typescript-icon",
-      python: "logos:python",
-      java: "logos:java",
-      "c++": "logos:c-plusplus",
-      "c#": "logos:c-sharp",
-      php: "logos:php",
-      ruby: "logos:ruby",
-      go: "logos:go",
-      rust: "logos:rust",
-      swift: "logos:swift",
-      kotlin: "logos:kotlin-icon",
-      scala: "logos:scala",
-      perl: "logos:perl",
-      lua: "logos:lua",
-      dart: "logos:dart",
-      r: "logos:r",
-      solidity: "logos:solidity",
-      sass: "logos:sass",
-      scss: "logos:sass",
-      sql: "logos:mysql",
-      shell: "logos:bash-icon",
-      bash: "logos:bash-icon",
-      sh: "logos:bash-icon",
-      assembly: "logos:assemblyscript",
-      "objective-c": "logos:objective-c",
-      elixir: "logos:elixir",
-      clojure: "logos:clojure",
-      vue: "logos:vue",
-      react: "logos:react",
-      angular: "logos:angular-icon",
-      "node.js": "logos:nodejs-icon",
-      node: "logos:nodejs-icon",
-      dockerfile: "logos:docker-icon",
-      graphql: "logos:graphql",
-      kubernetes: "logos:kubernetes",
-      terraform: "logos:terraform-icon",
-    };
-    const iconName = iconMap[lowerLang] || "logos:javascript";
-    return (
-      <Icon
-        icon={iconName}
-        className="rounded-full -ml-[2px]"
-        width={30}
-        height={30}
-      />
-    );
-  };
 
   const handleResize = () => {
     if (isExpanded) {
@@ -287,7 +190,6 @@ export default function Project() {
         const [
           contributorsResponse,
           languagesResponse,
-          readmeResponse,
           commitsResponse
         ] = await Promise.all([
           // 1. Fetch collaborators
@@ -309,14 +211,7 @@ export default function Project() {
             
           ),
           
-          // 3. Fetch README
-          octokit.request(
-            `GET /repos/${repoData.projectOwner}/${repoData.project_repository}/readme`,
-            {
-              owner: repoData.projectOwner,
-              repo: repoData.project_repository,
-            }
-          ),
+        
           
           // 4. Fetch commits (limited to 10)
           octokit.request(
@@ -330,13 +225,13 @@ export default function Project() {
         
         // Set contributors and filter for collabs
         setContributors(contributorsResponse.data);
-        setCollabs(
-          contributorsResponse.data.filter(
-            (collab: any) =>
-              collab.permissions?.admin === true ||
-              collab.permissions?.maintain === true
-          )
-        );
+        
+
+        console.log(repoData.contributors.filter(
+          (collab: any) =>
+            collab.permissions?.admin === true ||
+            collab.permissions?.maintain === true
+        ),"dhasadhsdhashda")
         
         // Set languages
         setLanguages(languagesResponse.data);
@@ -435,15 +330,15 @@ export default function Project() {
     }
   };
   // Calculate total bytes and percentages
-  const totalBytes = languages
-    ? Object.values(languages).reduce(
+  const totalBytes = repoData?.languages
+    ? Object.values(repoData?.languages).reduce(
         (acc: number, bytes) => acc + (typeof bytes === 'number' ? bytes : Number(bytes) || 0),
         0,
       )
     : 0;
   const languagePercentages: { [key: string]: number } = {};
-  if (languages && Object.keys(languages).length > 0) {
-    for (const [lang, bytes] of Object.entries(languages)) {
+  if (repoData?.languages && Object.keys(repoData?.languages).length > 0) {
+    for (const [lang, bytes] of Object.entries(repoData?.languages)) {
       const byteValue = typeof bytes === 'number' ? bytes : Number(bytes) || 0;
       languagePercentages[lang] = parseFloat(
         ((byteValue / totalBytes) * 100).toFixed(1),
@@ -480,7 +375,11 @@ export default function Project() {
                   <div>
                     <h2 className="text-xl font-bold pt-4">Owner</h2>
                     <div className="flex pt-2 space-x-2">
-                      {collabs?.map((collab: any) => (
+                      {repoData.contributors.filter(
+                          (collab: any) =>
+                            collab.permissions?.admin === true ||
+                            collab.permissions?.maintain === true
+                        )?.map((collab: any) => (
                         <div key={collab.id} className="flex items-center">
                           <img
                             src={collab.avatar_url}
@@ -497,7 +396,7 @@ export default function Project() {
                     <h2 className="text-xl font-bold pt-4">Contributors</h2>
                     <div className="pt-2 space-x-2">
                       <div className="flex space-x-2">
-                        {contributors?.map((collab: any) => {
+                        {repoData?.contributors?.map((collab: any) => {
                           return (
                             <>
                               <div

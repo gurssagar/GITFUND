@@ -55,6 +55,7 @@ export const project=pgTable('project', {
   likes:integer('likes'),
   owner:json('owner'),
   language:json('language'),
+  comits:json('comits'),
 })
 export const projects = pgTable('projects', {
   projectName: varchar('id',{ length: 256 }).primaryKey(),

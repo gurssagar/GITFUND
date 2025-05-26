@@ -30,6 +30,7 @@ export default function CreateProjects() {
     const [stars, setStars] = useState<number>(0);
     const [forks, setForks] = useState<number>(0);
     const [contributors, setContributors] = useState<any>([]);
+    const [comits, setComits] = useState<any>();
     // Initialize Octokit once or when the access token changes
     const octokit = useMemo(() => {
         if ((sessionData as any)?.accessToken) {
@@ -55,6 +56,25 @@ export default function CreateProjects() {
                 setAlertMessage("Failed to fetch repositories.");
             }
         };
+
+
+        const fetchCommits=async () => {
+            if (!octokit) return; // Don't fetch if octokit is not initialized
+            try {
+              await octokit.request(
+                `/repos/${(sessionData as any)?.username}/${selectedRepo}/commits`,
+                {
+                  owner: (sessionData as any)?.username,
+                  repo: selectedRepo,
+                }
+              ).then((response) => response.data)
+              .then((data:any) => setComits(data)); // Log the lengt
+            }
+            catch(e){
+              console.error("Error fetching repo commits:", e);
+            }
+        }
+
 
         const fetchRepoMaintainers=async () => {
             if (!octokit) return; // Don't fetch if octokit is not initialized
@@ -88,7 +108,7 @@ export default function CreateProjects() {
               console.error("Error fetching repo languages:", e);
             }
         }
-
+        fetchCommits();
         languages();
         fetchRepoMaintainers();
         fetchRepos();
@@ -163,7 +183,7 @@ export default function CreateProjects() {
         async function fetchRepoDetails() {
           let fetchedCollabs: any[] = [];
           try {
-            const collabsResponse = await octokit?.request('GET /repos/{owner}/{repo}/contributors', {
+            const collabsResponse = await octokit?.request('GET /repos/{owner}/{repo}/collaborators', {
                 owner: (sessionData?.user as any).username,
                 repo: selectedRepo,
                 headers: {
@@ -179,7 +199,7 @@ export default function CreateProjects() {
             });
             const repoForksArray = repoForks?.data;
             console.log(repoForksArray?.length, "forks fetched");
-            setForks(repoForksArray.length);
+            setForks(repoForksArray?.length);
             const repoStars=await octokit?.request('GET /repos/{owner}/{repo}/stargazers', {
                 owner: (sessionData?.user as any).username,
                 repo: selectedRepo,
@@ -188,8 +208,7 @@ export default function CreateProjects() {
                 }
             })
             const repoStarsArray = repoStars?.data;
-            console.log(repoStarsArray?.length, "stars fetched");
-            setStars(repoStarsArray.length);
+            console.log(repoStarsArray?.length, "stars fetched")
             const repoLanguages=await octokit?.request('GET /repos/{owner}/{repo}/languages', {
                 owner: (sessionData?.user as any).username,
                 repo: selectedRepo,
@@ -199,7 +218,7 @@ export default function CreateProjects() {
             });
             const repoLanguagesArray = repoLanguages?.data;
             setLanguages(repoLanguagesArray);
-            fetchedCollabs = collabsResponse.data;
+            fetchedCollabs = collabsResponse?.data;
             setCollabs(fetchedCollabs); // Update state
             console.log(fetchedCollabs, "collaborators fetched");
         } catch (collabError) {
@@ -274,7 +293,8 @@ export default function CreateProjects() {
                     languages:languages,
                     maintainers:contributors,
                     stars:stars,
-                    forks:forks
+                    forks:forks,
+                    comits:comits
                 }),
             });
 
