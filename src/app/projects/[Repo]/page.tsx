@@ -750,12 +750,11 @@ export default function Project() {
                       Recent Activity
                     </h2>
 
-                    {commitData &&
-                    Array.isArray(commitData) &&
-                    commitData.length > 0 ? (
+                    {repoData?.comits &&
+                    Array.isArray(repoData?.comits) &&
+                    repoData?.comits.length > 0 ? (
                       <div className="space-y-2">
-                        {commitData
-                          .slice(0, 10)
+                        {repoData?.comits
                           .map((commit: any, index: number) => (
                             <div
                               key={commit.sha}

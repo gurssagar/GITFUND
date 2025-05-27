@@ -62,13 +62,18 @@ export default function CreateProjects() {
             if (!octokit) return; // Don't fetch if octokit is not initialized
             try {
               await octokit.request(
-                `/repos/${(sessionData as any)?.username}/${selectedRepo}/commits`,
+                `/repos/${ (sessionData?.user as any).username}/${selectedRepo}/commits`,
                 {
-                  owner: (sessionData as any)?.username,
+                  owner:  (sessionData?.user as any).username,
                   repo: selectedRepo,
+                  per_page: 10,
+                  page: 1
                 }
               ).then((response) => response.data)
-              .then((data:any) => setComits(data)); // Log the lengt
+              .then((data:any) => {
+                setComits(data); 
+                console.log(data, "commits");}); // Log the lengt
+              
             }
             catch(e){
               console.error("Error fetching repo commits:", e);
@@ -80,7 +85,7 @@ export default function CreateProjects() {
             if (!octokit) return; // Don't fetch if octokit is not initialized
             try {
                 const response = await octokit.request("GET /repos/{owner}/{repo}/contributors", {
-                    owner: (sessionData as any)?.username,
+                    owner:  (sessionData?.user as any).username,
                     repo: selectedRepo,
                     headers: {
                         "X-GitHub-Api-Version": "2022-11-28",
@@ -96,7 +101,7 @@ export default function CreateProjects() {
             if (!octokit) return; // Don't fetch if octokit is not initialized
             try {
                await octokit.request('GET /repos/{owner}/{repo}/languages', {
-                    owner: (sessionData as any)?.username,
+                    owner:  (sessionData?.user as any).username,
                     repo: selectedRepo,
                     headers: {
                         "X-GitHub-Api-Version": "2022-11-28",
@@ -112,7 +117,7 @@ export default function CreateProjects() {
         languages();
         fetchRepoMaintainers();
         fetchRepos();
-    }, [octokit]); // Dependency: octokit
+    }, [octokit,sessionData,selectedRepo]); // Dependency: octokit
 
 
 
