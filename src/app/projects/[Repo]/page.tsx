@@ -401,18 +401,36 @@ export default function Project() {
                             <>
                               <div
                                 key={collab.id}
-                                className="flex items-center"
+                                className="flex "
                               >
                                 <img
                                   src={collab.avatar_url}
                                   alt={collab.login}
                                   className="w-7 h-7 rounded-full"
                                 />
-                                <p className="px-3">{collab.login}</p>
+                               
                               </div>
                             </>
                           );
                         })}
+                        
+                        
+                      </div>
+                      <div className="flex gap-1 mt-1">
+                        
+                        {repoData?.contributors?.slice(0,3).map((collab: any) => {
+                          return (
+                            <>
+                              <div
+                                key={collab.id}
+                                className="flex "
+                              >
+                                <p className="text-gray-700 dark:text-gray-100 text-[12px]">{collab.login}</p>
+                              </div>
+                            </>
+                          );
+                        })}
+                        
                       </div>
                     </div>
                   </div>
@@ -649,7 +667,7 @@ export default function Project() {
                                   <>
                                     <a
                                       href={`https://github.com/${projects[0]?.projectOwner}/${projects[0]?.project_repository}/issues/${issue.project_issues}`}
-                                      className="mx-4 bg-gray-600 rounded-full px-2 py-1"
+                                      className="mx-4 bg-gray-100 dark:bg-custom-dark-gray rounded-full px-2 py-1"
                                       target="_blank"
                                       rel="noopener noreferrer"
                                     >
@@ -901,7 +919,7 @@ export default function Project() {
                           </div>
                           <button
                             type="submit"
-                            className="w-full bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            className="w-full bg-custom-dark-gray dark:bg-gray-100 dark:text-black text-white px-4 py-2 rounded-md hover:bg-custom-dark-gray/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                           >
                             Submit
                           </button>
