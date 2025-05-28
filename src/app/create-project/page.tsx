@@ -17,21 +17,23 @@ interface Repo {
 }
 
 export default function CreateProjects() {
-    const { data: sessionData } = useSession(); // Renamed to avoid conflict with repoData's 'data'
-    const [repoData, setRepoData] = useState<Repo[]>([]); // Use the Repo interface
+
+    const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+    const { data: sessionData } = useSession();
+    const [repoData, setRepoData] = useState<Repo[]>([]);
     const [page, setPage] = useState(1);
     const [alertMessage, setAlertMessage] = useState<string | null>(null);
-    const [selectedRepo, setSelectedRepo] = useState<string>(''); // Initialize with empty string
+    const [selectedRepo, setSelectedRepo] = useState<string>('');
     const [aiReply, setAiReply] = useState<string | undefined>();
-    const [repoValue, setRepoValue] = useState<string>(''); // Initialize with empty string
-    const [collabs, setCollabs] = useState<any[]>([]); // Initialize as an empty array
+    const [repoValue, setRepoValue] = useState<string>('');
+    const [collabs, setCollabs] = useState<any[]>([]);
     const { isShrunk } = useSidebarContext();
     const [languages, setLanguages] = useState<any>([]);
     const [stars, setStars] = useState<number>(0);
     const [forks, setForks] = useState<number>(0);
     const [contributors, setContributors] = useState<any>([]);
     const [comits, setComits] = useState<any>();
-    // Initialize Octokit once or when the access token changes
+
     const octokit = useMemo(() => {
         if ((sessionData as any)?.accessToken) {
             return new Octokit({ auth: (sessionData as any)?.accessToken });
@@ -39,132 +41,136 @@ export default function CreateProjects() {
         return null;
     }, [sessionData]);
 
-    // Fetch repositories when the component mounts and octokit is available
+    // Effect to fetch user's repositories (runs once or when octokit changes)
     useEffect(() => {
         const fetchRepos = async () => {
-            if (!octokit) return; // Don't fetch if octokit is not initialized
+            if (!octokit) return;
             try {
                 const response = await octokit.request("GET /user/repos", {
                     headers: {
                         "X-GitHub-Api-Version": "2022-11-28",
                     },
                 });
-                setRepoData(response.data as Repo[]); 
-                console.log(response.data, "repos");
+                setRepoData(response.data as Repo[]);
             } catch (error) {
                 console.error("Error fetching repositories:", error);
                 setAlertMessage("Failed to fetch repositories.");
             }
         };
-
-
-        const fetchCommits=async () => {
-            if (!octokit) return; // Don't fetch if octokit is not initialized
-            try {
-              await octokit.request(
-                `/repos/${ (sessionData?.user as any).username}/${selectedRepo}/commits`,
-                {
-                  owner:  (sessionData?.user as any).username,
-                  repo: selectedRepo,
-                  per_page: 10,
-                  page: 1
-                }
-              ).then((response) => response.data)
-              .then((data:any) => {
-                setComits(data); 
-                console.log(data, "commits");}); // Log the lengt
-              
-            }
-            catch(e){
-              console.error("Error fetching repo commits:", e);
-            }
-        }
-
-
-        const fetchRepoMaintainers=async () => {
-            if (!octokit) return; // Don't fetch if octokit is not initialized
-            try {
-                const response = await octokit.request("GET /repos/{owner}/{repo}/contributors", {
-                    owner:  (sessionData?.user as any).username,
-                    repo: selectedRepo,
-                    headers: {
-                        "X-GitHub-Api-Version": "2022-11-28",
-                    },
-                }).then((response) => response.data)
-                .then((data) => setContributors(data));
-            }
-            catch(e){
-              console.error("Error fetching repo maintainers:", e);
-            }
-        }
-        const languages=async () => {
-            if (!octokit) return; // Don't fetch if octokit is not initialized
-            try {
-               await octokit.request('GET /repos/{owner}/{repo}/languages', {
-                    owner:  (sessionData?.user as any).username,
-                    repo: selectedRepo,
-                    headers: {
-                        "X-GitHub-Api-Version": "2022-11-28",
-                    }
-                }).then((response) => response.data)
-               .then((data) => setLanguages(data))
-            }
-            catch(e){
-              console.error("Error fetching repo languages:", e);
-            }
-        }
-        fetchCommits();
-        languages();
-        fetchRepoMaintainers();
         fetchRepos();
-    }, [octokit,sessionData,selectedRepo]); // Dependency: octokit
+    }, [octokit]);
 
+    // Effect to fetch repo details (commits, maintainers, languages) when selectedRepo changes
+    useEffect(() => {
+        if (!selectedRepo || !octokit || !(sessionData?.user as any)?.username) {
+            // Clear related states if no repo is selected or session/octokit is unavailable
+            setComits(undefined);
+            setContributors([]);
+            setLanguages([]);
+            setStars(0);
+            setForks(0);
+            setCollabs([]);
+            return;
+        }
 
+        const fetchAllRepoDetails = async () => {
+            const username = (sessionData?.user as any).username;
+            try {
+                // Fetch commits
+                const commitsData = await octokit.request(
+                    `/repos/${username}/${selectedRepo}/commits`,
+                    { owner: username, repo: selectedRepo, per_page: 10, page: 1 }
+                ).then(res => res.data);
+                setComits(commitsData);
 
+                // Fetch contributors (used as maintainers in your code)
+                const contributorsData = await octokit.request("GET /repos/{owner}/{repo}/contributors", {
+                    owner: username, repo: selectedRepo,
+                    headers: { "X-GitHub-Api-Version": "2022-11-28" },
+                }).then(res => res.data);
+                setContributors(contributorsData);
 
-    // Fetch README when selectedRepo changes and octokit/session is available
+                // Fetch languages
+                const languagesData = await octokit.request('GET /repos/{owner}/{repo}/languages', {
+                    owner: username, repo: selectedRepo,
+                    headers: { "X-GitHub-Api-Version": "2022-11-28" },
+                }).then(res => res.data);
+                setLanguages(languagesData);
+
+                // Fetch collaborators
+                const collabsResponse = await octokit.request('GET /repos/{owner}/{repo}/collaborators', {
+                    owner: username, repo: selectedRepo,
+                    headers: { 'X-GitHub-Api-Version': '2022-11-28' }
+                });
+                setCollabs(collabsResponse.data || []);
+
+                // Fetch forks count (simplified)
+                const repoDetailsResponse = await octokit.request('GET /repos/{owner}/{repo}', {
+                    owner: username, repo: selectedRepo,
+                    headers: { 'X-GitHub-Api-Version': '2022-11-28' }
+                });
+                setForks(repoDetailsResponse.data.forks_count || 0);
+                setStars(repoDetailsResponse.data.stargazers_count || 0);
+
+            } catch (error) {
+                console.error(`Error fetching details for ${selectedRepo}:`, error);
+                setAlertMessage(`Failed to fetch some details for ${selectedRepo}.`);
+            }
+        };
+
+        fetchAllRepoDetails();
+    }, [selectedRepo, octokit, sessionData]);
+
+    // Fetch README when selectedRepo changes
     useEffect(() => {
         const fetchReadme = async () => {
             if (!selectedRepo || !octokit || !(sessionData?.user as any)?.username) {
-                // Clear repoValue if conditions are not met, or handle as needed
-                if (repoValue) setRepoValue(''); 
+                setRepoValue('');
+                setAiReply(undefined); // Clear AI reply if repo is deselected
                 return;
             }
+            // When a new repo is selected, disable the button until AI summary is ready
+            setIsButtonDisabled(true);
+            setAiReply(undefined); // Clear previous AI reply
+
             try {
                 const response = await octokit.request('GET /repos/{owner}/{repo}/readme', {
                     owner: (sessionData?.user as any).username,
                     repo: selectedRepo,
-                    headers: {
-                        'X-GitHub-Api-Version': '2022-11-28'
-                    }
+                    headers: { 'X-GitHub-Api-Version': '2022-11-28' }
                 });
-                // Ensure content exists and is a string before decoding
                 if (response.data && typeof response.data.content === 'string') {
                     const value = atob(response.data.content);
                     setRepoValue(value);
-                    console.log("README content fetched for", selectedRepo);
                 } else {
-                    console.warn("README content is missing or not a string for", selectedRepo);
-                    setRepoValue(''); // Set to empty or handle as an error
+                    setRepoValue('');
                     setAlertMessage(`README not found or is empty for ${selectedRepo}.`);
+                    setIsButtonDisabled(true); // Keep disabled if no README for AI summary
                 }
             } catch (error) {
                 console.error("Error fetching README:", error);
-                setRepoValue(''); // Clear on error
+                setRepoValue('');
                 setAlertMessage(`Failed to fetch README for ${selectedRepo}.`);
+                setIsButtonDisabled(true); // Keep disabled on README fetch error
             }
         };
 
         fetchReadme();
-    }, [selectedRepo, octokit, sessionData, repoValue]); // Added repoValue to dependencies to avoid stale closure issues if we clear it
+    }, [selectedRepo, octokit, sessionData]);
 
-    // Generate AI reply when repoValue changes
+    // Generate AI reply when repoValue changes (README content)
     useEffect(() => {
         async function generateAiSummary() {
-            if (!repoValue) {  
+            if (!repoValue) {
+                // If there's no repoValue (e.g. no README), ensure button remains disabled
+                // unless you want to allow submission without AI summary.
+                // For now, we assume AI summary is crucial, so button stays disabled.
+                setIsButtonDisabled(true);
                 return;
             }
 
+            // Button is already set to disabled when repoValue changes (in previous useEffect)
+            // or will be set here if repoValue was initially empty.
             console.log("Generating AI summary for repo value:", repoValue.substring(0,100) + "...");
             try {
               const response = await fetch('/api/ai-description', {
@@ -174,66 +180,32 @@ export default function CreateProjects() {
               });
               const data = await response.json();
               setAiReply(data.text || 'Failed to generate AI summary.');
-              console.log('AI summary generated.');
+              if (data.text) {
+                setIsButtonDisabled(false); // Enable button ONLY if AI summary is successful
+              } else {
+                setIsButtonDisabled(true); // Keep disabled if AI summary failed
+              }
             } catch (error) {
               console.error('Error generating AI reply:', error);
               setAiReply('Failed to generate AI summary. Please try again.');
+              setIsButtonDisabled(true); // Keep disabled on error
             }
         }
 
         generateAiSummary();
-    }, [repoValue]); // Dependency: repoValue
+    }, [repoValue]);
 
+    // Additional effect to handle button disable state based on selectedRepo directly
     useEffect(() => {
-        async function fetchRepoDetails() {
-          let fetchedCollabs: any[] = [];
-          try {
-            const collabsResponse = await octokit?.request('GET /repos/{owner}/{repo}/collaborators', {
-                owner: (sessionData?.user as any).username,
-                repo: selectedRepo,
-                headers: {
-                    'X-GitHub-Api-Version': '2022-11-28'
-                }
-            });
-            const repoForks=await octokit?.request('GET /repos/{owner}/{repo}/forks', {
-                owner: (sessionData?.user as any).username,
-                repo: selectedRepo,
-                headers: {
-                    'X-GitHub-Api-Version': '2022-11-28'
-                }
-            });
-            const repoForksArray = repoForks?.data;
-            console.log(repoForksArray?.length, "forks fetched");
-            setForks(repoForksArray?.length);
-            const repoStars=await octokit?.request('GET /repos/{owner}/{repo}/stargazers', {
-                owner: (sessionData?.user as any).username,
-                repo: selectedRepo,
-                headers: {
-                    'X-GitHub-Api-Version': '2022-11-28'
-                }
-            })
-            const repoStarsArray = repoStars?.data;
-            console.log(repoStarsArray?.length, "stars fetched")
-            const repoLanguages=await octokit?.request('GET /repos/{owner}/{repo}/languages', {
-                owner: (sessionData?.user as any).username,
-                repo: selectedRepo,
-                headers: {
-                    'X-GitHub-Api-Version': '2022-11-28'
-                }
-            });
-            const repoLanguagesArray = repoLanguages?.data;
-            setLanguages(repoLanguagesArray);
-            fetchedCollabs = collabsResponse?.data;
-            setCollabs(fetchedCollabs); // Update state
-            console.log(fetchedCollabs, "collaborators fetched");
-        } catch (collabError) {
-            console.error("Error fetching collaborators:", collabError);
-            // Decide if this is a critical error or if you can proceed without collabs
-            setAlertMessage("Warning: Could not fetch project collaborators.");
+        if (!selectedRepo) {
+            setIsButtonDisabled(true);
+            setAiReply(undefined); // Clear AI reply if no repo is selected
+            setRepoValue('');    // Clear repo value (README)
         }
-        }
-        fetchRepoDetails();
-    },[ repoValue]);
+        // If a repo is selected, the button's state is primarily managed by the AI summary loading process.
+        // However, if repoValue becomes empty (e.g. README fetch failed or no README), 
+        // the AI summary useEffect will handle disabling the button.
+    }, [selectedRepo]);
 
     const addProject = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -440,10 +412,9 @@ export default function CreateProjects() {
 
                     <div className="mt-6 flex justify-end">
                       <button
-                        type="submit" // Changed from onClick to type="submit" for form submission
-                        // onClick={() => setPage(2)} // This button now submits the form, page change handled in addProject
+                        type="submit"
+                        disabled={isButtonDisabled} // This will now correctly reflect loading state
                         className="bg-[#29292c] text-white p-2 rounded-md hover:bg-[#222225] px-4 disabled:opacity-50"
-                        // disabled={!selectedRepo || !formDataIsComplete} // Add more robust disabling logic if needed
                       >
                         Submit Project
                       </button>
