@@ -74,7 +74,7 @@ function ChatPageLayout() {
     if (!session?.user?.username) return; // Ensure username exists before proceeding
 
     // Create socket but don't connect yet
-    const newSocket = io("https://octopus-app-pcmuh.ondigitalocean.app/", {
+    const newSocket = io("https://gitfund-chat-8uaxx.ondigitalocean.app/", {
       autoConnect: false,
       reconnectionAttempts: 5,
       reconnectionDelay: 2000,
