@@ -38,6 +38,8 @@ type ConnectionStatus = "disconnected" | "connecting" | "connected";
 
 export default function OptimizedChatPage() {
   const { data: session } = useSession();
+
+  const [databaseMessages, setDatabaseMessages] = useState([]);
   const memoizedSession = useMemo(() => session, [session]);
 
   const { theme } = useTheme();
@@ -54,9 +56,43 @@ export default function OptimizedChatPage() {
   const [messageInput, setMessageInput] = useState("");
   const [connectionStatus, setConnectionStatus] =
     useState<ConnectionStatus>("disconnected");
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const username = memoizedSession?.user?.username;
+        const response = await fetch(
+          `/api/chat${username ? `?username=${username}` : ""}`,
+        );
+        const data = await response.json();
+        console.log(data, "yeyyyy messages");
+        if (data.projects) {
+          setDatabaseMessages(data.projects.slice(0, 100));
+        }
+      } catch (error) {
+        console.error("Failed to fetch messages:", error);
+      }
+    };
+
+    fetchMessages();
+  }, []);
+
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeUsers, setActiveUsers] = useState<string[]>([]);
   const [isReconnecting, setIsReconnecting] = useState(false);
+
+  const saveMessageToBackend = useCallback(async (msg: ChatMessage) => {
+    console.log(msg, "hello this is the message");
+    try {
+      await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(msg),
+      });
+    } catch (error) {
+      console.error("Failed to save message to backend:", error);
+    }
+  }, []);
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -229,14 +265,31 @@ export default function OptimizedChatPage() {
         );
 
         if (response.error) {
+          saveMessageToBackend({
+            ...newMessage,
+            pending: false,
+            failed: false,
+            timestamp: response.timestamp || newMessage.timestamp,
+          });
           console.error("Message send failed:", response.error);
           setErrorMessage(response.error);
         } else {
           console.log("✅ Message sent successfully");
+          saveMessageToBackend({
+            ...newMessage,
+            pending: false,
+            failed: false,
+            timestamp: response.timestamp || newMessage.timestamp,
+          });
         }
       },
     );
-  }, [selectedUser, messageInput, memoizedSession?.user?.username]);
+  }, [
+    selectedUser,
+    messageInput,
+    memoizedSession?.user?.username,
+    saveMessageToBackend,
+  ]);
 
   const handleKeyPress = useCallback(
     (e: React.KeyboardEvent) => {
@@ -304,6 +357,15 @@ export default function OptimizedChatPage() {
         msg.to === memoizedSession.user?.username),
   );
 
+  const dbMessages = databaseMessages.filter(
+    (msg) =>
+      (msg.sender_id === memoizedSession.user?.username &&
+        msg.reciever_id === selectedUser?.id) ||
+      (msg.sender_id === selectedUser?.id &&
+        msg.reciever_id === memoizedSession.user?.username),
+  );
+
+  console.log("Final Messages", dbMessages);
   return (
     <div className="flex h-screen overflow-hidden bg-gray-100 dark:bg-gray-900">
       <Sidebar />
@@ -398,44 +460,85 @@ export default function OptimizedChatPage() {
 
                 {/* Messages */}
                 <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+                  {dbMessages?.length === 0 ? (
+                    <></>
+                  ) : (
+                    <>
+                      {dbMessages?.map((msg, id) => (
+                        <div
+                          key={`${msg.timestamp}-${id}`}
+                          className={cn(
+                            "flex flex-col max-w-[75%] p-3 rounded-lg shadow-sm",
+                            msg.sender_id === memoizedSession.user?.username
+                              ? "ml-auto bg-blue-500 text-white"
+                              : "mr-auto bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200",
+                          )}
+                        >
+                          <p className="text-sm whitespace-pre-wrap">
+                            {msg.text}
+                          </p>
+                          <div className="mt-1 text-xs opacity-75 self-end flex items-center">
+                            <span>
+                              {new Date(msg.timestamp).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </span>
+                            {msg.pending && <span className="ml-1">⏳</span>}
+                            {msg.failed && (
+                              <button
+                                onClick={() => retryFailedMessage(msg)}
+                                className="ml-1 text-red-300 hover:text-red-100"
+                                title="Click to retry"
+                              >
+                                ⚠️
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  )}
                   {conversationMessages.length === 0 ? (
                     <div className="text-center text-gray-500 mt-8">
                       <p>No messages yet. Start the conversation!</p>
                     </div>
                   ) : (
-                    conversationMessages.map((msg, index) => (
-                      <div
-                        key={`${msg.timestamp}-${index}`}
-                        className={cn(
-                          "flex flex-col max-w-[75%] p-3 rounded-lg shadow-sm",
-                          msg.from === memoizedSession.user?.username
-                            ? "ml-auto bg-blue-500 text-white"
-                            : "mr-auto bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200",
-                        )}
-                      >
-                        <p className="text-sm whitespace-pre-wrap">
-                          {msg.text}
-                        </p>
-                        <div className="mt-1 text-xs opacity-75 self-end flex items-center">
-                          <span>
-                            {new Date(msg.timestamp).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </span>
-                          {msg.pending && <span className="ml-1">⏳</span>}
-                          {msg.failed && (
-                            <button
-                              onClick={() => retryFailedMessage(msg)}
-                              className="ml-1 text-red-300 hover:text-red-100"
-                              title="Click to retry"
-                            >
-                              ⚠️
-                            </button>
+                    <>
+                      {conversationMessages.map((msg, index) => (
+                        <div
+                          key={`${msg.timestamp}-${index}`}
+                          className={cn(
+                            "flex flex-col max-w-[75%] p-3 rounded-lg shadow-sm",
+                            msg.from === memoizedSession.user?.username
+                              ? "ml-auto bg-blue-500 text-white"
+                              : "mr-auto bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200",
                           )}
+                        >
+                          <p className="text-sm whitespace-pre-wrap">
+                            {msg.text}
+                          </p>
+                          <div className="mt-1 text-xs opacity-75 self-end flex items-center">
+                            <span>
+                              {new Date(msg.timestamp).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </span>
+                            {msg.pending && <span className="ml-1">⏳</span>}
+                            {msg.failed && (
+                              <button
+                                onClick={() => retryFailedMessage(msg)}
+                                className="ml-1 text-red-300 hover:text-red-100"
+                                title="Click to retry"
+                              >
+                                ⚠️
+                              </button>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      ))}
+                    </>
                   )}
                   <div ref={messagesEndRef} />
                 </div>

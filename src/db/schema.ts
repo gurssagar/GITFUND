@@ -36,13 +36,10 @@ export const messages = pgTable("messages", {
   id: varchar("id", { length: 256 })
     .primaryKey()
     .default(sql`gen_random_uuid()`),
-  body: text("body").notNull(),
-  conversation_id: varchar("conversation_id", { length: 256 })
-    .notNull()
-    .references(() => conversations.id),
-  sender_id: varchar("sender_id", { length: 256 })
-    .notNull()
-    .references(() => users.id),
+  text: text("text"),
+  timestamp: timestamp("timestamp"),
+  reciever_id: varchar("reciever_id", { length: 256 }),
+  sender_id: varchar("sender_id", { length: 256 }),
 });
 
 // Participants Table
