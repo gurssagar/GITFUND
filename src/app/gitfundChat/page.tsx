@@ -117,7 +117,7 @@ export default function OptimizedChatPage() {
     setConnectionStatus("connecting");
     setErrorMessage(null);
 
-    const socket = io("http://localhost:4000", {
+    const socket = io("https://gitfund-chat-8uaxx.ondigitalocean.app", {
       auth: { username: memoizedSession.user.username },
       reconnectionAttempts: 5,
       reconnectionDelay: 2000,
