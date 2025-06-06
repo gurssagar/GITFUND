@@ -1,15 +1,21 @@
 'use client';
 
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import SearchModal from './SearchModal';
 import { useSearch } from './SearchContext';
-export default function KbarBlurWrapper({
+
+const KbarBlurWrapper = memo(({
   children,
 }: {
   children: React.ReactNode;
-}) {
-    const { isSearchOpen, toggleSearchModal, closeSearchModal } = useSearch();
-    console.log(isSearchOpen,'query') // <-- query is a string, not a booleans like in the ap
+}) => {
+    const { isSearchOpen } = useSearch();
+    // Remove unused variables and console.log to reduce unnecessary work
+    
+    // Use useMemo to only recompute the className when isSearchOpen changes
+    const blurClass = useMemo(() => isSearchOpen ? 'blur blur-[2px]' : '', [isSearchOpen]);
+    
+    return <div className={blurClass}>{children}</div>;
+});
 
-  return <div className={isSearchOpen ? 'blur blur-[2px]' : ''}>{children}</div>;
-}
+export default KbarBlurWrapper;

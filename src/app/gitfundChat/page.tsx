@@ -1,12 +1,12 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import Sidebar from "@/assets/components/chats/chatSidebar";
-import Topbar from "@/assets/components/chats/chatTopbar";
-import { usechatSidebarContext } from "@/assets/components/chats/chatSiderbarContext";
-import { Suspense } from "react";
-import { useSession, SessionContextValue } from "next-auth/react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
+import { signIn, useSession } from "next-auth/react";
 import { io, Socket } from "socket.io-client";
 import Image from "next/image";
 import { useTheme } from "next-themes";
@@ -15,273 +15,271 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { useRef } from "react";
+import Sidebar from "@/assets/components/chats/chatSidebar";
+import Topbar from "@/assets/components/chats/chatTopbar";
+import { usechatSidebarContext } from "@/assets/components/chats/chatSiderbarContext";
 
 interface ChatMessage {
   text: string;
   timestamp: string;
   to: string;
   from: string;
-  pending?: boolean; // Added for local message status
+  pending?: boolean;
+  failed?: boolean;
 }
 
-interface SessionUser {
-  user?: {
-    name?: string | null;
-    email?: string | null;
-    image?: string | null;
-    id?: string | null; // Assuming id is part of your user object
-    username?: string | null; // Assuming username is part of your user object
-  };
-  // Potentially add other session properties like accessToken if needed
-  accessToken?: string;
+interface User {
+  id: string;
+  username?: string;
+  isOnline?: boolean;
 }
 
-// New component to encapsulate the layout and use the context
-function ChatPageLayout() {
-  const { data: session } = useSession() as { data: SessionUser | null }; // Use SessionUser type
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [socket, setSocket] = useState<Socket | null>(null);
-  const [messageInput, setMessageInput] = useState<string>("");
-  const {
-    isShrunk,
-    setIsShrunk,
-    selectedUser,
-    filteredUsers,
-    refreshUsers,
-    isLoadingUsers,
-  } = usechatSidebarContext();
-  // Using context for user data instead of local state
-  const [usernameAlreadySelected, setUsernameAlreadySelected] =
-    useState<boolean>(false);
-  const [connectionStatus, setConnectionStatus] = useState<
-    "disconnected" | "connecting" | "connected"
-  >("disconnected");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+type ConnectionStatus = "disconnected" | "connecting" | "connected";
+
+export default function OptimizedChatPage() {
+  const { data: session } = useSession();
+  const memoizedSession = useMemo(() => session, [session]);
+
   const { theme } = useTheme();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const socketRef = useRef<Socket | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Auto-scroll to bottom when chatMessages change
+  // Context from sidebar
+  const { isShrunk, selectedUser, isLoadingUsers, refreshUsers } =
+    usechatSidebarContext();
+
+  // State
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messageInput, setMessageInput] = useState("");
+  const [connectionStatus, setConnectionStatus] =
+    useState<ConnectionStatus>("disconnected");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [activeUsers, setActiveUsers] = useState<string[]>([]);
+  const [isReconnecting, setIsReconnecting] = useState(false);
+
+  // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Not needed anymore as we're using the context for user data
-
-  // Initialize socket without connecting
+  // Clear error message after 5 seconds
   useEffect(() => {
-    if (!session?.user?.username) return; // Ensure username exists before proceeding
+    if (errorMessage) {
+      const timer = setTimeout(() => setErrorMessage(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage]);
 
-    // Create socket but don't connect yet
-    const newSocket = io("https://gitfund-chat-8uaxx.ondigitalocean.app/", {
-      autoConnect: false,
+  // Socket connection management
+  const connectSocket = useCallback(() => {
+    if (!memoizedSession?.user?.username || socketRef.current?.connected) {
+      return;
+    }
+
+    console.log(`Connecting as ${memoizedSession.user.username}...`);
+    setConnectionStatus("connecting");
+    setErrorMessage(null);
+
+    const socket = io("http://localhost:4000", {
+      auth: { username: memoizedSession.user.username },
       reconnectionAttempts: 5,
       reconnectionDelay: 2000,
       timeout: 10000,
     });
 
-    // Set up event listeners
-    newSocket.on("connect", () => {
-      setIsConnected(true);
+    // Connection events
+    socket.on("connect", () => {
+      console.log("✅ Connected to chat server");
       setConnectionStatus("connected");
       setErrorMessage(null);
-      console.log("Socket connected");
+      setIsReconnecting(false);
 
-      // Refresh users after connection
-      refreshUsers();
-    });
-
-    newSocket.on("connecting", () => {
-      setConnectionStatus("connecting");
-      console.log("Socket connecting...");
-    });
-
-    newSocket.on("reconnect_attempt", (attempt: number) => {
-      setConnectionStatus("connecting");
-      console.log(`Socket reconnection attempt ${attempt}`);
-    });
-
-    newSocket.on("authenticated", (data: { username: string }) => {
-      console.log(`Socket authenticated as ${data.username}`);
-      setConnectionStatus("connected");
-      setErrorMessage(null);
-    });
-
-    newSocket.on("auth_error", (error: { message: string } | string) => {
-      // More specific error type
-      const errorMessageText =
-        typeof error === "string" ? error : error.message;
-      if (errorMessageText === "User already connected") {
-        setErrorMessage(
-          "You are already connected from another tab or device. Please close other sessions and try again.",
-        );
-      } else {
-        setErrorMessage(`Authentication error: ${errorMessageText}`);
-        console.error("Authentication error:", errorMessageText);
-      }
-      setConnectionStatus("disconnected");
-    });
-
-    newSocket.on("error", (error: { message: string } | string) => {
-      // More specific error type
-      const errorMessageText =
-        typeof error === "string" ? error : error.message;
-      if (errorMessageText === "Recipient not available") {
-        setErrorMessage("The user you are trying to message is not online.");
-      } else if (errorMessageText === "Unauthorized message attempt") {
-        setErrorMessage("You are not authorized to send this message.");
-      } else if (errorMessageText === "Communication not allowed") {
-        setErrorMessage("Communication with this user is not allowed.");
-      } else {
-        setErrorMessage(`Socket error: ${errorMessageText}`);
-        console.error("Socket error:", errorMessageText);
+      // Clear any pending reconnection timeout
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
       }
     });
 
-    newSocket.on("privateMessage", (msg: ChatMessage) => {
-      setMessages((prev) => [...prev, msg]);
-    });
-
-    newSocket.on(
-      "messageDelivered",
-      (data: { to: string; timestamp: string }) => {
-        console.log(`Message delivered to ${data.to} at ${data.timestamp}`);
-        // You could update the message state to show "delivered" status
-        // or add a visual indicator next to messages that have been delivered
-      },
-    );
-
-    newSocket.on("disconnect", (reason: Socket.DisconnectReason) => {
-      console.log(`Socket disconnected: ${reason}`);
-      setIsConnected(false);
+    socket.on("disconnect", (reason) => {
+      console.log(`❌ Disconnected: ${reason}`);
       setConnectionStatus("disconnected");
 
       if (reason === "io server disconnect") {
-        // the disconnection was initiated by the server, reconnect manually
-        setErrorMessage("Disconnected by server. Trying to reconnect...");
-        newSocket.connect();
-      } else if (reason === "transport close") {
-        // connection was closed (e.g., user lost internet)
-        setErrorMessage("Connection lost. Trying to reconnect...");
-      } else {
-        setErrorMessage(`Disconnected: ${reason}`);
+        setErrorMessage("Server disconnected. Attempting to reconnect...");
+        setIsReconnecting(true);
       }
     });
 
-    newSocket.on("reconnect", (attemptNumber: number) => {
-      console.log(`Socket reconnected after ${attemptNumber} attempts`);
-      setErrorMessage(null);
+    socket.on("connect_error", (error) => {
+      console.error("Connection error:", error.message);
+      setConnectionStatus("disconnected");
+      setErrorMessage(`Connection failed: ${error.message}`);
     });
 
-    newSocket.on("reconnect_failed", () => {
-      setErrorMessage(
-        "Failed to reconnect to the chat server. Please refresh the page.",
-      );
+    // Authentication events
+    socket.on("authenticated", (data: { username: string }) => {
+      console.log(`🔐 Authenticated as ${data.username}`);
     });
 
-    setSocket(newSocket);
+    // User list events
+    socket.on("usersList", (data: { users: string[] }) => {
+      console.log("👥 Users list updated:", data.users);
+      setActiveUsers(data.users);
+      refreshUsers();
+    });
+
+    // Message events
+    socket.on("privateMessage", (msg: ChatMessage) => {
+      console.log("💬 Received message:", msg);
+      setMessages((prev) => [...prev, { ...msg, pending: false }]);
+    });
+
+    // Error handling
+    socket.on("error", (error: string) => {
+      console.error("Socket error:", error);
+      setErrorMessage(error);
+    });
+
+    socketRef.current = socket;
+  }, [refreshUsers, memoizedSession]);
+
+  // Initialize socket connection
+  useEffect(() => {
+    connectSocket();
 
     return () => {
-      newSocket.disconnect();
-    };
-  }, [session]);
-
-  // Function to handle username selection and connect
-  const onUsernameSelection = (username: string) => {
-    if (!socket || !username) return;
-
-    setUsernameAlreadySelected(true);
-    setConnectionStatus("connecting");
-
-    // Set auth before connection, as the server uses handshake.auth
-    socket.auth = { username };
-
-    try {
-      socket.connect();
-      console.log(`Connecting as ${username}...`);
-    } catch (error) {
-      console.error("Connection error:", error);
-      setErrorMessage(`Failed to connect: ${error}`);
-      setConnectionStatus("disconnected");
-    }
-  };
-
-  // Auto-connect when session is available
-  useEffect(() => {
-    if (session?.user?.username && socket && !usernameAlreadySelected) {
-      const username = session.user.username; // Username is confirmed to exist here
-      if (username) {
-        console.log(`Auto-connecting as ${username}`);
-        onUsernameSelection(username);
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
       }
-    }
-  }, [session, socket, usernameAlreadySelected]); // Removed onUsernameSelection from deps as it's stable
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+    };
+  }, [connectSocket]);
 
-  const sendMessage = () => {
+  // Handle reconnection
+  useEffect(() => {
     if (
-      !socket ||
+      connectionStatus === "disconnected" &&
+      !isReconnecting &&
+      memoizedSession?.user?.username
+    ) {
+      reconnectTimeoutRef.current = setTimeout(() => {
+        console.log("🔄 Attempting to reconnect...");
+        setIsReconnecting(true);
+        connectSocket();
+      }, 3000);
+    }
+  }, [
+    connectionStatus,
+    isReconnecting,
+    memoizedSession?.user?.username,
+    connectSocket,
+  ]);
+
+  const sendMessage = useCallback(() => {
+    const socket = socketRef.current;
+
+    if (
+      !socket?.connected ||
       !selectedUser ||
       !messageInput.trim() ||
-      !session?.user?.username
-    )
+      !memoizedSession?.user?.username
+    ) {
       return;
+    }
 
-    const localMsg: ChatMessage = {
-      text: messageInput,
+    const messageId = `${Date.now()}-${Math.random()}`;
+    const newMessage: ChatMessage = {
+      text: messageInput.trim(),
       timestamp: new Date().toISOString(),
-      to: selectedUser.username,
-      from: session.user.username, // Username is confirmed to exist here
+      to: selectedUser.id,
+      from: memoizedSession.user.username,
       pending: true,
     };
-    setMessages((prev) => [...prev, localMsg]);
 
+    // Add message optimistically
+    setMessages((prev) => [...prev, { ...newMessage }]);
+    setMessageInput("");
+
+    // Send to server with callback
     socket.emit(
       "privateMessage",
       {
-        to: selectedUser.username,
-        text: messageInput,
+        to: selectedUser.id,
+        text: newMessage.text,
+        timestamp: newMessage.timestamp,
       },
-      (ack: { error?: string; messageId?: string }) => {
-        if (ack.error) {
-          console.error("Message send error:", ack.error);
-          setMessages((prevMessages) =>
-            prevMessages.map((msg) =>
-              msg.timestamp === localMsg.timestamp
-                ? { ...msg, pending: false, error: ack.error } // Add error to message
-                : msg,
-            ),
-          );
-          setErrorMessage(`Failed to send message: ${ack.error}`);
+      (response: { success?: boolean; error?: string; timestamp?: string }) => {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.timestamp === newMessage.timestamp &&
+            msg.from === newMessage.from
+              ? {
+                  ...msg,
+                  pending: false,
+                  failed: !!response.error,
+                  timestamp: response.timestamp || msg.timestamp,
+                }
+              : msg,
+          ),
+        );
+
+        if (response.error) {
+          console.error("Message send failed:", response.error);
+          setErrorMessage(response.error);
         } else {
-          console.log(
-            "Message sent and acknowledged by server, id:",
-            ack.messageId,
-          );
-          setMessages((prevMessages) =>
-            prevMessages.map((msg) =>
-              msg.timestamp === localMsg.timestamp
-                ? { ...msg, pending: false, id: ack.messageId } // Add server ID, remove pending
-                : msg,
-            ),
-          );
+          console.log("✅ Message sent successfully");
         }
       },
     );
-    setMessageInput("");
-  };
+  }, [selectedUser, messageInput, memoizedSession?.user?.username]);
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setMessageInput(event.target.value);
-  };
+  const handleKeyPress = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    },
+    [sendMessage],
+  );
 
-  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      sendMessage();
-    }
-  };
+  const retryFailedMessage = useCallback((failedMessage: ChatMessage) => {
+    if (!socketRef.current?.connected || !failedMessage.failed) return;
 
-  if (!session) {
+    // Remove failed flag and mark as pending
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg === failedMessage ? { ...msg, pending: true, failed: false } : msg,
+      ),
+    );
+
+    // Retry sending
+    socketRef.current.emit(
+      "privateMessage",
+      {
+        to: failedMessage.to,
+        text: failedMessage.text,
+        timestamp: failedMessage.timestamp,
+      },
+      (response: { success?: boolean; error?: string }) => {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.timestamp === failedMessage.timestamp
+              ? { ...msg, pending: false, failed: !!response.error }
+              : msg,
+          ),
+        );
+      },
+    );
+  }, []);
+
+  // Show sign-in if not authenticated
+  if (!memoizedSession) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
         <p className="mb-4 text-lg text-gray-700 dark:text-gray-300">
@@ -297,127 +295,180 @@ function ChatPageLayout() {
     );
   }
 
+  // Filter messages for current conversation
+  const conversationMessages = messages.filter(
+    (msg) =>
+      (msg.from === memoizedSession.user?.username &&
+        msg.to === selectedUser?.id) ||
+      (msg.from === selectedUser?.id &&
+        msg.to === memoizedSession.user?.username),
+  );
+
   return (
     <div className="flex h-screen overflow-hidden bg-gray-100 dark:bg-gray-900">
       <Sidebar />
+
       <div
         className={cn(
-          "flex-1 flex flex-col transition-all duration-300 ease-in-out",
-          isShrunk
-            ? "ml-[5rem] w-[calc(100%_-_5rem)]"
-            : "ml-[16rem] w-[calc(100%_-_16rem)]",
+          "flex-1 flex flex-col transition-all duration-300",
+          isShrunk ? "ml-20" : "ml-64",
         )}
       >
         <Topbar />
-        <main className="flex-1 flex flex-col p-4 pt-[70px] overflow-y-auto">
+
+        <main className="flex-1 flex flex-col p-4 pt-[70px]">
+          {/* Status indicators */}
           {errorMessage && (
-            <div className="p-3 mb-3 text-sm text-red-700 bg-red-100 rounded-md dark:bg-red-900 dark:text-red-300">
-              {errorMessage}
+            <div className="p-3 mb-3 text-sm text-red-700 bg-red-100 rounded-md dark:bg-red-900 dark:text-red-300 flex justify-between items-center">
+              <span>{errorMessage}</span>
+              <button
+                onClick={() => setErrorMessage(null)}
+                className="ml-2 text-red-500 hover:text-red-700"
+              >
+                ✕
+              </button>
             </div>
           )}
-          {connectionStatus === "connecting" && (
-            <div className="p-3 mb-3 text-sm text-yellow-700 bg-yellow-100 rounded-md dark:bg-yellow-900 dark:text-yellow-300">
-              Connecting to chat server...
-            </div>
-          )}
+
+          <div
+            className={cn(
+              "p-2 mb-3 text-sm rounded-md flex items-center",
+              connectionStatus === "connected"
+                ? "text-green-700 bg-green-100 dark:bg-green-900 dark:text-green-300"
+                : connectionStatus === "connecting" || isReconnecting
+                  ? "text-yellow-700 bg-yellow-100 dark:bg-yellow-900 dark:text-yellow-300"
+                  : "text-red-700 bg-red-100 dark:bg-red-900 dark:text-red-300",
+            )}
+          >
+            <div
+              className={cn(
+                "w-2 h-2 rounded-full mr-2",
+                connectionStatus === "connected"
+                  ? "bg-green-500"
+                  : connectionStatus === "connecting" || isReconnecting
+                    ? "bg-yellow-500 animate-pulse"
+                    : "bg-red-500",
+              )}
+            />
+            {connectionStatus === "connected" && "Connected"}
+            {(connectionStatus === "connecting" || isReconnecting) &&
+              "Connecting..."}
+            {connectionStatus === "disconnected" &&
+              !isReconnecting &&
+              "Disconnected"}
+          </div>
+
+          {/* Main content */}
           {!selectedUser ? (
             <div className="flex flex-col items-center justify-center flex-1">
               <Image
                 src={theme === "dark" ? "/astro-dark.svg" : "/astro.svg"}
-                alt="Select a user to start chatting"
+                alt="Select a user"
                 width={200}
                 height={200}
                 className="mb-4"
               />
               <p className="text-lg text-gray-600 dark:text-gray-400">
-                Select a user from the sidebar to start a conversation.
+                Select a user to start chatting
               </p>
               {isLoadingUsers && (
-                <p className="mt-2 text-sm text-gray-500 dark:text-gray-500">
-                  Loading users...
-                </p>
+                <p className="mt-2 text-sm text-gray-500">Loading users...</p>
               )}
             </div>
           ) : (
-            <Card className="flex-1 flex flex-col bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden">
+            <Card className="flex-1 flex flex-col">
               <CardContent className="flex-1 flex flex-col p-0">
-                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                  <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
-                    Chat with {selectedUser.username}
-                  </h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {selectedUser.isOnline ? (
-                      <span className="text-green-500">Online</span>
+                {/* Chat header */}
+                <div className="p-4 border-b">
+                  <h2 className="text-xl font-semibold">{selectedUser.id}</h2>
+                  <p className="text-sm">
+                    {activeUsers.includes(selectedUser.id) ? (
+                      <span className="text-green-500 flex items-center">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mr-1" />
+                        Online
+                      </span>
                     ) : (
-                      <span className="text-red-500">Offline</span>
+                      <span className="text-gray-500 flex items-center">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full mr-1" />
+                        Offline
+                      </span>
                     )}
                   </p>
                 </div>
-                <div className="flex-1 p-4 space-y-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
-                  {messages
-                    .filter(
-                      (msg) =>
-                        (msg.from === session?.user?.username &&
-                          msg.to === selectedUser.username) ||
-                        (msg.from === selectedUser.username &&
-                          msg.to === session?.user?.username),
-                    )
-                    .map((msg, index) => (
+
+                {/* Messages */}
+                <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+                  {conversationMessages.length === 0 ? (
+                    <div className="text-center text-gray-500 mt-8">
+                      <p>No messages yet. Start the conversation!</p>
+                    </div>
+                  ) : (
+                    conversationMessages.map((msg, index) => (
                       <div
-                        key={index} // Consider using a more stable key if messages have unique IDs
+                        key={`${msg.timestamp}-${index}`}
                         className={cn(
-                          "flex flex-col max-w-[75%] p-3 rounded-lg shadow",
-                          msg.from === session?.user?.username
-                            ? "ml-auto bg-blue-500 text-white dark:bg-blue-600"
-                            : "mr-auto bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
+                          "flex flex-col max-w-[75%] p-3 rounded-lg shadow-sm",
+                          msg.from === memoizedSession.user?.username
+                            ? "ml-auto bg-blue-500 text-white"
+                            : "mr-auto bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200",
                         )}
                       >
-                        <p className="text-sm">{msg.text}</p>
-                        <span className="mt-1 text-xs opacity-75 self-end">
-                          {new Date(msg.timestamp).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                          {msg.pending && (
-                            <span className="ml-1">(sending...)</span>
+                        <p className="text-sm whitespace-pre-wrap">
+                          {msg.text}
+                        </p>
+                        <div className="mt-1 text-xs opacity-75 self-end flex items-center">
+                          <span>
+                            {new Date(msg.timestamp).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                          {msg.pending && <span className="ml-1">⏳</span>}
+                          {msg.failed && (
+                            <button
+                              onClick={() => retryFailedMessage(msg)}
+                              className="ml-1 text-red-300 hover:text-red-100"
+                              title="Click to retry"
+                            >
+                              ⚠️
+                            </button>
                           )}
-                          {"error" in msg && (
-                            <span className="ml-1 text-red-300">(failed)</span>
-                          )}{" "}
-                          {/* Display error status */}
-                        </span>
+                        </div>
                       </div>
-                    ))}
-                  <div ref={messagesEndRef} /> {/* For auto-scrolling */}
+                    ))
+                  )}
+                  <div ref={messagesEndRef} />
                 </div>
-                <Separator className="my-0" />
-                <div className="p-4 bg-gray-50 dark:bg-gray-850 border-t border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center space-x-2">
+
+                <Separator />
+
+                {/* Message input */}
+                <div className="p-4">
+                  <div className="flex space-x-2">
                     <Input
                       type="text"
-                      placeholder={`Message ${selectedUser.username}...`}
+                      placeholder={`Message ${selectedUser.username || selectedUser.id}...`}
                       value={messageInput}
-                      onChange={handleInputChange}
+                      onChange={(e) => setMessageInput(e.target.value)}
                       onKeyPress={handleKeyPress}
-                      className="flex-1 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                      disabled={!isConnected || !selectedUser.isOnline}
+                      disabled={connectionStatus !== "connected"}
+                      className="flex-1"
                     />
                     <Button
                       onClick={sendMessage}
                       disabled={
-                        !isConnected ||
-                        !messageInput.trim() ||
-                        !selectedUser.isOnline
+                        !messageInput.trim() || connectionStatus !== "connected"
                       }
-                      className="bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-600 dark:hover:bg-blue-700"
+                      className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50"
                     >
                       Send
                     </Button>
                   </div>
-                  {!selectedUser.isOnline && isConnected && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {selectedUser.username} is currently offline. Messages
-                      will not be delivered.
+
+                  {selectedUser && !activeUsers.includes(selectedUser.id) && (
+                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                      ⚠️ User appears offline. Messages may not be delivered
+                      immediately.
                     </p>
                   )}
                 </div>
@@ -427,16 +478,5 @@ function ChatPageLayout() {
         </main>
       </div>
     </div>
-  );
-}
-
-// Main page component that wraps the layout with Suspense
-export default function GitFundChatPage() {
-  return (
-    <Suspense fallback={<div>Loading Chat...</div>}>
-      {" "}
-      {/* Ensure fallback UI is meaningful */}
-      <ChatPageLayout />
-    </Suspense>
   );
 }

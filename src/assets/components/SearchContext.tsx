@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useState, useContext, ReactNode, Dispatch, SetStateAction, useCallback } from 'react';
+import { createContext, useState, useContext, ReactNode, Dispatch, SetStateAction, useCallback, useMemo } from 'react';
 
 interface SearchContextType {
   isSearchOpen: boolean;
@@ -18,9 +18,18 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
   const openSearchModal = useCallback(() => setIsSearchOpen(true), []);
   const closeSearchModal = useCallback(() => setIsSearchOpen(false), []);
   const toggleSearchModal = useCallback(() => setIsSearchOpen(prev => !prev), []);
+  
+  // Memoize the context value to prevent unnecessary rerenders
+  const contextValue = useMemo(() => ({ 
+    isSearchOpen, 
+    setIsSearchOpen, 
+    openSearchModal, 
+    closeSearchModal, 
+    toggleSearchModal 
+  }), [isSearchOpen, setIsSearchOpen, openSearchModal, closeSearchModal, toggleSearchModal]);
 
   return (
-    <SearchContext.Provider value={{ isSearchOpen, setIsSearchOpen, openSearchModal, closeSearchModal, toggleSearchModal }}>
+    <SearchContext.Provider value={contextValue}>
       {children}
     </SearchContext.Provider>
   );

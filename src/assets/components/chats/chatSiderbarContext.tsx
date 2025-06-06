@@ -1,5 +1,5 @@
 'use client'
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
 
 // Define a more specific type for a user if available, otherwise 'any' is a placeholder
 type UserType = any; 
@@ -26,7 +26,7 @@ export const ChatSidebarProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [filteredUsers, setFilteredUsers] = useState<UserType[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 
-  const fetchAllUsers = async () => {
+  const fetchAllUsers = useCallback(async () => {
     try {
       const response = await fetch('/api/signup', {
         method: 'GET',
@@ -46,9 +46,9 @@ export const ChatSidebarProvider: React.FC<{ children: React.ReactNode }> = ({ c
       console.error("Error fetching all users:", error);
       return [];
     }
-  };
+  }, []);
 
-  const fetchAssignedUsers = async () => {
+  const fetchAssignedUsers = useCallback(async () => {
     try {
       const response = await fetch('/api/assignedIssue', {
         method: 'GET',
@@ -68,28 +68,32 @@ export const ChatSidebarProvider: React.FC<{ children: React.ReactNode }> = ({ c
       console.error("Error fetching assigned users:", error);
       return [];
     }
-  };
+  }, []);
 
-  const refreshUsers = async () => {
+  const refreshUsers = useCallback(async () => {
     setIsLoadingUsers(true);
     try {
       await Promise.all([fetchAllUsers(), fetchAssignedUsers()]);
     } finally {
       setIsLoadingUsers(false);
     }
-  };
+  }, [fetchAllUsers, fetchAssignedUsers]);
 
   // Update filtered users whenever allUsers or assignedUsers changes
   useEffect(() => {
-    if (allUsers.length > 0 && assignedUsers.length > 0) {
-      const filtered = allUsers.filter((user: UserType) =>
-        assignedUsers.some((contributor: any) => contributor.Contributor_id === user.id)
-      );
-      console.log("Filtered users updated:", filtered);
-      setFilteredUsers(filtered);
-    } else {
-      setFilteredUsers([]);
-    }
+    const filterUsers = () => {
+      if (allUsers.length > 0 && assignedUsers.length > 0) {
+        const filtered = allUsers.filter((user: UserType) =>
+          assignedUsers.some((contributor: any) => contributor.Contributor_id === user.id)
+        );
+        console.log("Filtered users updated:", filtered);
+        setFilteredUsers(filtered);
+      } else {
+        setFilteredUsers([]);
+      }
+    };
+    
+    filterUsers();
   }, [allUsers, assignedUsers]);
 
   // Initial fetch
@@ -97,18 +101,30 @@ export const ChatSidebarProvider: React.FC<{ children: React.ReactNode }> = ({ c
     refreshUsers();
   }, []);
 
+  const contextValue = useMemo(() => ({
+    isShrunk, 
+    setIsShrunk, 
+    selectedUser, 
+    setSelectedUser,
+    allUsers,
+    assignedUsers,
+    filteredUsers,
+    refreshUsers,
+    isLoadingUsers
+  }), [
+    isShrunk, 
+    setIsShrunk, 
+    selectedUser, 
+    setSelectedUser,
+    allUsers,
+    assignedUsers,
+    filteredUsers,
+    refreshUsers,
+    isLoadingUsers
+  ]);
+  
   return (
-    <chatSidebarContext.Provider value={{ 
-      isShrunk, 
-      setIsShrunk, 
-      selectedUser, 
-      setSelectedUser,
-      allUsers,
-      assignedUsers,
-      filteredUsers,
-      refreshUsers,
-      isLoadingUsers
-    }}>
+    <chatSidebarContext.Provider value={contextValue}>
       {children}
     </chatSidebarContext.Provider>
   );
