@@ -3,7 +3,7 @@ import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import { sepolia } from '@reown/appkit/networks'
 
 // Get projectId from environment variables with fallback
-export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID || 'default_project_id';
+export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID || 'demo-project-id';
 
 // Define the custom Pharos Devnet chain
 const pharosDevnet = {
@@ -53,7 +53,7 @@ export const wagmiAdapter = new WagmiAdapter({
     storage: cookieStorage
   }),
   ssr: true,
-  projectId,
+  projectId: projectId || 'demo-project-id', // Ensure we always have a fallback
   networks
 });
 

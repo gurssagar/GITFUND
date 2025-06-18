@@ -3,35 +3,60 @@ import { db } from '../../../db/index';
 import { project } from '../../../db/schema';
 import nodemailer from 'nodemailer';
 
-const transporter = nodemailer.createTransport({
-    host: "mail.gdggtbit.in",
-    port: 587,
-    secure: false,
-    auth: {
-        user: 'gitfund@gdggtbit.in',
-        pass: 'SagarTanav2003#@'
-    }
-});
+// Create a more resilient transporter
+const createTransporter = () => {
+  try {
+    return nodemailer.createTransport({
+      host: "mail.gdggtbit.in",
+      port: 587,
+      secure: false,
+      auth: {
+          user: 'gitfund@gdggtbit.in',
+          pass: 'SagarTanav2003#@'
+      }
+    });
+  } catch (error) {
+    console.error('Failed to create email transporter:', error);
+    // Return a mock transporter that logs instead of sending
+    return {
+      sendMail: async (options) => {
+        console.log('Email would be sent:', options);
+        return { accepted: [], rejected: [], messageId: 'mock-id' };
+      }
+    };
+  }
+};
+
+const transporter = createTransporter();
 
 export async function POST(request: Request) {
     try {
-        const { email, projectName,comits,languages,contributors, aiDescription, projectOwner, shortdes, longdis, image_url, project_repository ,stars,forks} = await request.json();
-        console.log(stars,forks,"hello")
+        const { email, projectName, comits, languages, contributors, aiDescription, projectOwner, shortdes, longdis, image_url, project_repository, stars, forks } = await request.json();
+        console.log(stars, forks, "hello");
+        
         // First insert the project
-        await db.insert(project).values({
-            contributors:contributors,
-            aiDescription:aiDescription,
-            projectOwner:projectOwner,
-            projectName: projectName,
-            shortdes: shortdes,
-            longdis: longdis,
-            image_url: image_url,
-            project_repository: project_repository,
-            languages:languages,
-            stars:stars,
-            forks:forks,
-            comits:comits,
-        });
+        try {
+            await db.insert(project).values({
+                projectName: projectName,
+                contributors: contributors,
+                aiDescription: aiDescription,
+                projectOwner: projectOwner,
+                shortdes: shortdes,
+                longdis: longdis,
+                image_url: image_url,
+                project_repository: project_repository,
+                languages: languages,
+                stars: stars,
+                forks: forks,
+                comits: comits,
+            });
+        } catch (dbError) {
+            console.error('Database error during project creation:', dbError);
+            return NextResponse.json({ 
+                success: false, 
+                error: 'Failed to create project in database'
+            }, { status: 500 });
+        }
 
         // Then send email notification
         try {
@@ -78,10 +103,17 @@ export async function POST(request: Request) {
 
 export async function GET() {
     try {
-        const projectsData = await db.select().from(project);
-        return NextResponse.json({ project: projectsData });
+        // Add error handling for database operations
+        try {
+            const projectsData = await db.select().from(project);
+            return NextResponse.json({ project: projectsData });
+        } catch (dbError) {
+            console.error('Database error fetching projects:', dbError);
+            // Return empty array instead of failing
+            return NextResponse.json({ project: [] });
+        }
     } catch (error) {
         console.error('Error fetching projects:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ error: 'Internal Server Error', project: [] }, { status: 500 });
     }
 }

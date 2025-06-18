@@ -26,8 +26,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // Get cookies for Reown AppKit
-  const headersList = await headers();
-  const cookies = headersList?.get("cookie");
+  const headersList = headers();
+  const cookies = headersList?.get("cookie") || "";
   return (
     <html lang="en" className={`dark`}>
       <body className={`bg-background text-foreground`}>
