@@ -25,8 +25,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Get cookies for Reown AppKit
-  const headersList = headers();
+  // Get cookies for Reown AppKit - properly await headers()
+  const headersList = await headers();
   const cookies = headersList?.get("cookie") || "";
   return (
     <html lang="en" className={`dark`}>
