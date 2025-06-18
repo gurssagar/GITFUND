@@ -2,12 +2,8 @@ import { cookieStorage, createStorage } from 'wagmi'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import { sepolia } from '@reown/appkit/networks'
 
-// Get projectId from https://cloud.reown.com
-export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID
-
-if (!projectId) {
-  throw new Error('Project ID is not defined')
-}
+// Get projectId from environment variables with fallback
+export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID || 'default_project_id';
 
 // Define the custom Pharos Devnet chain
 const pharosDevnet = {
@@ -21,12 +17,12 @@ const pharosDevnet = {
   blockExplorers: {
     default: { name: 'PharosScan Devnet', url: 'https://devnet.pharosscan.xyz' },
   },
-}
+};
 
 const BnbTestnet = {
   id: 97,
   name: 'BNB Smart Chain Testnet',
-  nativeCurrency: { name: 'tBNB', symbol: 'tBNB', decimals: 18 }, // Adjust if necessary
+  nativeCurrency: { name: 'tBNB', symbol: 'tBNB', decimals: 18 },
   rpcUrls: {
     default: { http: ['https://bsc-testnet.bnbchain.org/'] },
     public: { http: ['https://bsc-testnet.bnbchain.org/'] },
@@ -34,8 +30,6 @@ const BnbTestnet = {
   blockExplorers: {
     default: { name: 'Binance Smart Chain Testnet', url: 'https://testnet.bscscan.com' },
   },
-  // You can add testnet: true if appropriate, though not explicitly stated
-  // testnet: true, 
 };
 
 const pharosTestnet = {
@@ -49,9 +43,9 @@ const pharosTestnet = {
   blockExplorers: {
     default: { name: 'PharosScan Testnet', url: 'https://testnet.pharosscan.xyz' },
   }
-}
+};
 
-export const networks = [sepolia, pharosDevnet, pharosTestnet,BnbTestnet]
+export const networks = [sepolia, pharosDevnet, pharosTestnet, BnbTestnet];
 
 // Set up the Wagmi Adapter (Config)
 export const wagmiAdapter = new WagmiAdapter({
@@ -61,6 +55,6 @@ export const wagmiAdapter = new WagmiAdapter({
   ssr: true,
   projectId,
   networks
-})
+});
 
-export const config = wagmiAdapter.wagmiConfig
+export const config = wagmiAdapter.wagmiConfig;
