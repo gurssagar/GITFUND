@@ -392,11 +392,11 @@ export default function PullRequestDetails() {
       >
         <Topbar />
         <div className="p-4 mt-24 w-[80%] mx-auto  min-h-screen">
-          <div className="max-w-5xl mx-auto mt-8">
+          <div className="max-w-7xl mx-auto mt-8">
             <div className="mb-4">
               <a
                 href="/PullRequests"
-                className="text-sm text-gray-500 dark:text-gray-400 hover:underline"
+                className="text-sm text-neutral-500 dark:text-neutral-400 hover:underline"
               >
                 &larr; Back to Pull Requests
               </a>
@@ -404,10 +404,10 @@ export default function PullRequestDetails() {
 
             <div className="flex justify-between items-start mb-2">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
                   {repoData?.title}
                 </h1>
-                <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <div className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                   #{repoData?.number} opened by {repoData?.user?.login} on{" "}
                   {new Date(repoData?.created_at).toLocaleDateString()}{" "}
                 </div>
@@ -416,7 +416,7 @@ export default function PullRequestDetails() {
                 href={repoData?.html_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-custom-dark-gray"
+                className="px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-custom-dark-neutral"
               >
                 View on GitHub
               </a>
@@ -424,7 +424,7 @@ export default function PullRequestDetails() {
             <div className="flex gap-6 mt-6">
               {/* Left: PR Details */}
               <div className="flex-1">
-                <div className="bg-white dark:bg-custom-dark-gray border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-6">
+                <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-5 mb-6">
                   <h2 className="font-semibold text-lg mb-2 flex items-center gap-2 dark:text-white">
                     <svg
                       width="20"
@@ -433,14 +433,14 @@ export default function PullRequestDetails() {
                       stroke="currentColor"
                       strokeWidth="1.5"
                       viewBox="0 0 24 24"
-                      className="text-gray-400 dark:text-gray-300"
+                      className="text-neutral-400 dark:text-neutral-300"
                     >
                       <path d="M16 17v1a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h6a3 3 0 013 3v1" />
                       <path d="M9 12h12l-3-3m0 6l3-3" />
                     </svg>
                     Pull Request Details
                   </h2>
-                  <div className="text-gray-700 dark:text-gray-300 mb-3">
+                  <div className="text-neutral-700 dark:text-neutral-300 mb-3">
                     {repoData?.body || "No description provided"}
                   </div>
                   <div className="flex items-center gap-6 mb-2">
@@ -466,7 +466,7 @@ export default function PullRequestDetails() {
                         className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
                           repoData?.merged
                             ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
-                            : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                            : "bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300"
                         }`}
                       >
                         {repoData?.merged ? "Merged" : "Not Merged"}
@@ -476,21 +476,21 @@ export default function PullRequestDetails() {
                       <span className="font-medium dark:text-white">
                         Project:
                       </span>
-                      <span className="text-gray-800 dark:text-gray-200">
+                      <span className="text-neutral-800 dark:text-neutral-200">
                         {repoData?.head?.repo?.name}
                       </span>
                     </div>
                   </div>
-                  <hr className="my-4 border-gray-200 dark:border-gray-700" />
+                  <hr className="my-4 border-neutral-200 dark:border-neutral-700" />
                   <div>
                     <div className="font-medium mb-2 dark:text-white">
                       Associated Issue
                     </div>
-                    <div className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
-                      <div className="font-semibold text-gray-900 dark:text-white mb-1">
+                    <div className="bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-800 rounded-lg p-4">
+                      <div className="font-semibold text-neutral-900 dark:text-white mb-1">
                         {repoData?.title}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                      <div className="text-sm text-neutral-600 dark:text-neutral-300 mb-2">
                         {repoData?.body || "No description provided"}
                       </div>
                       <div className="flex flex-wrap gap-2">
@@ -503,7 +503,7 @@ export default function PullRequestDetails() {
                         <span className="bg-red-200 text-red-800 dark:bg-red-900 dark:text-red-200 px-2 py-0.5 rounded-full text-xs">
                           -{repoData?.deletions} deletions
                         </span>
-                        <span className="bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 px-2 py-0.5 rounded-full text-xs">
+                        <span className="bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200 px-2 py-0.5 rounded-full text-xs">
                           Commits: {repoData?.commits}
                         </span>
                       </div>
@@ -513,7 +513,7 @@ export default function PullRequestDetails() {
               </div>
               {/* Right: Review Actions */}
               <div className="w-80 flex-shrink-0">
-                <div className="bg-white dark:bg-custom-dark-gray border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-4">
+                <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-5 mb-4">
                   <div className="font-semibold mb-3 dark:text-white">
                     Review Actions
                   </div>
@@ -545,7 +545,7 @@ export default function PullRequestDetails() {
                       href={`${repoData?.html_url}#submit-review`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full border border-gray-300 text-gray-700 py-2 rounded-lg flex items-center justify-center gap-2 font-medium dark:border-gray-600 dark:text-gray-300"
+                      className="w-full border border-neutral-300 text-neutral-700 py-2 rounded-lg flex items-center justify-center gap-2 font-medium dark:border-neutral-600 dark:text-neutral-300"
                     >
                       <svg
                         width="18"
@@ -577,19 +577,19 @@ export default function PullRequestDetails() {
                       Back to List
                     </Link>
                   </div>
-                  <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3 text-sm">
+                  <div className="bg-neutral-100 dark:bg-neutral-800 rounded-lg p-3 text-sm">
                     <div className="font-medium dark:text-white">PR Stats</div>
-                    <div className="text-gray-500 dark:text-gray-400">
+                    <div className="text-neutral-500 dark:text-neutral-400">
                       Commits: {repoData?.commits}
                     </div>
-                    <div className="text-gray-500 dark:text-gray-400">
+                    <div className="text-neutral-500 dark:text-neutral-400">
                       Comments: {repoData?.comments}
                     </div>
-                    <div className="text-gray-500 dark:text-gray-400">
+                    <div className="text-neutral-500 dark:text-neutral-400">
                       Created:{" "}
                       {new Date(repoData?.created_at).toLocaleDateString()}
                     </div>
-                    <div className="text-gray-500 dark:text-gray-400">
+                    <div className="text-neutral-500 dark:text-neutral-400">
                       Last Updated:{" "}
                       {new Date(repoData?.updated_at).toLocaleDateString()}
                     </div>
@@ -599,11 +599,11 @@ export default function PullRequestDetails() {
             </div>
           </div>
           {/* Tabs for Files Changed and Comments */}
-          <div className="bg-white dark:bg-custom-dark-gray border border-gray-200 dark:border-gray-700 rounded-xl p-0 mb-6">
-            <div className="flex border-b border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-0 mb-6">
+            <div className="flex border-b border-neutral-200 dark:border-neutral-700">
               <button onClick={() => {
                 setAi(false)
-              }} className="flex-1 py-3 text-center font-medium text-gray-900 dark:text-white bg-gray-100 dark:bg-custom-dark-gray rounded-tl-xl focus:outline-none">
+              }} className="flex-1 py-3 text-center font-medium text-neutral-900 dark:text-white bg-neutral-100 dark:bg-neutral-900 rounded-tl-xl focus:outline-none">
                 Files Changed
               </button>
               <button
@@ -632,7 +632,7 @@ export default function PullRequestDetails() {
                   !issueNumber ||
                   hasRunCompletion
                 }
-                className="flex-1 py-3 text-center font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white focus:outline-none"
+                className="flex-1 py-3 text-center font-medium text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white focus:outline-none"
               >
                 {isCompletionLoading
                   ? "Analyzing..."
@@ -658,17 +658,17 @@ export default function PullRequestDetails() {
                     <div className="text-xl font-bold mb-1 dark:text-white">
                       Files Changed
                     </div>
-                    <div className="text-gray-500 dark:text-gray-400 text-sm mb-6">
+                    <div className="text-neutral-500 dark:text-neutral-400 text-sm mb-6">
                       {`${repoData?.changed_files} ${repoData?.changed_files === 1 ? "file" : "files"} changed with ${repoData?.additions} addition${repoData?.additions === 1 ? "" : "s"} and ${repoData?.deletions} deletion${repoData?.deletions === 1 ? "" : "s"}`}
                     </div>
                     {/* File Cards */}
                     <div className="space-y-6">
                       {/* Show real file changes if available */}
                       {repoData?.changed_files > 0 ? (
-                        <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-custom-dark-gray flex flex-col gap-2 relative">
-                          <div className="flex items-center gap-2 font-medium text-gray-900 dark:text-white">
+                        <div className="border border-neutral-200 dark:border-neutral-800 rounded-lg p-4 bg-white dark:bg-neutral-800 flex flex-col gap-2 relative">
+                          <div className="flex items-center gap-2 font-medium text-neutral-900 dark:text-white">
                             <svg
-                              className="w-5 h-5 text-gray-400 dark:text-gray-500"
+                              className="w-5 h-5 text-neutral-400 dark:text-neutral-500"
                               fill="none"
                               stroke="currentColor"
                               strokeWidth="1.5"
@@ -703,7 +703,7 @@ export default function PullRequestDetails() {
                           </div>
                         </div>
                       ) : (
-                        <div className="text-center py-8 text-gray-600 dark:text-gray-400 border border-dashed border-gray-200 dark:border-gray-700 rounded-lg">
+                        <div className="text-center py-8 text-neutral-600 dark:text-neutral-400 border border-dashed border-neutral-200 dark:border-neutral-700 rounded-lg">
                           No file changes available
                         </div>
                       )}

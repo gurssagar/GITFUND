@@ -76,25 +76,8 @@ export default function Sidebar() {
                   <div className="text-[13px] text-gray-400 py-2">Explore</div>
                 )}
                 <Link href="/homepage">
-                  <div className="rounded-lg text-sm focus:bg-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a]  px-2 py-2 flex">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="my-auto mr-2"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                    >
-                      <g
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                      >
-                        <circle cx="12" cy="12" r="9" />
-                        <path d="M11.307 9.739L15 9l-.739 3.693a2 2 0 0 1-1.568 1.569L9 15l.739-3.693a2 2 0 0 1 1.568-1.568" />
-                      </g>
-                    </svg>
+                  <div className="rounded-lg text-sm focus:bg-gray-400 text-white hover:bg-gray-100 dark:hover:bg-[#27272a]  px-2 py-2 flex">
+                    <Image src="/discover.svg" height="20" width="20" className="" alt="discover"/>
                     {!isShrunk && "Discover"}
                   </div>
                 </Link>

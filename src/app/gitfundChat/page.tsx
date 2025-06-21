@@ -430,10 +430,10 @@ export default function OptimizedChatPage() {
                         <div
                           key={`${msg.timestamp}-${id}`}
                           className={cn(
-                            "flex flex-col max-w-[75%] p-3 rounded-lg shadow-sm",
+                            "flex flex-col p-3 rounded-lg shadow-sm",
                             msg.sender_id === memoizedSession.user?.username
-                              ? "ml-auto"
-                              : "mr-auto",
+                              ? "ml-auto justify-end"
+                              : "mr-auto justify-start",
                           )}
                         >
                           <div className="flex ">
@@ -503,7 +503,7 @@ export default function OptimizedChatPage() {
                                   msg.sender_id ===
                                     memoizedSession.user?.username
                                     ? "bg-neutral-700 text-white p-2 rounded-b-lg rounded-tr-lg"
-                                    : " bg-neutral-200 dark:bg-neutral-700  rounded-b-lg rounded-tr-lg text-neutral-800 dark:text-neutral-200",
+                                    : " bg-neutral-200 dark:bg-neutral-700 p-2  rounded-b-lg rounded-tr-lg text-neutral-800 dark:text-neutral-200",
                                 )}
                               >
                                 {msg.text}
@@ -533,26 +533,92 @@ export default function OptimizedChatPage() {
                     </div>
                   ) : (
                     <>
-                      {conversationMessages.map((msg, index) => (
+                      {conversationMessages?.map((msg, id) => (
                         <div
-                          key={`${msg.timestamp}-${index}`}
+                          key={`${msg.timestamp}-${id}`}
                           className={cn(
                             "flex flex-col max-w-[75%] p-3 rounded-lg shadow-sm",
-                            msg.from === memoizedSession.user?.username
-                              ? "ml-auto bg-blue-500 text-white"
-                              : "mr-auto bg-neutral-200 dark:bg-neutral-700 text-neutral-800 dark:text-neutral-200",
+                            msg.sender_id === memoizedSession.user?.username
+                              ? "ml-auto justify-end"
+                              : "mr-auto justify-start",
                           )}
                         >
-                          <p className="text-sm whitespace-pre-wrap">
-                            {msg.text}
-                          </p>
+                          <div className="flex ">
+                            {msg.sender_id ===
+                            memoizedSession.user?.username ? (
+                              <>
+                                <div>
+                                  <Image
+                                    src={memoizedSession.user?.image}
+                                    width={40}
+                                    height={40}
+                                    alt={`user`}
+                                    className="rounded-full mx-4"
+                                  />
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <div>
+                                  <Image
+                                    src={selectedUser.image_url}
+                                    width={40}
+                                    height={40}
+                                    alt={`user`}
+                                    className="rounded-full mx-4"
+                                  />
+                                </div>
+                              </>
+                            )}
+
+                            <div>
+                              <div className="flex gap-3">
+                                {msg.sender_id ===
+                                memoizedSession.user?.username ? (
+                                  <>
+                                    <h3 className={`my-1 font-bold`}>
+                                      {memoizedSession.user?.name}
+                                    </h3>
+                                    <div className="my-1 text-neutral-400">
+                                      {new Date(
+                                        msg.timestamp,
+                                      ).toLocaleTimeString([], {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                      })}
+                                    </div>
+                                  </>
+                                ) : (
+                                  <>
+                                    <h3 className={`my-1 text-neutral-400`}>
+                                      {selectedUser.fullName}
+                                    </h3>
+                                    <span className="">
+                                      {new Date(
+                                        msg.timestamp,
+                                      ).toLocaleTimeString([], {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                      })}
+                                    </span>
+                                  </>
+                                )}
+                              </div>
+                              <p
+                                className={cn(
+                                  "text-sm whitespace-pre-wrap",
+                                  msg.sender_id ===
+                                    memoizedSession.user?.username
+                                    ? "bg-neutral-700 text-white p-2 rounded-b-lg rounded-tr-lg"
+                                    : " bg-neutral-200 dark:bg-neutral-700 p-2  rounded-b-lg rounded-tr-lg text-neutral-800 dark:text-neutral-200",
+                                )}
+                              >
+                                {msg.text}
+                              </p>
+                            </div>
+                          </div>
+
                           <div className="mt-1 text-xs opacity-75 self-end flex items-center">
-                            <span>
-                              {new Date(msg.timestamp).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </span>
                             {msg.pending && <span className="ml-1">⏳</span>}
                             {msg.failed && (
                               <button
