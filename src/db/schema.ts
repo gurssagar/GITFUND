@@ -69,6 +69,7 @@ export const issues = pgTable("issues", {
     .primaryKey()
     .default(sql`gen_random_uuid()`),
   issue_name: varchar("issue_name", { length: 256 }),
+  publisher:varchar("publisher", { length: 256 }),
   issue_description: text("issue_description"),
   issue_date: varchar("issue_date", { length: 256 }),
   Difficulty: varchar("Difficulty", { length: 256 }),

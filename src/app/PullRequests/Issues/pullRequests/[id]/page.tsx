@@ -416,7 +416,7 @@ export default function PullRequestDetails() {
                 href={repoData?.html_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-custom-dark-neutral"
+                className="px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-950 dark:hover:bg-custom-dark-neutral"
               >
                 View on GitHub
               </a>
