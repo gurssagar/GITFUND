@@ -8,6 +8,9 @@ import { useSession } from "next-auth/react";
 import { Octokit } from "octokit"
 import { useSearchParams  } from "next/navigation"
 import { useMemo,useEffect,useState } from "react";
+import { useSidebarContext } from "@/assets/components/SidebarContext"
+import Sidebar from "@/assets/components/sidebar";
+import Topbar from "@/assets/components/topbar";
 interface PageProps {
   params: { owner: string; repository: string; issueNumber: string }
 }
@@ -15,6 +18,7 @@ interface PageProps {
 export default function IssuePullRequestsPage({ params }: PageProps) {
   const {data:session}=useSession();
   const searchParams = useSearchParams();
+  const { isShrunk } = useSidebarContext();
   const repository=searchParams?.get('repo');;
   const issueNumber=searchParams?.get('issues');
   const [issue,setIssues]=useState();
@@ -81,6 +85,12 @@ export default function IssuePullRequestsPage({ params }: PageProps) {
   }, [octokit, owner, repository, issueNumber]);
   console.log(PrUrls,"dshjdhshdsa")
   return (
+    <div className="flex">
+                      <Sidebar />
+                      <div
+                        className={` ${isShrunk ? "ml-[4rem] w-[calc(100%_-_4rem)]" : "ml-[16rem] w-[calc(100%_-_16rem)]"}`}
+                      >
+                        <Topbar />
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8">
         <div className="flex items-center gap-4 mb-4">
@@ -238,6 +248,8 @@ export default function IssuePullRequestsPage({ params }: PageProps) {
           </div>
         </div>
       )}
+    </div>
+    </div>
     </div>
   )
 }

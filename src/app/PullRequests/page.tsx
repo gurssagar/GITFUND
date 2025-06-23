@@ -6,9 +6,13 @@ import { Button } from "@/components/ui/button"
 import { GitBranch, Star, Eye, AlertCircle } from "lucide-react"
 import { useSession } from "next-auth/react"
 import {useState,useEffect,useCallback} from "react"
-import { useRouter } from "next/navigation"
+import { useRouter } from "next/navigation";
+import { useSidebarContext } from "@/assets/components/SidebarContext";
+import Sidebar from "@/assets/components/sidebar";
+import Topbar from "@/assets/components/topbar";
 export default function RepositoriesPage() {
   const {data:session} = useSession();
+  const { isShrunk } = useSidebarContext();
   const [repoData,setRepoData]=useState([])
   useEffect(() => {
     fetchData();
@@ -29,6 +33,12 @@ export default function RepositoriesPage() {
   
 
   return (
+    <div className="flex">
+              <Sidebar />
+              <div
+                className={` ${isShrunk ? "ml-[4rem] w-[calc(100%_-_4rem)]" : "ml-[16rem] w-[calc(100%_-_16rem)]"}`}
+              >
+                <Topbar />
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">GitHub Repositories</h1>
@@ -98,6 +108,11 @@ export default function RepositoriesPage() {
           </Button> */}
         </div>
       </div>
+    </div>
+    <div>
+
+    </div>
+    </div>
     </div>
   )
 }

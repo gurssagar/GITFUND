@@ -8,12 +8,15 @@ import {useSession} from 'next-auth/react'
 import { useSearchParams  } from "next/navigation"
 import { useEffect, useState, useMemo } from "react"
 import Image from "next/image"
-
+import { useSidebarContext } from "@/assets/components/SidebarContext"
+import Sidebar from "@/assets/components/sidebar";
+import Topbar from "@/assets/components/topbar";
 interface PageProps {
   params: { owner: string; name: string }
 }
 
 export default function RepositoryIssuesPage({ params }: PageProps) {
+  const { isShrunk } = useSidebarContext();
   const {data:session} = useSession();
   const [repoData,setRepoData]=useState([])
   const [issues,setIssues]=useState([]);
@@ -62,6 +65,12 @@ export default function RepositoryIssuesPage({ params }: PageProps) {
 
 
   return (
+    <div className="flex">
+                  <Sidebar />
+                  <div
+                    className={` ${isShrunk ? "ml-[4rem] w-[calc(100%_-_4rem)]" : "ml-[16rem] w-[calc(100%_-_16rem)]"}`}
+                  >
+                    <Topbar />
     <div className="container mx-auto py-8 px-4">
       <div className="mb-8">
         <div className="flex items-center gap-4 mb-4">
@@ -153,6 +162,8 @@ export default function RepositoryIssuesPage({ params }: PageProps) {
           <p className="text-muted-foreground">No issues found for this repository.</p>
         </div>
       )}
+    </div>
+    </div>
     </div>
   )
 }
