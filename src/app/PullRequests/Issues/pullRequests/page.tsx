@@ -221,7 +221,7 @@ export default function IssuePullRequestsPage({ params }: PageProps) {
                       pathname: `/PullRequests/Issues/pullRequests/${pr.source.issue.number}`,
                       query: {
                         rewardAmount: issue?.rewardAmount,
-                        issueNumber: issueNumber,
+                        issueNumber: pr.source.issue.number,
                         project: repository,
                         owner: owner,
                       },

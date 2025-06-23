@@ -39,11 +39,21 @@ export default function RepositoriesPage() {
                 className={` ${isShrunk ? "ml-[4rem] w-[calc(100%_-_4rem)]" : "ml-[16rem] w-[calc(100%_-_16rem)]"}`}
               >
                 <Topbar />
-    <div className="container mx-auto py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">GitHub Repositories</h1>
+    <div className="container mx-auto py-8 px-4 mt-16">
+      <div className="flex items-center justify-between mb-6">
+        <div className="mb-8 ">
+        <h1 className="text-3xl font-bold mb-2">My Projects</h1>
         <p className="text-muted-foreground">Repositories with open issues and linked pull requests</p>
       </div>
+      <div>
+                              <Link href="/create-project">
+                              <button className="bg-black dark:bg-white dark:text-black text-white rounded-lg px-4 py-2">
+                                  + Add Project
+                              </button>
+                              </Link>
+                          </div>
+      </div>
+      
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {repoData.map((repo) => (
@@ -97,6 +107,27 @@ export default function RepositoriesPage() {
           </Card>
         ))}
       </div>
+      {
+        repoData.length === 0 && (
+          <div className="text-center py-10">
+                            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                            </svg>
+                            <h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-white">No projects found</h3>
+                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                You haven't created or been assigned to any projects yet.
+                            </p>
+                            {/* Optional: Add a button to create a new project if applicable */}
+                            {/* <div className="mt-6">
+                                <Link href="/create-project">
+                                    <a className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        Create new project
+                                    </a>
+                                </Link>
+                            </div> */}
+                        </div>
+        )
+      }
 
       <div className="mt-8 text-center">
         <div className="flex gap-4 justify-center">
