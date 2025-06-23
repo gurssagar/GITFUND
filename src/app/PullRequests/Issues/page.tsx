@@ -83,13 +83,16 @@ export default function RepositoryIssuesPage({ params }: PageProps) {
         </div>
 
         <div className="flex justify-between items-center gap-3 mb-4">
-          <Repository className="h-8 w-8 text-blue-500" />
+          <div>
+            <Repository className="h-8 w-8 text-blue-500" />
           <div>
             <h1 className="text-3xl font-bold">{repoData?.project_repository}</h1>
             <p className="text-muted-foreground">
               {repoData?.projectOwner}/{repoData?.projectName}
             </p>
           </div>
+          </div>
+          
           <div>
                           <div className="flex gap-3 mt-6">
                             <a href={`/create-issues`} target="_blank" rel="">
@@ -156,7 +159,7 @@ export default function RepositoryIssuesPage({ params }: PageProps) {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground line-clamp-3">{issue.issue_description}</p>
+              <p className="text-sm text-muted-foreground h-6 line-clamp-2">{issue.issue_description}</p>
 
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
