@@ -82,7 +82,7 @@ export default function RepositoryIssuesPage({ params }: PageProps) {
           </Button>
         </div>
 
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex justify-between items-center gap-3 mb-4">
           <Repository className="h-8 w-8 text-blue-500" />
           <div>
             <h1 className="text-3xl font-bold">{repoData?.project_repository}</h1>
@@ -99,7 +99,7 @@ export default function RepositoryIssuesPage({ params }: PageProps) {
                               </button>
                             </a>
                             <a
-                              href={`https://github.com/${repo?.projectOwner}/${repo?.project_repository}`}
+                              href={`https://github.com/${repoData.projectOwner}/${repoData.project_repository}`}
                               target="_blank"
                               rel=""
                               className="flex items-center px-5 py-2 border border-gray-300 rounded-md font-medium hover:dark:text-black hover:dark:bg-white  transition"
@@ -127,55 +127,55 @@ export default function RepositoryIssuesPage({ params }: PageProps) {
           </div>
         </div>
 
-        <h2 className="text-2xl font-semibold mb-4">Issues ({issues?.length})</h2>
+        <h2 className="text-2xl font-semibold mb-4">Issues ({issues.length})</h2>
       </div>
 
       <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {issues.map((issue) => (
-          <Card key={issue?.id} className="hover:shadow-md transition-shadow">
+          <Card key={issue.id} className="hover:shadow-md transition-shadow">
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="space-y-2 flex-1">
                   <div className="flex items-center gap-2">
-                    <CardTitle className="text-lg">{issue?.issue_name}</CardTitle>
+                    <CardTitle className="text-lg">{issue.issue_name}</CardTitle>
                     <Badge
-                      variant={issue?.priority === "low" ? "destructive" : "secondary"}
-                      className={issue?.priority === "low" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : ""}
+                      variant={issue.priority === "low" ? "destructive" : "secondary"}
+                      className={issue.priority === "low" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : ""}
                     >
-                      {issue?.priority}
+                      {issue.priority}
                     </Badge>
                   </div>
-                  <CardDescription>Issue #{issue?.project_issues}</CardDescription>
+                  <CardDescription>Issue #{issue.project_issues}</CardDescription>
                 </div>
                 <div>
                     <div className="flex gap-1 text-neutral-300 font-bold text-xl">
                         <Image src={`/pharos_small.png`} alt="Pharos" width={20} height={20} />
-                        {issue?.rewardAmount} 
+                        {issue.rewardAmount} 
                     </div>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground line-clamp-3">{issue?.issue_description}</p>
+              <p className="text-sm text-muted-foreground line-clamp-3">{issue.issue_description}</p>
 
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <User className="h-4 w-4" />
-                  {issue?.publisher}
+                  {issue.publisher}
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
-                  {new Date(issue?.issue_date).toLocaleDateString()}
+                  {new Date(issue.issue_date).toLocaleDateString()}
                 </div>
                 <div className="flex items-center gap-1">
                   <MessageSquare className="h-4 w-4" />
-                  {issue?.comments} comments
+                  {issue.comments} comments
                 </div>
               </div>
 
               <div className="flex items-center justify-between pt-2 border-t">
                 <Button className="w-full">
-                  <Link href={`/PullRequests/Issues/pullRequests?issues=${issue?.project_issues}&repo=${repository}`}>View Pull Requests</Link>
+                  <Link href={`/PullRequests/Issues/pullRequests?issues=${issue.project_issues}&repo=${repository}`}>View Pull Requests</Link>
                 </Button>
               </div>
             </CardContent>
