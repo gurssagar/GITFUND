@@ -99,7 +99,7 @@ export default function RepositoriesPage() {
 
               <div className="flex gap-2">
                 <Button asChild size="sm" className="flex-1">
-                  <Link href={`/pullRequests/Issues?repo=${repo?.project_repository}`}>View Issues</Link>
+                  <Link href={`/PullRequests/Issues?repo=${repo?.project_repository}`}>View Issues</Link>
                 </Button>
                 
               </div>
