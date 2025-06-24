@@ -51,6 +51,7 @@ export async function GET() {
           metadata: {
             projectName: project.projectName,
             description: project.aiDescription,
+            languages: project.languages,
             owner: project.projectOwner,
           },
         };
