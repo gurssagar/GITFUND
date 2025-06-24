@@ -17,11 +17,6 @@ import Topbar from "@/assets/components/topbar";
 import { useSidebarContext } from "@/assets/components/SidebarContext";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import {
-  oneDark,
-  oneLight,
-} from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface UrlPreview {
   title: string;
@@ -48,109 +43,9 @@ export default function Page() {
     {}
   );
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
-
   // Enhanced emoji regex that catches common emoji patterns
   const emojiRegex =
     /(:[\w+-]+:|\p{Emoji}|\p{Emoji_Presentation}|\p{Emoji_Modifier_Base}|\p{Emoji_Modifier}|\p{Emoji_Component})/gu;
-
-  // Enhanced CodeBlock component
-  const CodeBlock = ({ inline, className, children, ...props }: any) => {
-    const [copied, setCopied] = useState(false);
-    const language = className?.replace("language-", "") || "text";
-    const codeString = String(children).replace(/\n$/, "");
-
-    const handleCopy = async () => {
-      try {
-        await navigator.clipboard.writeText(codeString);
-        setCopied(true);
-        setCopiedCode(codeString);
-        setTimeout(() => setCopied(false), 2000);
-      } catch (err) {
-        console.error("Failed to copy code:", err);
-      }
-    };
-
-    if (inline) {
-      return (
-        <code
-          className="bg-secondary/30 px-1 py-0.5 rounded text-sm font-mono text-primary"
-          {...props}
-        >
-          {children}
-        </code>
-      );
-    }
-
-    return (
-      <div className="relative group my-4">
-        <div className="flex items-center justify-between bg-secondary/20 px-3 py-2 rounded-t-md border-b border-secondary/30">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            {language === "text" ? "Plain Text" : language}
-          </span>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 px-2 text-xs opacity-70 hover:opacity-100 transition-opacity"
-            onClick={handleCopy}
-          >
-            {copied ? (
-              <>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-3 w-3 mr-1 text-green-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                Copied
-              </>
-            ) : (
-              <>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-3 w-3 mr-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                  />
-                </svg>
-                Copy
-              </>
-            )}
-          </Button>
-        </div>
-        <SyntaxHighlighter
-          language={language}
-          style={oneDark} // Change to oneLight for light theme
-          customStyle={{
-            margin: 0,
-            borderRadius: "0 0 0.375rem 0.375rem",
-            fontSize: "0.875rem",
-            lineHeight: "1.5",
-            background: "rgba(0, 0, 0, 0.05)",
-          }}
-          showLineNumbers={codeString.split("\n").length > 5}
-          wrapLines={true}
-          wrapLongLines={true}
-        >
-          {codeString}
-        </SyntaxHighlighter>
-      </div>
-    );
-  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -495,22 +390,103 @@ export default function Page() {
                                     {...props}
                                   />
                                 ),
-                                code: CodeBlock,
-                                pre: ({ children, ...props }: any) => {
-                                  // If pre contains a code element, let the code component handle it
-                                  if (
-                                    React.isValidElement(children) &&
-                                    children.type === "code"
-                                  ) {
-                                    return <>{children}</>;
+                                code: ({
+                                  inline,
+                                  className,
+                                  children,
+                                  ...props
+                                }: any) => {
+                                  if (inline) {
+                                    return (
+                                      <code
+                                        className="bg-secondary/30 px-1 py-0.5 rounded text-sm font-mono"
+                                        {...props}
+                                      >
+                                        {children}
+                                      </code>
+                                    );
                                   }
+                                  const codeElement = React.Children.toArray(
+                                    children
+                                  ).find(
+                                    (child) =>
+                                      React.isValidElement(child) &&
+                                      child.type === "code"
+                                  ) as
+                                    | React.ReactElement<
+                                        React.HTMLAttributes<HTMLElement>
+                                      >
+                                    | undefined;
+
+                                  const codeString =
+                                    codeElement?.props?.children?.toString() ||
+                                    "";
+                                  const language =
+                                    codeElement?.props?.className?.replace(
+                                      "language-",
+                                      ""
+                                    ) || "";
+
+                                  const handleCopy = () => {
+                                    navigator.clipboard.writeText(codeString);
+                                    setCopiedCode(codeString); // Indicate which code block was copied
+                                  };
+
                                   return (
-                                    <pre
-                                      className="bg-secondary/30 p-3 rounded-md overflow-x-auto text-sm font-mono"
-                                      {...props}
-                                    >
-                                      {children}
-                                    </pre>
+                                    <div className="relative group">
+                                      <pre
+                                        {...props}
+                                        className="bg-secondary/30 p-3 rounded-md overflow-x-auto text-sm font-mono"
+                                      >
+                                        {children}
+                                      </pre>
+                                      {codeString && (
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity bg-background/70 hover:bg-background text-muted-foreground hover:text-foreground"
+                                          onClick={handleCopy}
+                                          title="Copy code"
+                                        >
+                                          {copiedCode === codeString ? (
+                                            <svg
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              className="h-4 w-4 text-green-500"
+                                              fill="none"
+                                              viewBox="0 0 24 24"
+                                              stroke="currentColor"
+                                            >
+                                              <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M5 13l4 4L19 7"
+                                              />
+                                            </svg>
+                                          ) : (
+                                            <svg
+                                              xmlns="http://www.w3.org/2000/svg"
+                                              className="h-4 w-4"
+                                              fill="none"
+                                              viewBox="0 0 24 24"
+                                              stroke="currentColor"
+                                            >
+                                              <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                                              />
+                                            </svg>
+                                          )}
+                                        </Button>
+                                      )}
+                                      {language && (
+                                        <span className="absolute bottom-1 right-2 text-xs text-muted-foreground/50 select-none">
+                                          {language}
+                                        </span>
+                                      )}
+                                    </div>
                                   );
                                 },
                               }}
