@@ -391,7 +391,92 @@ export default function PullRequestDetails() {
         className={` ${isShrunk ? "ml-[4rem] w-[calc(100%_-_4rem)]" : "ml-[16rem] w-[calc(100%_-_16rem)]"}`}
       >
         <Topbar />
-        <div className="p-4 mt-24 w-[80%] mx-auto  min-h-screen">
+        {!repoData ? (
+          <div className="z-10 p-4 mt-24 w-[80%] mx-auto min-h-screen animate-pulse">
+            {/* Header Skeleton */}
+            <div className="max-w-7xl mx-auto mt-8">
+              <div className="mb-4">
+                <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              </div>
+
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <div className="h-8 w-64 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                  <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                </div>
+                <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+              </div>
+
+              {/* Main Content Skeleton */}
+              <div className="flex gap-6 mt-6">
+                {/* Left: PR Details Skeleton */}
+                <div className="flex-1">
+                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-6">
+                    <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+                    <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded mb-3"></div>
+                    <div className="flex items-center gap-6 mb-2">
+                      <div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      <div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      <div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                    <hr className="my-4 border-gray-200 dark:border-gray-700" />
+                    <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                    <div className="bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                      <div className="h-6 w-64 bg-gray-200 dark:bg-gray-600 rounded mb-2"></div>
+                      <div className="h-4 w-full bg-gray-200 dark:bg-gray-600 rounded mb-3"></div>
+                      <div className="flex flex-wrap gap-2">
+                        <div className="h-6 w-20 bg-gray-200 dark:bg-gray-600 rounded-full"></div>
+                        <div className="h-6 w-20 bg-gray-200 dark:bg-gray-600 rounded-full"></div>
+                        <div className="h-6 w-20 bg-gray-200 dark:bg-gray-600 rounded-full"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Review Actions Skeleton */}
+                <div className="w-80 flex-shrink-0">
+                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-4">
+                    <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded mb-3"></div>
+                    <div className="flex flex-col gap-2 mb-4">
+                      <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                      <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                      <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                    </div>
+                    <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3">
+                      <div className="h-6 w-24 bg-gray-200 dark:bg-gray-600 rounded mb-2"></div>
+                      <div className="h-4 w-32 bg-gray-200 dark:bg-gray-600 rounded mb-1"></div>
+                      <div className="h-4 w-32 bg-gray-200 dark:bg-gray-600 rounded mb-1"></div>
+                      <div className="h-4 w-32 bg-gray-200 dark:bg-gray-600 rounded mb-1"></div>
+                      <div className="h-4 w-32 bg-gray-200 dark:bg-gray-600 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Files Changed Skeleton */}
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-0 mb-6">
+                <div className="flex border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex-1 py-3 text-center font-medium bg-gray-100 dark:bg-gray-800 rounded-tl-xl">
+                    <div className="h-6 w-32 mx-auto bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  </div>
+                  <div className="flex-1 py-3 text-center font-medium">
+                    <div className="h-6 w-32 mx-auto bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                  <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded mb-6"></div>
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800">
+                    <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                    <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded mb-3"></div>
+                    <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="p-4 mt-24 w-[80%] mx-auto min-h-screen">
           <div className="max-w-7xl mx-auto mt-8">
             <div className="mb-4">
               <a
@@ -716,6 +801,7 @@ export default function PullRequestDetails() {
           </div>
           
         </div>
+        )}
       </div>
     </div>
   );

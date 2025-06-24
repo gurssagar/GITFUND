@@ -11,6 +11,28 @@ import Image from "next/image"
 import { useSidebarContext } from "@/assets/components/SidebarContext"
 import Sidebar from "@/assets/components/sidebar";
 import Topbar from "@/assets/components/topbar";
+interface RepositoryData {
+  project_repository: string;
+  projectOwner: string;
+  projectName: string;
+  aiDescription: string;
+  stars: number;
+  forks: number;
+  contributors: string[];
+}
+
+interface IssueData {
+  id: string;
+  issue_name: string;
+  priority: string;
+  project_issues: string;
+  rewardAmount: string;
+  issue_description: string;
+  publisher: string;
+  issue_date: string;
+  comments: number;
+}
+
 interface PageProps {
   params: { owner: string; name: string }
 }
@@ -18,8 +40,8 @@ interface PageProps {
 export default function RepositoryIssuesPage({ params }: PageProps) {
   const { isShrunk } = useSidebarContext();
   const {data:session} = useSession();
-  const [repoData,setRepoData]=useState([])
-  const [issues,setIssues]=useState([]);
+  const [repoData,setRepoData]=useState<RepositoryData[]>([])
+  const [issues,setIssues]=useState<IssueData[]>([]);
   useEffect(() => {
     fetchData();
   }, [session]);
@@ -71,7 +93,63 @@ export default function RepositoryIssuesPage({ params }: PageProps) {
                     className={` ${isShrunk ? "ml-[4rem] w-[calc(100%_-_4rem)]" : "ml-[16rem] w-[calc(100%_-_16rem)]"}`}
                   >
                     <Topbar />
-    <div className="container mx-auto py-8 px-4">
+                    {
+                      repoData.length === 0 ? (
+                      <div className="container mx-auto mt-16 py-8 px-4">
+                        <div className="mb-8">
+                          <div className="flex items-center gap-4 mb-4">
+                            <div className="h-9 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                          </div>
+
+                          <div className="flex justify-between items-center gap-3 mb-4">
+                            <div>
+                              <div className="h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                              <div className="mt-2">
+                                <div className="h-8 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                                <div className="h-4 w-32 mt-2 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <div className="flex gap-3 mt-6">
+                                <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
+                                <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="bg-gray-50 dark:bg-neutral-900 rounded-lg p-4 mb-6">
+                            <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2"></div>
+                            <div className="flex items-center gap-4">
+                              <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                              <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                              <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                            </div>
+                          </div>
+
+                          <div className="h-8 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4"></div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {[...Array(3)].map((_, i) => (
+                            <div key={i} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 animate-pulse">
+                              <div className="space-y-4">
+                                <div className="h-6 w-3/4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                <div className="h-4 w-1/2 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                <div className="flex gap-4">
+                                  <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                  <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                  <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      ) : (<>
+
+                      <div className="container mx-auto py-8 px-4">
       <div className="mb-8">
         <div className="flex items-center gap-4 mb-4">
           <Button asChild variant="outline" size="sm" className="bg-white dark:bg-transparent border border-gray-300 dark:border-gray-700 text-black dark:text-white">
@@ -158,8 +236,8 @@ export default function RepositoryIssuesPage({ params }: PageProps) {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground h-6 line-clamp-2">{issue.issue_description}</p>
+            <CardContent className="pb-2">
+              <p className="text-sm text-muted-foreground h-12 line-clamp-2">{issue.issue_description}</p>
 
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
@@ -178,7 +256,7 @@ export default function RepositoryIssuesPage({ params }: PageProps) {
 
               <div className="flex items-center justify-between pt-2 border-t">
                 <Button className="w-full">
-                  <Link href={`/PullRequests/Issues/pullRequests?issues=${issue.project_issues}&repo=${repository}`}>View Pull Requests</Link>
+                  <Link href={`/myProjects/Issues/pullRequests?issues=${issue.project_issues}&repo=${repository}`}>View Pull Requests</Link>
                 </Button>
               </div>
             </CardContent>
@@ -192,6 +270,9 @@ export default function RepositoryIssuesPage({ params }: PageProps) {
         </div>
       )}
     </div>
+                      </>)
+                    }
+    
     </div>
     </div>
   )

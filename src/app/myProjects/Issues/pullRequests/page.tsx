@@ -11,6 +11,7 @@ import { useMemo,useEffect,useState } from "react";
 import { useSidebarContext } from "@/assets/components/SidebarContext"
 import Sidebar from "@/assets/components/sidebar";
 import Topbar from "@/assets/components/topbar";
+import Image from "next/image";
 interface PageProps {
   params: { owner: string; repository: string; issueNumber: string }
 }
@@ -111,13 +112,13 @@ export default function IssuePullRequestsPage({ params }: PageProps) {
           </div>
 
           {/* Issue Summary Card */}
-          <Card className="bg-blue-50 border-blue-200">
+          <Card className="bg-neutral-50 dark:bg-neutral-800 dark:border-neutral-600 border-neutral-200">
             <CardHeader>
               <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+                <AlertCircle className="h-5 w-5 dark:text-neutral-100 text-neutral-900 mt-0.5" />
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <CardTitle className="text-lg text-blue-900">{issue?.issue_name}</CardTitle>
+                    <CardTitle className="text-lg dark:text-neutral-100 text-neutral-900">{issue?.issue_name}</CardTitle>
                     {issue?.rewardAmount && (
                       <Badge
                         variant="outline"
@@ -127,20 +128,33 @@ export default function IssuePullRequestsPage({ params }: PageProps) {
                       </Badge>
                     )}
                   </div>
-                  <CardDescription className="text-blue-700">
+                  <CardDescription className="dark:text-neutral-100 text-neutral-900">
                     Issue #{issue?.project_issues} • Opened by {issue?.publisher} on {new Date(issue?.issue_date).toLocaleDateString()}
                   </CardDescription>
+                  <p className="text-sm dark:text-neutral-100 text-neutral-900 line-clamp-2">{issue?.issue_description}</p>
+
                 </div>
-                <Badge
-                  variant={issue?.high === "medium" ? "destructive" : "secondary"}
-                  className={issue?.priority === "medium" ? "bg-green-100 text-green-800" : ""}
-                >
-                  {issue?.priority}
-                </Badge>
+                <div className=" items-center justify-end gap-2">
+                  <div className="justify-end flex items-center gap-2">
+                  <Badge
+                    variant={issue?.high === "medium" ? "destructive" : "secondary"}
+                    className={issue?.priority === "medium" ? "bg-green-100 text-green-800" : ""}
+                  >
+                    {issue?.priority}
+                  </Badge>
+                  
+                  </div>
+                
+                <div className="flex gap-1 text-neutral-300 font-bold text-xl">
+                    <Image src={`/pharos_small.png`} alt="Pharos" width={20} height={20} />
+                   {issue?.rewardAmount} 
+                </div>
+               
+                </div>
+                
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-blue-800 line-clamp-2">{issue?.issue_description}</p>
               
             </CardContent>
           </Card>
@@ -155,8 +169,9 @@ export default function IssuePullRequestsPage({ params }: PageProps) {
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="space-y-2 flex-1">
-                  <div className="flex items-center gap-2">
-                    <GitPullRequest className="h-5 w-5 text-blue-500" />
+                  <div className="flex justify-between  items-center gap-2">
+                    <div className="flex items-center gap-2">
+<GitPullRequest className="h-5 w-5 text-blue-500" />
                     <CardTitle className="text-lg">{pr.source.issue.title}</CardTitle>
                     <Badge
                       variant={pr.source.issue.state === "open" ? "default" : pr.source.issue.state === "merged" ? "secondary" : "destructive"}
@@ -170,6 +185,26 @@ export default function IssuePullRequestsPage({ params }: PageProps) {
                     >
                       {pr.source.issue.state}
                     </Badge>
+                    </div>
+                    
+                    <div>
+                      <a
+                              href={pr.source.issue.html_url}
+                              target="_blank"
+                              rel=""
+                              className="flex items-center px-5 py-2 border border-gray-300 rounded-md font-medium hover:dark:text-black hover:dark:bg-white  transition"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 16 16"
+                                fill="currentColor"
+                                className="w-5 h-5 mr-2"
+                              >
+                                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.65 7.65 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
+                              </svg>
+                              View Pull Request
+                            </a>
+                    </div>
                   </div>
                   <CardDescription>
                     Pull Request #{pr.source.issue.number} • {pr.baseBranch} ← {pr.headBranch}
@@ -208,17 +243,9 @@ export default function IssuePullRequestsPage({ params }: PageProps) {
                   This pull request addresses issue #{issueNumber}: {issue?.project_repository}
                 </div>
                 <div>
-                <a
-                    href={pr.source.issue.html_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                  >
-                    View PR
-                  </a>
                   <Link
                     href={{
-                      pathname: `/PullRequests/Issues/pullRequests/${pr.source.issue.number}`,
+                      pathname: `/myProjects/Issues/pullRequests/${pr.source.issue.number}`,
                       query: {
                         rewardAmount: issue?.rewardAmount,
                         issueNumber: pr.source.issue.number,
@@ -227,9 +254,9 @@ export default function IssuePullRequestsPage({ params }: PageProps) {
                       },
                     }}
                   >
-                    <button className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                    <Button className="text-neutral-100 hover:text-white dark:text-neutral-900 dark:hover:text-black">
                       Review PR
-                    </button>
+                    </Button>
                   </Link>
                 </div>
               </div>
