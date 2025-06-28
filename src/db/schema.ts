@@ -33,6 +33,23 @@ export const users = pgTable("users", {
   skills: json("skills"),
 });
 
+
+
+export const PullRequest = pgTable("users", {
+  id: varchar("id", { length: 256 }).primaryKey().default(sql`gen_random_uuid()`),
+  repository: varchar("repository", { length: 256 }),
+  pullRequestId: varchar("pullRequestId", { length: 256 }),
+  title: text("title"),
+  description: text("description"),
+  status: varchar("status", { length: 256 }),
+  createdAt: timestamp("createdAt").default(sql`now()`),
+  rewardedAt: timestamp("rewardedAt").default(sql`now()`),
+  contributorId: varchar("contributorId", { length: 256 }),
+  projectName: varchar("projectName", { length: 256 }),
+  rewardAmount: varchar("reward", { length: 256 }),
+  issue: varchar("issue", { length: 256 }),
+});
+
 // Messages Table
 export const messages = pgTable("messages", {
   id: varchar("id", { length: 256 })

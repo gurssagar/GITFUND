@@ -826,7 +826,7 @@ const UserProfilePage: NextPage = () => {
       >
         <Topbar />
         {users.length > 0 ? <>
-        <div className="mt-20 min-h-screen  p-4 sm:p-6 lg:p-8">
+        <div className="mt-20 z-10 min-h-screen  p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
             {/* User Info Header */}
             <div className="bg-white dark:bg-neutral-800 shadow rounded-lg p-6 mb-6">
@@ -892,7 +892,7 @@ const UserProfilePage: NextPage = () => {
                   <div className="mt-3 flex items-center justify-center sm:justify-start">
                     <Star className="w-4 h-4 text-yellow-400 mr-1" />
                     <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                      {userData.rating}/5.0 rating
+                      {users[0].rating}/5.0 rating
                     </span>
                   </div>
                 </div>
@@ -902,14 +902,15 @@ const UserProfilePage: NextPage = () => {
                   Skills
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {userData.skills.map((skill) => (
-                    <span
-                      key={skill}
-                      className="px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-100 dark:text-blue-200 dark:bg-blue-700 rounded-full"
-                    >
-                      {skill}
-                    </span>
-                  ))}
+                   {users[0].skills?.languages?.map((lang) => (
+                        <span
+                          key={lang.name}
+                          className="px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-100 dark:text-blue-200 dark:bg-blue-700 rounded-full"
+                          title={`${lang.proficiency} (${lang.yearsOfExperience} years)`}
+                        >
+                          {lang.name}
+                        </span>
+                      ))} 
                 </div>
               </div>
             </div>
@@ -1001,7 +1002,7 @@ const UserProfilePage: NextPage = () => {
             <div>{renderTabContent()}</div>
           </div>
         </div>
-        </>:<div className="mt-20 min-h-screen p-4 sm:p-6 lg:p-8">
+        </>:<div className="z-10 mt-20 min-h-screen p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
             {/* User Info Header */}
             <div className="bg-white dark:bg-neutral-800 shadow rounded-lg p-6 mb-6">

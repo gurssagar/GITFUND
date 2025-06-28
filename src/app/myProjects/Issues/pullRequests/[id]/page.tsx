@@ -212,12 +212,12 @@ export default function PullRequestDetails() {
   );
   const { isShrunk } = useSidebarContext();
   const searchParams = useSearchParams();
-  const RewardAmount = searchParams?.get("RewardAmount");
+const RewardAmount = searchParams?.get("RewardAmount") ?? '';
   const issueNumber = searchParams?.get("issueNumber");
   const project = searchParams?.get("project");
   const owner = searchParams?.get("owner");
 
-  const [rewardAmount, setRewardAmount] = useState("0.1");
+
   const [transactionState, setTransactionState] = useState<
     "idle" | "loading" | "success" | "error"
   >("idle");
@@ -319,12 +319,37 @@ export default function PullRequestDetails() {
         pull_number: parseInt(issueNumber as string),
       },
     );
+    try{
+      await fetch(`/api/handlePR`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: issueNumber,
+          repository: project,
+          pullRequestId: issueNumber,
+          title: repoData?.title,
+          description: repoData?.body,
+          status: "merged",
+          createdAt: repoData?.created_at,
+          rewardedAt: new Date().toISOString(),
+          contributorId: session?.user?.name ,
+          projectName: project,
+          RewardAmount: RewardAmount ,
+          issue: repoData?.html_url,
+        }),
+      });
+    } catch (err) {
+      console.error("Error merging PR:", err);
+    }
+    
   }, [octokit, owner, project, issueNumber]);
 
   const handleWithdraw = React.useCallback(async () => {
     if (!walletAddress || !session?.user?.name) return;
 
-    const withdrawAmount = parseEther(rewardAmount);
+    const withdrawAmount = parseEther(RewardAmount);
     const customGasPrice = parseEther('0.000003'); // 300,000,000,000 Gwei
 
     try {
@@ -352,7 +377,7 @@ export default function PullRequestDetails() {
       setError(err.message || "Failed to withdraw");
       setTransactionState("error");
     }
-  }, [walletAddress, rewardAmount, writeContractAsync, session?.user?.name, contractAddress, contractAbi]); // Added contractAddress and contractAbi to dependency array
+  }, [walletAddress, RewardAmount, writeContractAsync, session?.user?.name, contractAddress, contractAbi]); // Added contractAddress and contractAbi to dependency array
 
 
   useEffect(() => {
