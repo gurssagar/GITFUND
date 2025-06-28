@@ -215,7 +215,8 @@ function Component() {
         if (!Array.isArray(data?.projects)) {
           throw new Error('Invalid reward data format')
         }
-        setRewardData(data.projects)
+        const projects = data.projects
+        setRewardData(projects)
       } catch (error) {
         console.error('Error fetching reward data:', error)
         setRewardData([])
@@ -241,7 +242,7 @@ function Component() {
 
     // Initialize empty contribution data for each day
     const result: RewardDay[] = []
-    for (let d = new Date(startOfYear+1); d <= new Date(endOfYear); d.setDate(d.getDate() + 1)) {
+    for (let d = new Date(startOfYear); d <= new Date(endOfYear); d.setDate(d.getDate() + 1)) {
       result.push({
         date: d.toISOString().split('T')[0],
         rewards: 0
@@ -443,8 +444,8 @@ const UserProfilePage: NextPage = () => {
   const [TotalEarnings, updateEarnings] = useState<number | undefined>(undefined);
   const [rewardAmount, setRewardAmount] = useState<number>(0);
   const [rewardData, setRewardData] = useState<any[]>([]); // Adjust type as needed
+  const [uniqueRewardDays, setUniqueRewardDays] = useState(0);
 
-  
   const [githubStats, setGithubStats] = useState<GitHubStats>({
     totalContributions: 0,
     pullRequests: 0,
@@ -482,6 +483,26 @@ const UserProfilePage: NextPage = () => {
               setRewardAmount(prev => prev + (data.projects[i].rewardAmount || 0));
           }
           setRewardData(data.projects || []);
+
+          // Calculate unique reward days from last 365 days
+          const now = new Date();
+          const oneYearAgo = new Date(now);
+          oneYearAgo.setFullYear(now.getFullYear() - 1);
+          
+          const validDates = data.projects
+            .map(pr => {
+              if (!pr.rewardedAt) return null;
+              try {
+                const date = new Date(pr.rewardedAt);
+                if (isNaN(date.getTime()) || date < oneYearAgo) return null;
+                return date.toISOString().split('T')[0];
+              } catch {
+                return null;
+              }
+            })
+            .filter(Boolean) as string[];
+            
+          setUniqueRewardDays(new Set(validDates).size);
 
           
           
@@ -716,7 +737,7 @@ const UserProfilePage: NextPage = () => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                      {rewardData.filter((pr) => pr.status === "completed").length} contributions in the last year
+                      {uniqueRewardDays} reward days in the last year
                     </p>
                     
                   </div>
@@ -726,46 +747,22 @@ const UserProfilePage: NextPage = () => {
 
                   <div className="grid grid-cols-4 gap-4 mt-4">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-neutral-900 dark:text-white">{githubStats.pullRequests}</div>
+                      <div className="text-2xl font-bold text-neutral-900 dark:text-white">{ rewardData.filter((pr) => pr.status === "completed").length}</div>
                       <div className="text-sm text-neutral-500 dark:text-neutral-400">Pull Requests</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-neutral-900 dark:text-white">{githubStats.issues}</div>
+                      <div className="text-2xl font-bold text-neutral-900 dark:text-white">{new Set(rewardData.map((pr) => pr.issue)).size}</div>
                       <div className="text-sm text-neutral-500 dark:text-neutral-400">Issues</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-neutral-900 dark:text-white">{githubStats.repositories}</div>
+                      <div className="text-2xl font-bold text-neutral-900 dark:text-white">{new Set(rewardData.map((pr) => pr.repository)).size }</div>
                       <div className="text-sm text-neutral-500 dark:text-neutral-400">Repositories</div>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-neutral-900 dark:text-white">
-                        {contributionData.filter(day => day.count > 0).length}
+                        {new Set(rewardData.map((pr) => pr.rewardedAt)).size}
                       </div>
                       <div className="text-sm text-neutral-500 dark:text-neutral-400">Active Days</div>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-6">
-                    <h3 className="text-lg font-semibold mb-3 text-neutral-900 dark:text-white">Recent Activity</h3>
-                    <div className="space-y-3 max-h-60 overflow-y-auto">
-                      {contributionData
-                        .filter(day => day.contributions && day.contributions.length > 0)
-                        .slice(0, 5)
-                        .map((day, idx) => (
-                          <div key={idx} className="border-l-2 border-green-400 dark:border-green-600 pl-3">
-                            <div className="text-sm font-medium">{new Date(day.date).toLocaleDateString()}</div>
-                            <div className="text-xs text-neutral-500 dark:text-neutral-400">
-                              {day.count} contributions
-                            </div>
-                            <div className="mt-1 space-y-1">
-                              {day.contributions && day.contributions.slice(0, 3).map((contrib, i) => (
-                                <div key={i} className="text-xs text-neutral-600 dark:text-neutral-400">
-                                  • {contrib.description} <span className="text-neutral-500">({contrib.repo})</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
                     </div>
                   </div>
                 </div>
@@ -1151,7 +1148,7 @@ const UserProfilePage: NextPage = () => {
                 {
                   icon: <Briefcase className="w-6 h-6 text-purple-500" />,
                   label: "Projects",
-                  value: new Set(rewardData.filter(r => r.status === "completed").map(r => r.projectName)).size,
+                  value: new Set(rewardData.filter(r => r.status === "completed").map(r => r.issue)).size,
                   subtext: "Contributed to",
                 },
                 {
