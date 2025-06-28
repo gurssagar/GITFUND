@@ -6,6 +6,7 @@ import {
   timestamp,
   integer,
   unique,
+  doublePrecision ,
 } from "drizzle-orm/pg-core";
 import { sql, relations } from "drizzle-orm";
 
@@ -35,20 +36,7 @@ export const users = pgTable("users", {
 
 
 
-export const PullRequest = pgTable("users", {
-  id: varchar("id", { length: 256 }).primaryKey().default(sql`gen_random_uuid()`),
-  repository: varchar("repository", { length: 256 }),
-  pullRequestId: varchar("pullRequestId", { length: 256 }),
-  title: text("title"),
-  description: text("description"),
-  status: varchar("status", { length: 256 }),
-  createdAt: timestamp("createdAt").default(sql`now()`),
-  rewardedAt: timestamp("rewardedAt").default(sql`now()`),
-  contributorId: varchar("contributorId", { length: 256 }),
-  projectName: varchar("projectName", { length: 256 }),
-  rewardAmount: varchar("reward", { length: 256 }),
-  issue: varchar("issue", { length: 256 }),
-});
+
 
 // Messages Table
 export const messages = pgTable("messages", {
@@ -190,14 +178,19 @@ export const participantRelations = relations(participants, ({ one }) => ({
 
 // The rest of your tables (pullRequests, assignIssues, assignedIssues, pendingReview, completedIssues, Rewards) remain unchanged, as they do not have foreign key constraints or relations that need correction.
 
-export const pullRequests = pgTable("pullRequests", {
-  projectName: varchar("projectName", { length: 256 }),
-  Contributor_id: varchar("Contributor", { length: 256 }),
-  issue: varchar("issue", { length: 256 }),
-  image_url: varchar("image_url", { length: 256 }),
-  name: varchar("name", { length: 256 }),
+export const PullRequests = pgTable("PullRequests", {
+  id: varchar("id", { length: 256 }).primaryKey().default(sql`gen_random_uuid()`),
+  repository: varchar("repository", { length: 256 }),
+  pullRequestId: varchar("pullRequestId", { length: 256 }),
+  title: text("title"),
   description: text("description"),
   status: varchar("status", { length: 256 }),
+  createdAt: timestamp("createdAt").default(sql`now()`),
+  rewardedAt: timestamp("rewardedAt").default(sql`now()`),
+  contributorId: varchar("contributorId", { length: 256 }),
+  projectName: varchar("projectName", { length: 256 }),
+  rewardAmount: doublePrecision("rewardAmount"),
+  issue: varchar("issue", { length: 256 }),
 });
 export const assignIssues = pgTable("assignIssues", {
   projectName: varchar("projectName", { length: 256 }),

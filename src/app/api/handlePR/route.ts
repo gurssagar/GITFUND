@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { db } from '../../../db/index';
-import { PullRequest } from '../../../db/schema';
+import { PullRequests } from '../../../db/schema';
 import { eq } from 'drizzle-orm';
 
 
 export async function POST(request: Request) {
     try {
-        const { id,
+        const { 
           repository,
           pullRequestId,
           title,
@@ -21,8 +21,7 @@ export async function POST(request: Request) {
         } = await request.json();
 
         // First insert the project
-        await db.insert(PullRequest).values({
-            id: id,
+        await db.insert(PullRequests).values({
             repository: repository,
             pullRequestId: pullRequestId,
             title: title,
@@ -35,6 +34,9 @@ export async function POST(request: Request) {
             rewardAmount: rewardAmount,
             issue: issue
         });
+
+        // Optionally, you can return the created project data
+        return NextResponse.json({ success: true }, { status: 201 });
 
     } catch (error) {
         console.error('Error in project creation:', error);
@@ -54,7 +56,7 @@ export async function GET(request:Request) {
     }
 
     try {
-        const projectsData = await db.select().from(issues).where(eq(issues.project_repository, project_repository)).orderBy(issues.priority);
+        const projectsData = await db.select().from(PullRequests).where(eq(PullRequests.repository, project_repository));
         return NextResponse.json({ projects: projectsData });
     } catch (error) {
         console.error('Error fetching projects:', error);
