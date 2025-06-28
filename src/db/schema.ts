@@ -29,6 +29,8 @@ export const users = pgTable("users", {
   Telegram: varchar("Telegram", { length: 256 }),
   Twitter: varchar("Twitter", { length: 256 }),
   Linkedin: varchar("Linkedin", { length: 256 }),
+  rating: integer("rating").default(5),
+  skills: json("skills"),
 });
 
 // Messages Table
