@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect ,useMemo} from "react";
+import React, { useState, useEffect ,useMemo,useCallback} from "react";
 import { NextPage } from "next";
 import {
   BarChart,
@@ -457,76 +457,73 @@ const UserProfilePage: NextPage = () => {
   const userFromQuery = searchParams?.get('user');
 
 
-  useEffect(() => {
-    const fetchEarnings = async () => {
-      if (!userFromQuery) return;
-      
-      try {
-
-        const rewards = await fetch(`/api/handleReward?contributor=${userFromQuery}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        const res = await fetch("/api/rewards", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        
-        if (rewards.ok) {
-          const data = await rewards.json();
-          console.log(data, "rewards data");
-          for(let i = 0; i < data.projects.length; i++) {
-              setRewardAmount(prev => prev + (data.projects[i].rewardAmount || 0));
-          }
-          setRewardData(data.projects || []);
-
-          // Calculate unique reward days from last 365 days
-          const now = new Date();
-          const oneYearAgo = new Date(now);
-          oneYearAgo.setFullYear(now.getFullYear() - 1);
-          
-          const validDates = data.projects
-            .map(pr => {
-              if (!pr.rewardedAt) return null;
-              try {
-                const date = new Date(pr.rewardedAt);
-                if (isNaN(date.getTime()) || date < oneYearAgo) return null;
-                return date.toISOString().split('T')[0];
-              } catch {
-                return null;
-              }
-            })
-            .filter(Boolean) as string[];
-            
-          setUniqueRewardDays(new Set(validDates).size);
-
-          
-          
-          if (data.Rewards && Array.isArray(data.Rewards)) {
-            // Filter and map rewards where Contributor_id matches userFromQuery
-            const userRewards = data.Rewards
-              .filter((reward: any) => reward.Contributor_id === userFromQuery)
-              .map((reward: any) => Number(reward.value));
-            
-            // Calculate total earnings from filtered rewards
-            const totalEarnings = userRewards.reduce((sum: number, value: number) => sum + value, 0);
-            
-            updateEarnings(totalEarnings);
-          }
-        } else {
-          console.error('Failed to fetch earnings:', res.statusText);
-        }
-      } catch (error) {
-        console.error('Error fetching earnings:', error);
-      }
-    };
+  const fetchEarnings = useCallback(async () => {
+    if (!userFromQuery) return;
     
+    try {
+      const rewards = await fetch(`/api/handleReward?contributor=${userFromQuery}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const res = await fetch("/api/rewards", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      
+      if (rewards.ok) {
+        const data = await rewards.json();
+        console.log(data, "rewards data");
+        for(let i = 0; i < data.projects.length; i++) {
+            setRewardAmount(prev => prev + (data.projects[i].rewardAmount || 0));
+        }
+        setRewardData(data.projects || []);
+
+        // Calculate unique reward days from last 365 days
+        const now = new Date();
+        const oneYearAgo = new Date(now);
+        oneYearAgo.setFullYear(now.getFullYear() - 1);
+        
+        const validDates = data.projects
+          .map(pr => {
+            if (!pr.rewardedAt) return null;
+            try {
+              const date = new Date(pr.rewardedAt);
+              if (isNaN(date.getTime()) || date < oneYearAgo) return null;
+              return date.toISOString().split('T')[0];
+            } catch {
+              return null;
+            }
+          })
+          .filter(Boolean) as string[];
+          
+        setUniqueRewardDays(new Set(validDates).size);
+
+        if (data.Rewards && Array.isArray(data.Rewards)) {
+          // Filter and map rewards where Contributor_id matches userFromQuery
+          const userRewards = data.Rewards
+            .filter((reward: any) => reward.Contributor_id === userFromQuery)
+            .map((reward: any) => Number(reward.value));
+          
+          // Calculate total earnings from filtered rewards
+          const totalEarnings = userRewards.reduce((sum: number, value: number) => sum + value, 0);
+          
+          updateEarnings(totalEarnings);
+        }
+      } else {
+        console.error('Failed to fetch earnings:', res.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching earnings:', error);
+    }
+  }, [userFromQuery, updateEarnings]);
+
+  useEffect(() => {
     fetchEarnings();
-  }, [userFromQuery]);
+  }, [fetchEarnings]);
   
   // console.log(userFromQuery, "userFromQuery");
   // console.log(TotalEarnings, "TotalEarnings");
@@ -816,7 +813,7 @@ const UserProfilePage: NextPage = () => {
                       scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-300 uppercase tracking-wider"
                     >
-                      Difficulty
+                      Description
                     </th>
                     <th
                       scope="col"
@@ -836,26 +833,25 @@ const UserProfilePage: NextPage = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white dark:bg-neutral-800 divide-y divide-neutral-200 dark:divide-neutral-700">
-                  {completedPRs.map((pr) => (
+                  {rewardData.map((pr) => (
                     <tr key={pr.id}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-neutral-900 dark:text-white">
                         {pr.title}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500 dark:text-neutral-400">
-                        {pr.project}
+                        {pr.projectName}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${pr.difficulty === "Hard" ? "bg-red-100 text-red-800 dark:bg-red-700 dark:text-red-100" : pr.difficulty === "Medium" ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-100" : "bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100"}`}
-                        >
-                          {pr.difficulty}
-                        </span>
+                          {pr.description}
+
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500 dark:text-neutral-400">
-                        {pr.mergedDate}
+                        {pr.rewardedAt
+                          ? new Date(pr.rewardedAt).toLocaleDateString("en-US", {})
+                          : "N/A"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-neutral-500 dark:text-neutral-400">
-                        ${pr.reward}
+                        ${pr.rewardAmount.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <a
@@ -904,129 +900,7 @@ const UserProfilePage: NextPage = () => {
             </div>
           </div>
         );
-      case "Activity":
-              return (
-                <div className="mt-6 bg-white dark:bg-neutral-800 p-6 rounded-lg shadow">
-                  <h2 className="text-xl font-semibold mb-4 text-neutral-900 dark:text-white">
-                    Contribution Activity
-                  </h2>
-                  <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-6">
-                    Your contribution history over time
-                  </p>
-            
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="bg-neutral-50 dark:bg-neutral-700 p-4 rounded-lg">
-                      <h3 className="text-md font-semibold mb-3 text-neutral-900 dark:text-white">
-                        Monthly Contribution Breakdown
-                      </h3>
-                      <div className="h-80">
-                        <div className="w-full h-full">
-                          <div className="flex h-full items-end">
-                            {contributionActivityData.map((month, index) => (
-                              <div key={index} className="flex-1 flex flex-col items-center mx-0.5">
-                                <div className="w-full flex flex-col-reverse h-[80%]">
-                                  <div 
-                                    className="w-full bg-blue-500 dark:bg-blue-600 rounded-t" 
-                                    style={{ height: `${(month.prs / 12) * 100}%` }} 
-                                    title={`${month.prs} PRs`}
-                                  ></div>
-                                  <div 
-                                    className="w-full bg-yellow-500 dark:bg-yellow-600 rounded-t" 
-                                    style={{ height: `${(month.issues / 12) * 100}%` }} 
-                                    title={`${month.issues} Issues`}
-                                  ></div>
-                                  <div 
-                                    className="w-full bg-green-500 dark:bg-green-600 rounded-t" 
-                                    style={{ height: `${(month.commits / 15) * 100}%` }} 
-                                    title={`${month.commits} Commits`}
-                                  ></div>
-                                </div>
-                                <div className="text-xs mt-1 text-neutral-600 dark:text-neutral-400">{month.month}</div>
-                                <div className="text-xs text-neutral-500 dark:text-neutral-500">{month.contributions}</div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex justify-center mt-2 space-x-4">
-                        <div className="flex items-center">
-                          <div className="w-3 h-3 bg-green-500 dark:bg-green-600 rounded-sm mr-1"></div>
-                          <span className="text-xs text-neutral-600 dark:text-neutral-400">Commits</span>
-                        </div>
-                        <div className="flex items-center">
-                          <div className="w-3 h-3 bg-yellow-500 dark:bg-yellow-600 rounded-sm mr-1"></div>
-                          <span className="text-xs text-neutral-600 dark:text-neutral-400">Issues</span>
-                        </div>
-                        <div className="flex items-center">
-                          <div className="w-3 h-3 bg-blue-500 dark:bg-blue-600 rounded-sm mr-1"></div>
-                          <span className="text-xs text-neutral-600 dark:text-neutral-400">Pull Requests</span>
-                        </div>
-                      </div>
-                    </div>
-              
-                    <div className="bg-neutral-50 dark:bg-neutral-700 p-4 rounded-lg">
-                      <h3 className="text-md font-semibold mb-3 text-neutral-900 dark:text-white">
-                        Contribution Timeline
-                      </h3>
-                      <div className="space-y-4 max-h-[350px] overflow-y-auto">
-                        {contributionData
-                          .filter(day => day.contributions && day.contributions.length > 0)
-                          .slice(0, 20)
-                          .map((day, idx) => (
-                            <div key={idx} className="border-l-2 border-green-400 dark:border-green-600 pl-3">
-                              <div className="text-sm font-medium">{new Date(day.date).toLocaleDateString()}</div>
-                              <div className="text-xs text-neutral-500 dark:text-neutral-400 mb-1">
-                                {day.count} contributions
-                              </div>
-                              <div className="space-y-1">
-                                {day.contributions && day.contributions.slice(0, 4).map((contrib, i) => (
-                                  <div key={i} className="text-xs text-neutral-600 dark:text-neutral-400">
-                                    • {contrib.description} <span className="text-neutral-500">({contrib.repo})</span>
-                                  </div>
-                                ))}
-                                {day.contributions && day.contributions.length > 4 && (
-                                  <div className="text-xs text-neutral-500">+ {day.contributions.length - 4} more</div>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  </div>
-            
-                  <div className="mt-6 bg-neutral-50 dark:bg-neutral-700 p-4 rounded-lg">
-                    <h3 className="text-md font-semibold mb-3 text-neutral-900 dark:text-white">
-                      Contribution Summary
-                    </h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="bg-white dark:bg-neutral-800 p-3 rounded-lg text-center">
-                        <div className="text-3xl font-bold text-neutral-900 dark:text-white">
-                          {githubStats.totalContributions}
-                        </div>
-                        <div className="text-sm text-neutral-500 dark:text-neutral-400">Total Contributions</div>
-                      </div>
-                      <div className="bg-white dark:bg-neutral-800 p-3 rounded-lg text-center">
-                        <div className="text-3xl font-bold text-blue-500 dark:text-blue-400">
-                          {githubStats.pullRequests}
-                        </div>
-                        <div className="text-sm text-neutral-500 dark:text-neutral-400">Pull Requests</div>
-                      </div>
-                      <div className="bg-white dark:bg-neutral-800 p-3 rounded-lg text-center">
-                        <div className="text-3xl font-bold text-yellow-500 dark:text-yellow-400">
-                          {githubStats.issues}
-                        </div>
-                        <div className="text-sm text-neutral-500 dark:text-neutral-400">Issues</div>
-                      </div>
-                      <div className="bg-white dark:bg-neutral-800 p-3 rounded-lg text-center">
-                        <div className="text-3xl font-bold text-green-500 dark:text-green-400">
-                          {contributionData.filter(day => day.count > 0).length}
-                        </div>
-                        <div className="text-sm text-neutral-500 dark:text-neutral-400">Active Days</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
+      
       default:
         return null;
     }
@@ -1192,7 +1066,7 @@ const UserProfilePage: NextPage = () => {
                       "Overview",
                       "Pull Requests",
                       "Achievements",
-                      "Activity",
+                      
                     ] as TabName[]
                   ).map((tab) => (
                     <button
