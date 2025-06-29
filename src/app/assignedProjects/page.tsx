@@ -288,11 +288,11 @@ const getStatusColor = (status?: string) => {
                                 <div>
                                     <p className="text-sm font-medium text-muted-foreground">Total Rewards</p>
                                     <p className="text-2xl font-bold">
-                                        {issues.reduce((sum, issue) => sum + Number.parseFloat(issue.rewardAmount), 0).toFixed(3)} ETH
+                                        {filteredUserIssues.reduce((sum, issue) => sum + Number.parseFloat(issue.rewardAmount), 0)} PHAROS
                                     </p>
                                 </div>
                                 <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
-                                    <DollarSign className="h-4 w-4 text-green-600" />
+                                    <Image src="/pharos_small.png" width={24} height={24} alt="Pharos Icon" className="h-4 w-4 text-green-600" />
                                 </div>
                             </div>
                         </CardContent>
@@ -430,7 +430,7 @@ const getStatusColor = (status?: string) => {
                                                 <Image src="/pharos_small.png" width={40} height={40} alt="Pharos Icon" className="h-6 w-6" />
                                                 <div>
                                                     <p className="text-sm font-medium text-green-800">Reward</p>
-                                                    <p className="text-lg font-bold text-green-900">{issue.rewardAmount} ETH</p>
+                                                    <p className="text-lg font-bold text-green-900">{issue.rewardAmount} PHAROS</p>
                                                 </div>
                                             </div>
 
