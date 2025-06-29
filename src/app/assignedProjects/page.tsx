@@ -15,6 +15,7 @@ import Topbar from "@/assets/components/topbar";
 import { useSidebarContext } from "@/assets/components/SidebarContext";
 import { Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 interface Project {
     id: number | string;
     project_name: string;
@@ -260,7 +261,7 @@ const getStatusColor = (status?: string) => {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-medium text-muted-foreground">Total Projects</p>
-                                    <p className="text-2xl font-bold">{projects.length}</p>
+                                    <p className="text-2xl font-bold">{filteredProjects.length}</p>
                                 </div>
                                 <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
                                     <User className="h-4 w-4 text-blue-600" />
@@ -273,7 +274,7 @@ const getStatusColor = (status?: string) => {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-medium text-muted-foreground">Available Issues</p>
-                                    <p className="text-2xl font-bold">{issues.length}</p>
+                                    <p className="text-2xl font-bold">{filteredUserIssues.length}</p>
                                 </div>
                                 <div className="h-8 w-8 bg-orange-100 rounded-full flex items-center justify-center">
                                     <AlertCircle className="h-4 w-4 text-orange-600" />
@@ -314,8 +315,8 @@ const getStatusColor = (status?: string) => {
                 {/* Tabs for Projects and Issues */}
                 <Tabs defaultValue="projects" className="space-y-6">
                     <TabsList>
-                        <TabsTrigger value="projects">My Projects ({projects.length})</TabsTrigger>
-                        <TabsTrigger value="issues">Available Issues ({issues.length})</TabsTrigger>
+                        <TabsTrigger value="projects">My Projects ({filteredProjects.length})</TabsTrigger>
+                        <TabsTrigger value="issues">Available Issues ({filteredUserIssues.length})</TabsTrigger>
                     </TabsList>
 
                     {/* Projects Tab */}
@@ -426,7 +427,7 @@ const getStatusColor = (status?: string) => {
 
                                             {/* Reward Amount */}
                                             <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg">
-                                                <DollarSign className="h-5 w-5 text-green-600" />
+                                                <Image src="/pharos_small.png" width={40} height={40} alt="Pharos Icon" className="h-6 w-6" />
                                                 <div>
                                                     <p className="text-sm font-medium text-green-800">Reward</p>
                                                     <p className="text-lg font-bold text-green-900">{issue.rewardAmount} ETH</p>
