@@ -57,17 +57,15 @@ interface AssignedIssue {
 
 interface UserIssue {
     id: string;
-    projectName: string;
-    Contributor_id: string;
-    contributor_email: string;
-    requestDate: string;
-    projectOwner: string | null;
-    skills: string[];
-    issue: string;
-    image_url: string;
-    name: string;
-    description: string;
-    status: string;
+    issue_name: string;
+    publisher: string;
+    issue_description: string;
+    issue_date: string;
+    Difficulty: string;
+    priority: string;
+    project_repository: string;
+    project_issues: string;
+    rewardAmount: string;
 }
 
 export default function Component() {
@@ -138,10 +136,23 @@ const filteredProjects = projects.filter(project =>
     issues.some(issue => issue.projectName === project.project_repository)
 );
 
-
-const filteredIssues = issues.filter(issue =>
-    userIssues.some(assignedIssue => assignedIssue.project_issues === issue.issue && assignedIssue.projectName === issue.project_repository)
+const filteredUserIssues = userIssues.filter(userIssue =>
+    issues.some(issue =>
+        String(userIssue?.project_issues)?.trim()?.toLowerCase() ===
+        String(issue?.issue)?.trim()?.toLowerCase() &&
+        String(userIssue?.project_repository)?.trim()?.toLowerCase() ===
+        String(issue?.projectName)?.trim()?.toLowerCase()
+    )
 );
+const filteredIssues = issues.filter(issue =>
+    userIssues.some(userIssue =>
+        String(userIssue?.project_issues)?.trim()?.toLowerCase() ===
+        String(issue?.issue)?.trim()?.toLowerCase() &&
+        String(userIssue?.project_repository)?.trim()?.toLowerCase() ===
+        String(issue?.projectName)?.trim()?.toLowerCase()
+    )
+);
+console.log('Filtered User Issues:', filteredUserIssues);
 console.log('Filtered Projects:', filteredProjects);
 console.log('Filtered Issues:', filteredIssues);
 const getStatusColor = (status?: string) => {
@@ -377,7 +388,7 @@ const getStatusColor = (status?: string) => {
                     {/* Issues Tab */}
                     <TabsContent value="issues">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {filteredIssues.map((issue) => {
+                            {filteredUserIssues.map((issue) => {
                                 const daysAgo = getDaysAgo(issue.issue_date)
                                 return (
                                     <Card key={issue.id} className="hover:shadow-md transition-shadow">
