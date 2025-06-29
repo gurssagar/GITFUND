@@ -288,7 +288,7 @@ const getStatusColor = (status?: string) => {
                                 <div>
                                     <p className="text-sm font-medium text-muted-foreground">Total Rewards</p>
                                     <p className="text-2xl font-bold">
-                                        {filteredUserIssues.reduce((sum, issue) => sum + Number.parseFloat(issue.rewardAmount), 0)} PHAROS
+                                        {filteredUserIssues.reduce((sum, issue) => sum + Number.parseFloat(issue.rewardAmount), 0).toFixed(7)} PHAROS
                                     </p>
                                 </div>
                                 <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
