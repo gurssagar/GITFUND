@@ -221,7 +221,7 @@ const getStatusColor = (status?: string) => {
                     className={` ${isShrunk ? "ml-[4rem] w-[calc(100%_-_4rem)]" : "ml-[16rem] w-[calc(100%_-_16rem)]"}`}
                   >
                     <Topbar />
-        <div className="mt-16 bg-background">
+        <div className="z-10 mt-16 bg-background">
             {/* Header */}
             <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
                 <div className="container mx-auto px-4 py-4">
