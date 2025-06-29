@@ -76,7 +76,7 @@ export default function Sidebar() {
                   <div className="text-[13px] text-gray-400 py-2">Explore</div>
                 )}
                 <Link href="/homepage">
-                  <div className="rounded-lg text-sm focus:bg-gray-400 text-white hover:bg-gray-100 dark:hover:bg-[#27272a]  px-2 py-2 flex">
+                  <div className="rounded-lg text-sm data-[active=true]:bg-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a] px-2 py-2 flex">
                     
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -146,28 +146,7 @@ export default function Sidebar() {
                     Contributor
                   </div>
                 )}
-                <Link href="/contributions">
-                  <div className="rounded-lg text-sm focus:bg-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a] px-2 py-2 flex">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      className="my-auto mr-2"
-                      height="20"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="1.5"
-                        d="M8 12h.009m3.986 0h.01m3.986 0H16m2 9c1.232 0 2.231-1.151 2.231-2.571c0-2.248-.1-3.742 1.442-5.52c.436-.502.436-1.316 0-1.818c-1.542-1.777-1.442-3.272-1.442-5.52C20.231 4.151 19.232 3 18 3M6 21c-1.232 0-2.231-1.151-2.231-2.571c0-2.248.1-3.742-1.442-5.52c-.436-.502-.436-1.316 0-1.818C3.835 9.353 3.769 7.84 3.769 5.57C3.769 4.151 4.768 3 6 3"
-                        color="currentColor"
-                      />
-                    </svg>
-                    {!isShrunk && "Contributions"}
-                  </div>
-                </Link>
+                
                 <Link href={{
                   pathname: '/userProfile',
                   query: {
@@ -175,23 +154,7 @@ export default function Sidebar() {
                   },
                 }}>
                   <div className="rounded-lg text-sm focus:bg-gray-400 hover:bg-gray-100 dark:hover:bg-[#27272a] px-2 py-2 flex">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      className="my-auto mr-2"
-                      height="20"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="1.5"
-                        d="M8 12h.009m3.986 0h.01m3.986 0H16m2 9c1.232 0 2.231-1.151 2.231-2.571c0-2.248-.1-3.742 1.442-5.52c.436-.502.436-1.316 0-1.818c-1.542-1.777-1.442-3.272-1.442-5.52C20.231 4.151 19.232 3 18 3M6 21c-1.232 0-2.231-1.151-2.231-2.571c0-2.248.1-3.742-1.442-5.52c-.436-.502-.436-1.316 0-1.818C3.835 9.353 3.769 7.84 3.769 5.57C3.769 4.151 4.768 3 6 3"
-                        color="currentColor"
-                      />
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M8 7a4 4 0 1 1 8 0a4 4 0 0 1-8 0m0 6a5 5 0 0 0-5 5a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3a5 5 0 0 0-5-5z" clip-rule="evenodd"/></svg>
                     {!isShrunk && "User Profile"}
                   </div>
                 </Link>
