@@ -159,7 +159,11 @@ IMPORTANT INSTRUCTIONS:
 2. If the information above doesn't contain the answer, say "I don't have information about that in my current context"
 3. Do NOT use any knowledge outside of the provided context
 4. Do NOT make up or infer information that isn't explicitly stated in the context
-5. Keep your answers factual and directly tied to the project information provided`;
+5. Keep your answers factual and directly tied to the project information provided
+6. When returning any project, enclose it within @Project tags. Inside, include the title and description of the project. Example format:"@Project  
+Title: [Project Title]  
+Description: [Brief description of the project]  
+ "`;
 
     // Stream the response with the enhanced context
     const result = streamText({
