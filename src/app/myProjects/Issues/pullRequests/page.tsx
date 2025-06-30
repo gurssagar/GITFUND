@@ -16,14 +16,51 @@ interface PageProps {
   params: { owner: string; repository: string; issueNumber: string }
 }
 
+
+interface Issue {
+  project_repository: string;
+  issue_name: string;
+  rewardAmount?: string;
+  project_issues: string;
+  publisher: string;
+  issue_date: string;
+  issue_description: string;
+  priority: string;
+  high?: string;
+}
+
+interface PullRequest {
+  id: string;
+  source: {
+    issue: {
+      title: string;
+      state: 'open' | 'closed' | 'merged';
+      number: number;
+      html_url: string;
+      user: {
+        login: string;
+      };
+      created_at: string;
+      comments: number;
+      body: string;
+    };
+  };
+  baseBranch?: string;
+  headBranch?: string;
+  additions?: number;
+  deletions?: number;
+  changedFiles?: number;
+  event?: string;
+}
+
 export default function IssuePullRequestsPage({ params }: PageProps) {
   const {data:session}=useSession();
   const searchParams = useSearchParams();
   const { isShrunk } = useSidebarContext();
   const repository=searchParams?.get('repo');;
   const issueNumber=searchParams?.get('issues');
-  const [issue,setIssues]=useState();
-  const [pullRequests,setPullRequests]=useState([]);
+  const [issue,setIssues]=useState<Issue>();
+  const [pullRequests,setPullRequests]=useState<PullRequest[]>([]);
   const [PrUrls,setPrUrls]=useState<string[]>([]);
   const owner=(session?.user as any)?.username;
   const octokit = useMemo(() => {
@@ -129,7 +166,7 @@ export default function IssuePullRequestsPage({ params }: PageProps) {
                     )}
                   </div>
                   <CardDescription className="dark:text-neutral-100 text-neutral-900">
-                    Issue #{issue?.project_issues} • Opened by {issue?.publisher} on {new Date(issue?.issue_date).toLocaleDateString()}
+                    Issue #{issue?.project_issues} • Opened by {issue?.publisher} {issue?.issue_date && `on ${new Date(issue.issue_date).toLocaleDateString()}`}
                   </CardDescription>
                   <p className="text-sm dark:text-neutral-100 text-neutral-900 line-clamp-2">{issue?.issue_description}</p>
 

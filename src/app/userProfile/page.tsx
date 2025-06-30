@@ -488,7 +488,7 @@ const UserProfilePage: NextPage = () => {
         oneYearAgo.setFullYear(now.getFullYear() - 1);
         
         const validDates = data.projects
-          .map(pr => {
+          .map((pr: {rewardedAt?: string}) => {
             if (!pr.rewardedAt) return null;
             try {
               const date = new Date(pr.rewardedAt);
