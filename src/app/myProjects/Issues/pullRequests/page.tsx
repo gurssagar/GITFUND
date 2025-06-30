@@ -24,7 +24,7 @@ export default function IssuePullRequestsPage({ params }: PageProps) {
   const issueNumber=searchParams?.get('issues');
   const [issue,setIssues]=useState();
   const [pullRequests,setPullRequests]=useState([]);
-  const [PrUrls,setPrUrls]=useState([]);
+  const [PrUrls,setPrUrls]=useState<string[]>([]);
   const owner=(session?.user as any)?.username;
   const octokit = useMemo(() => {
       if ((session as any)?.accessToken) {

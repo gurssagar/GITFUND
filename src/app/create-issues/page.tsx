@@ -442,7 +442,7 @@ export default function Project() {
 
     try {
       const currentSession = session.data as CustomSession; // Use CustomSession type
-      const username: string | undefined = currentSession?.user?.username;
+      const username : string = currentSession?.user?.username as string;
       if (!username) {
         setAlertMessage("User session not found.");
         return;
