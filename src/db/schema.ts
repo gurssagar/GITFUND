@@ -231,8 +231,12 @@ export const completedIssues = pgTable("completedIssues", {
 
 export const Rewards = pgTable("rewards", {
   projectName: varchar("projectName", { length: 256 }),
+  projectDescription: text("projectDescription"),
+  projectOwner: varchar("projectOwner", { length: 256 }),
+  project_repository: varchar("project_repository", { length: 256 }),
   Contributor_id: varchar("Contributor", { length: 256 }),
+  transactionHash: varchar("transactionHash", { length: 256 }),
+  rewardAmount: doublePrecision("rewardAmount"),
   issue: varchar("issue", { length: 256 }),
-  value: varchar("value", { length: 256 }),
-  date: varchar("date", { length: 256 }),
+  date: timestamp("date").default(sql`now()`),
 });

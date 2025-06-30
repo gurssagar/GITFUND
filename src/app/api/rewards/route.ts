@@ -2,17 +2,20 @@ import { NextResponse } from 'next/server';
 import { db } from '../../../db/index';
 import { Rewards } from '../../../db/schema';
 import { and, desc, eq, like } from 'drizzle-orm';
-import { InferModel } from 'drizzle-orm';
 
-type Reward = InferModel<typeof Rewards, 'select'>;
-type NewReward = InferModel<typeof Rewards, 'insert'>;
+type Reward = typeof Rewards.$inferSelect;
+type NewReward = typeof Rewards.$inferInsert;
 
 interface RewardInput {
   projectName: string;
   Contributor_id: string;
   issue: string;
-  value: number | string;
-  date: string;
+  rewardAmount: number | string;
+  date?: string;
+  projectDescription?: string;
+  projectOwner?: string;
+  project_repository?: string;
+  transactionHash?: string;
 }
 
 // Reusable error response
@@ -26,29 +29,47 @@ function errorResponse(message: string, status = 400) {
 export async function POST(request: Request): Promise<NextResponse> {
   try {
     const body = await request.json() as RewardInput;
-    const { projectName, Contributor_id, issue, value, date } = body;
-
-    if (!projectName || !Contributor_id || !issue || value === undefined || value === null || !date) {
-      return errorResponse('Missing required fields for reward entry (projectName, Contributor_id, issue, value, date)');
-    }
-
-    const numericValue = Number(value);
-    if (isNaN(numericValue) || numericValue < 0) {
-      return errorResponse('Invalid input: value must be a positive number.');
-    }
-
-    const dateValue = new Date(date);
-    if (isNaN(dateValue.getTime())) {
-      return errorResponse('Invalid date format.');
-    }
-
-    await db.insert(Rewards).values({
+    const {
       projectName,
       Contributor_id,
       issue,
-      value: String(numericValue),
-      date
-    });
+      rewardAmount,
+      date,
+      projectDescription,
+      projectOwner,
+      project_repository,
+      transactionHash
+    } = body;
+
+    if (!projectName || !Contributor_id || !issue || rewardAmount === undefined || rewardAmount === null) {
+      return errorResponse('Missing required fields for reward entry (projectName, Contributor_id, issue, rewardAmount)');
+    }
+
+    const numericAmount = Number(rewardAmount);
+    if (isNaN(numericAmount) || numericAmount < 0) {
+      return errorResponse('Invalid input: rewardAmount must be a positive number.');
+    }
+
+    const rewardData: NewReward = {
+      projectName,
+      Contributor_id,
+      issue,
+      rewardAmount: numericAmount,
+      projectDescription,
+      projectOwner,
+      project_repository,
+      transactionHash
+    };
+
+    if (date) {
+      const dateValue = new Date(date);
+      if (isNaN(dateValue.getTime())) {
+        return errorResponse('Invalid date format.');
+      }
+      rewardData.date = dateValue;
+    }
+
+    await db.insert(Rewards).values(rewardData);
 
     return NextResponse.json({
       success: true,
@@ -166,7 +187,17 @@ export async function PATCH(request: Request): Promise<NextResponse> {
       issue?: string;
     };
 
-    const { projectName, Contributor_id, issue, value, date } = body;
+    const {
+      projectName,
+      Contributor_id,
+      issue,
+      rewardAmount,
+      date,
+      projectDescription,
+      projectOwner,
+      project_repository,
+      transactionHash
+    } = body;
 
     if (!projectName || !Contributor_id || !issue) {
       return errorResponse('Missing required fields for identification (projectName, Contributor_id, issue)');
@@ -174,21 +205,26 @@ export async function PATCH(request: Request): Promise<NextResponse> {
 
     const updateData: Partial<NewReward> = {};
 
-    if (value !== undefined) {
-      const numericValue = Number(value);
-      if (isNaN(numericValue) || numericValue < 0) {
-        return errorResponse('Invalid input: value must be a positive number.');
+    if (rewardAmount !== undefined) {
+      const numericAmount = Number(rewardAmount);
+      if (isNaN(numericAmount) || numericAmount < 0) {
+        return errorResponse('Invalid input: rewardAmount must be a positive number.');
       }
-      updateData.value = String(numericValue);
+      updateData.rewardAmount = numericAmount;
     }
 
-    if (date !== undefined && date !== null && date !== '') {
+    if (date !== undefined && date !== null) {
       const dateValue = new Date(date);
       if (isNaN(dateValue.getTime())) {
         return errorResponse('Invalid date format.');
       }
-      updateData.date = date;
+      updateData.date = dateValue;
     }
+
+    if (projectDescription !== undefined) updateData.projectDescription = projectDescription;
+    if (projectOwner !== undefined) updateData.projectOwner = projectOwner;
+    if (project_repository !== undefined) updateData.project_repository = project_repository;
+    if (transactionHash !== undefined) updateData.transactionHash = transactionHash;
 
     if (Object.keys(updateData).length === 0) {
       return errorResponse('No fields provided for update');
