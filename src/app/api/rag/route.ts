@@ -21,9 +21,9 @@ async function getEmbedding(text: string): Promise<number[]> {
   const data = await hf.featureExtraction({
     model: "sentence-transformers/all-MiniLM-L6-v2",
     inputs: text,
-  });
+  }) as number[] | number[][];
   // data is [[...vector]] or [...vector]; flatten if needed
-  return Array.isArray(data[0]) ? data[0] : data;
+  return Array.isArray(data[0]) ? data[0] : data as number[];
 }
 
 export async function GET() {
@@ -50,9 +50,9 @@ export async function GET() {
           values,
           metadata: {
             projectName: project.projectName,
-            description: project.aiDescription,
+            description: project.aiDescription || '',
             languages: JSON.stringify(project.languages),
-            owner: project.projectOwner,
+            owner: project.projectOwner || '',
           },
         };
       })

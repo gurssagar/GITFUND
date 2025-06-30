@@ -37,10 +37,17 @@ interface PageProps {
   params: { owner: string; name: string }
 }
 
+
+interface User {
+  name?: string | null;
+  email?: string | null;
+  username?: string | null;
+}
+
 export default function RepositoryIssuesPage({ params }: PageProps) {
   const { isShrunk } = useSidebarContext();
   const {data:session} = useSession();
-  const [repoData,setRepoData]=useState<RepositoryData[]>([])
+  const [repoData,setRepoData]=useState<RepositoryData | null>(null)
   const [issues,setIssues]=useState<IssueData[]>([]);
   useEffect(() => {
     fetchData();
@@ -50,7 +57,7 @@ export default function RepositoryIssuesPage({ params }: PageProps) {
   console.log(repository)
 
   const fetchData = async () => {
-  const repositories = await fetch(`/api/manageProjects?projectOwner=${session?.user?.username}`,{
+  const repositories = await fetch(`/api/manageProjects?projectOwner=${(session?.user as User)?.username}`,{
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -94,7 +101,7 @@ export default function RepositoryIssuesPage({ params }: PageProps) {
                   >
                     <Topbar />
                     {
-                      repoData.length === 0 ? (
+                      !repoData ? (
                       <div className="container mx-auto mt-16 py-8 px-4">
                         <div className="mb-8">
                           <div className="flex items-center gap-4 mb-4">

@@ -18,10 +18,6 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  webpack: (config) => {
-    config.externals.push("pino-pretty", "lokijs", "encoding");
-    return config;
-  },
   
   // Add headers configuration for Cross-Origin-Opener-Policy
   async headers() {

@@ -1,9 +1,16 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "../../../db/index";
 import { messages } from "../../../db/schema";
 import { eq, and, or } from "drizzle-orm";
 
-export async function POST(req: Request, res: Response) {
+interface MessageData {
+  from: string;
+  text: string;
+  timestamp: string;
+  to: string;
+}
+
+export async function POST(req: NextRequest) {
   const { from, text, timestamp, to } = await req.json();
   console.log("Received message:", { from, text, timestamp, to });
   try {
@@ -16,12 +23,11 @@ export async function POST(req: Request, res: Response) {
     });
     return NextResponse.json({ data: "Success" }, { status: 200 });
   } catch (error) {
-    console.error("Error:", error);
-    return NextResponse.json({ error: error }, { status: 200 });
+    return NextResponse.json({ error: error }, { status: 400 });
   }
 }
 
-export async function GET(req: Request, res: Response) {
+export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const username = searchParams.get("username");
 

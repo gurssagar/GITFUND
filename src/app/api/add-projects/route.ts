@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '../../../db/index';
 import { project } from '../../../db/schema';
-import nodemailer from 'nodemailer';
+import nodemailer, { SendMailOptions } from 'nodemailer';
 
 // Create a more resilient transporter
 const createTransporter = () => {
@@ -19,7 +19,7 @@ const createTransporter = () => {
     console.error('Failed to create email transporter:', error);
     // Return a mock transporter that logs instead of sending
     return {
-      sendMail: async (options) => {
+      sendMail: async (options: SendMailOptions) => {
         console.log('Email would be sent:', options);
         return { accepted: [], rejected: [], messageId: 'mock-id' };
       }

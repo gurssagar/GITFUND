@@ -10,16 +10,37 @@ import { useRouter } from "next/navigation";
 import { useSidebarContext } from "@/assets/components/SidebarContext";
 import Sidebar from "@/assets/components/sidebar";
 import Topbar from "@/assets/components/topbar";
+
+interface User {
+  name?: string | null;
+  email?: string | null;
+  username?: string | null;
+}
+
+interface Repository {
+  id: string;
+  projectName: string;
+  projectOwner: string;
+  project_repository: string;
+  languages: Record<string, number>;
+  longdis: string;
+  stars: number;
+  forks: number;
+  contributors: string[];
+  openIssues: number;
+}
+
 export default function RepositoriesPage() {
   const {data:session} = useSession();
   const { isShrunk } = useSidebarContext();
-  const [repoData,setRepoData]=useState([])
+  const [repoData,setRepoData]=useState<Repository[]>([])
   useEffect(() => {
     fetchData();
   }, [session]);
 
   const fetchData = async () => {
-  const repositories = await fetch(`/api/manageProjects?projectOwner=${session?.user?.username}`,{
+    if (!session?.user) return;
+    const repositories = await fetch(`/api/manageProjects?projectOwner=${(session.user as User)?.username}`,{
     method: "GET",
     headers: {
       "Content-Type": "application/json",

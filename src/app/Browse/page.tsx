@@ -1,23 +1,12 @@
 'use client'
-import { useSession, SessionContextValue } from 'next-auth/react'; // Added SessionContextValue
+import { useSession } from 'next-auth/react'; // Added SessionContextValue
 import {useEffect, useState} from'react'
-import {useRouter} from 'next/navigation'
-import Image from 'next/image';
-import Link from 'next/link';
 import Sidebar from '@/assets/components/sidebar';
 import Topbar from '@/assets/components/topbar';
 import Issue from '@/assets/components/issue';
 import { useSidebarContext } from '@/assets/components/SidebarContext';
 import {Suspense} from'react';
-import {
-    KBarProvider,
-    KBarPortal,
-    KBarPositioner,
-    KBarAnimator,
-    KBarSearch,
-    useMatches,
-    NO_GROUP
-  } from "kbar";
+
 
 interface Repo {
     projectName: string;

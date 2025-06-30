@@ -18,7 +18,8 @@ import Link from "next/link";
 import Image from "next/image";
 interface Project {
     id: number | string;
-    project_name: string;
+    projectName: string;
+    shortdes: string;
     project_repository: string;
     project_description: string;
     project_icon_url?: string;
