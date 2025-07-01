@@ -687,7 +687,7 @@ const RewardAmount = searchParams?.get("RewardAmount") ?? '';
                       disabled={
                         !walletAddress ||
                         transactionState === "loading" ||
-                        (mergeStatus?.mergeable === false && mergeStatus?.mergeable === null)
+                        (mergeStatus?.mergeable === false || mergeStatus?.mergeable === null)
                       }
                       className="w-full bg-black text-white py-2 rounded-lg flex items-center justify-center gap-2 font-medium dark:bg-white dark:text-black disabled:opacity-50 disabled:cursor-not-allowed"
                     >
