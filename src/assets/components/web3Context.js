@@ -1,41 +1,41 @@
 "use client";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext } from "react";
+import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react";
 import { ethers } from "ethers";
 
 const Web3Context = createContext();
 
 export const Web3Provider = ({ children }) => {
-  const [provider, setProvider] = useState(null);
-  const [signer, setSigner] = useState(null);
-  const [account, setAccount] = useState(null);
+  const { address } = useAppKitAccount();
+  const { walletProvider } = useAppKitProvider("eip155");
 
-  // Connect to MetaMask
-  const connectWallet = async () => {
-    if (!window.ethereum) {
-      alert("MetaMask is not installed!");
-      return;
-    }
-    try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
-
-      setProvider(provider);
-      setSigner(signer);
-      setAccount(accounts[0]); // First connected account
-    } catch (error) {
-      console.error("Error connecting wallet:", error);
-    }
+  // Get provider and signer from AppKit
+  const getProvider = async () => {
+    if (!walletProvider) return null;
+    return new ethers.BrowserProvider(walletProvider);
   };
 
-  useEffect(() => {
-    if (window.ethereum) {
-      connectWallet();
-    }
-  }, []);
+  const getSigner = async () => {
+    const provider = await getProvider();
+    if (!provider) return null;
+    return provider.getSigner();
+  };
+
+  // Connect wallet using AppKit modal
+  const connectWallet = async () => {
+    // This will be managed by the AppKit button component
+    // The modal will open with the <appkit-button> or useAppKit().open()
+    console.log("Connect wallet through AppKit button");
+  };
 
   return (
-    <Web3Context.Provider value={{ provider, signer, account, connectWallet }}>
+    <Web3Context.Provider value={{ 
+      provider: walletProvider, 
+      getProvider, 
+      getSigner, 
+      account: address, 
+      connectWallet 
+    }}>
       {children}
     </Web3Context.Provider>
   );

@@ -1,13 +1,13 @@
 # GitFund
 
-dsddsds
+* dsddsds
 *   **GitHub Integration:** Authenticate with GitHub, list your repositories, select issues, view collaborators, and manage pull requests.
 *   **Smart Contract Funding:** Project owners can deposit cryptocurrency into a dedicated smart contract to fund specific tasks.
 *   **Crypto Rewards:** Contributors receive cryptocurrency rewards directly to their wallets upon successful merging of their pull requests by the project owner.
 *   **Web3 Wallet Connection:** Integrates with browser wallets like MetaMask for seamless deposit and withdrawal operations.
 *   **Project & Issue Management:** Create detailed project listings, link them to GitHub repositories and specific issues, and track contributions.
 *   **AI-Powered Descriptions:** Automatically generates project descriptions using AI based on the repository's README content.
-*   **S3 Image Storage:** Project images are uploaded and stored securely using AWS S3.
+*   **S3 Image Storage:** Project images are uploaded and stored securely using AWS S3 and other s3 providers.
 
 ## How It Works
 
@@ -50,4 +50,4 @@ dsddsds
     ```
 5.  Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-*(Note: You'll need a configured Web3 wallet like MetaMask connected to the appropriate network (e.g., Pharos, Educhain Testnet) and funded with test ETH for contract interactions.)*
+*(Note: You'll need a configured Web3 wallet like MetaMask connected to the appropriate network (e.g., BNB, Educhain Testnet) and funded with test ETH for contract interactions.)*

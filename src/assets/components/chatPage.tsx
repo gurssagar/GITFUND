@@ -269,7 +269,7 @@ const ChatPage = () => {
                         )}
                     </div>
                 </div>
-            )}
+            )} 
         </>
     );
 };

@@ -7,6 +7,7 @@ import Sidebar from "@/assets/components/sidebar";
 import Topbar from "@/assets/components/topbar";
 import Issue from "@/assets/components/issue";
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from "react";
 import { useSidebarContext } from '@/assets/components/SidebarContext';
 
 const IssueCommentForm = () => {
@@ -76,7 +77,7 @@ const IssueCommentForm = () => {
 
   return (
     <>
-        
+        <Suspense fallback={<div>Loading page...</div>}> {/* Added fallback */}
         <div className='flex'>
             <Sidebar/>
             <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
@@ -84,7 +85,7 @@ const IssueCommentForm = () => {
                 <div className='flex'>
                 <div className='w-[85%]'>
                 <div className="mt-20 mx-auto w-[calc(100%_-_16rem)] justify-center">
-                    <form onSubmit={handleSubmit} className="max-w-[600px] border-1 border-gray-800 rounded-xl p-10 mx-auto space-y-4">
+                    <form onSubmit={handleSubmit} className="max-w-[600px] border-2 dark:border-custom-dark-gray rounded-xl p-10 mx-auto space-y-4">
                     <div className="text-3xl mb-6">
               Add Comment to Issue #{Issue}
                     </div>
@@ -110,7 +111,7 @@ const IssueCommentForm = () => {
                 name="comment"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                className="w-full p-2 border-1 border-gray-800 rounded-md h-32"
+                className="w-full p-2 border-2 dark:border-custom-dark-gray rounded-md h-32"
                 required
               />
             </div>
@@ -130,7 +131,7 @@ const IssueCommentForm = () => {
     </div>
             </div>
         </div>
-
+        </Suspense>
         </>
     
   );

@@ -1,134 +1,170 @@
-'use client'
-import {useState,useEffect} from'react'
-import Image from 'next/image';
-import Link from 'next/link';
-import { useSession } from 'next-auth/react';
-import Sidebar from '@/assets/components/sidebar';
-import Topbar from '@/assets/components/topbar';
-import Issue from '@/assets/components/issue';
-import {useSidebarContext} from '@/assets/components/SidebarContext'
-export default function MyProject() {  // Changed from myProject to MyProject
-    const session = useSession();
-    console.log(session.data)
-    const {isShrunk}=useSidebarContext()
-    const [image,updateImage]=useState('')
-    const [visible,setVisible]=useState(null)
-    const [repoData,setRepoData]=useState<any>([])
-    const [projImage,setProjImage]=useState<any>(null)
-    const [isLoading, setIsLoading] = useState(false);
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setIsLoading(false);
-                const response = await fetch('/api/add-issues', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                });
+"use client"
+import Link from "next/link"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { GitBranch, Star, Eye, AlertCircle } from "lucide-react"
+import { useSession } from "next-auth/react"
+import {useState,useEffect,useCallback} from "react"
+import { useRouter } from "next/navigation";
+import { useSidebarContext } from "@/assets/components/SidebarContext";
+import Sidebar from "@/assets/components/sidebar";
+import Topbar from "@/assets/components/topbar";
 
-                
-                const data = await response.json();
-                
-                // Filter projects to only show those owned by current user
-                const userProjects = data.projects.filter(
-                    (project: any) => project.projectOwner === (session?.data?.user as any)?.username
-                );
-                
-                setRepoData(userProjects);
-                setIsLoading(true);
-            } catch (error) {
-                console.error('Error fetching projects:', error);
-                setIsLoading(false);
-            }
-        };
-    
-        fetchData();
-    }, [session]);
-    console.log(repoData)
-    return (
-        <>
-        <div className='flex'>
-            <Sidebar/>
-            <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
-            <Topbar/>
-                <div className='pt-20 grid grid-cols-3 gap-6 mx-10'>
-                    {repoData.map((repo:any) => {
-                        if (!repo.image_url?.trim()) return null;
-                        
-                        return (
-                            <div key={repo.projectName} className="hover:scale-[1.02] transition-transform duration-200">
-                                    <div className="border-1 rounded-xl border-gray-400 dark:border-gray-800">                            
-                                     <div className="p-4 rounded-xl ">
-            <div className="flex">
-                <div className="mr-4">
-                    <img src={repo.image_url} className="rounded" width={48} height={48} alt="avatar" />
-                </div>
-                <div>
-                    <h3>
-                    {repo.projectName}
-                    </h3>
-                    <div className="flex">
-                        <div className="flex text-gray-400 px-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="my-auto" width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="m12 17.275l-4.15 2.5q-.275.175-.575.15t-.525-.2t-.35-.437t-.05-.588l1.1-4.725L3.775 10.8q-.25-.225-.312-.513t.037-.562t.3-.45t.55-.225l4.85-.425l1.875-4.45q.125-.3.388-.45t.537-.15t.537.15t.388.45l1.875 4.45l4.85.425q.35.05.55.225t.3.45t.038.563t-.313.512l-3.675 3.175l1.1 4.725q.075.325-.05.588t-.35.437t-.525.2t-.575-.15z"/></svg>
-                        <p className="text-[15px]">{42}</p>
-                        </div>
-                        <div className="flex px-1 text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="my-auto"  width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M22 5a3 3 0 1 0-4 2.816V11H6V7.816a3 3 0 1 0-2 0V11a2 2 0 0 0 2 2h5v4.184a3 3 0 1 0 2 0V13h5a2 2 0 0 0 2-2V7.816A2.99 2.99 0 0 0 22 5"/></svg>                        
-                        <p className="text-[15px]">{128}</p>
-                        </div>
-                        <div className="flex px-1 text-gray-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="my-auto" width="16" height="16" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20.75a1 1 0 0 0 1-1v-1.246c.004-2.806-3.974-5.004-8-5.004s-8 2.198-8 5.004v1.246a1 1 0 0 0 1 1zM15.604 6.854a3.604 3.604 0 1 1-7.208 0a3.604 3.604 0 0 1 7.208 0"/></svg>                       
-                        <p className="text-[15px]">{8}</p>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>
-            <div className="pt-5">
-                    <div>
-                        <h3 className="text-[13px] text-gray-400">
-                            {repo.shortdes}
-                        </h3>
-                    </div>
-                </div>
-                <div>
+interface User {
+  name?: string | null;
+  email?: string | null;
+  username?: string | null;
+}
 
-            </div>
-                                    </div>
-                                    <div className='flex gap-4 px-4 pb-4'>
-                                    <Link href={{
-                                    pathname: `/myProjects/${repo.project_repository}/assignIssues`,
-                                    query: {
-                                        owner:repo.projectOwner,
-                                        repo: repo.project_repository,
-                                        issueNumber: repo.issue_number || '1' // Default to 1 if not available
-                                    }
-                                }}>
-                                    <button className='hover:scale-1.05 bg-white text-black px-3 py-2 rounded-xl'>Issues</button>
+interface Repository {
+  id: string;
+  projectName: string;
+  projectOwner: string;
+  project_repository: string;
+  languages: Record<string, number>;
+  longdis: string;
+  stars: number;
+  forks: number;
+  contributors: string[];
+  openIssues: number;
+}
+
+export default function RepositoriesPage() {
+  const {data:session} = useSession();
+  const { isShrunk } = useSidebarContext();
+  const [repoData,setRepoData]=useState<Repository[]>([])
+  useEffect(() => {
+    fetchData();
+  }, [session]);
+
+  const fetchData = async () => {
+    if (!session?.user) return;
+    const repositories = await fetch(`/api/manageProjects?projectOwner=${(session.user as User)?.username}`,{
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+  const repositoryData=await repositories.json()
+  setRepoData(repositoryData.project);
+  console.log(repositoryData.project)
+  }
+  
+  
+
+  return (
+    <div className="flex">
+              <Sidebar />
+              <div
+                className={` ${isShrunk ? "ml-[4rem] w-[calc(100%_-_4rem)]" : "ml-[16rem] w-[calc(100%_-_16rem)]"}`}
+              >
+                <Topbar />
+    <div className="container mx-auto py-8 px-4 mt-16">
+      <div className="flex items-center justify-between mb-6">
+        <div className="mb-8 ">
+        <h1 className="text-3xl font-bold mb-2">My Projects</h1>
+        <p className="text-muted-foreground">Repositories with open issues and linked pull requests</p>
+      </div>
+      <div>
+                              <Link href="/create-project">
+                              <button className="bg-black dark:bg-white dark:text-black text-white rounded-lg px-4 py-2">
+                                  + Add Project
+                              </button>
+                              </Link>
+                          </div>
+      </div>
+      
+
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {repoData.map((repo) => (
+          <Card key={repo?.id} className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <CardTitle className="text-lg">{repo?.projectName}</CardTitle>
+                  <CardDescription className="text-sm">
+                    {repo?.projectOwner
+                    }/{repo?.project_repository}
+                  </CardDescription>
+                </div>
+                <Badge variant="secondary" className="ml-2">
+                {Object.keys(repo?.languages ?? []).map((language) => (
+                    <span key={language}>{language}</span>
+                  ))}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground line-clamp-2">{repo?.longdis}</p>
+
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <Star className="h-4 w-4" />
+                  {repo?.stars}
+                </div>
+                <div className="flex items-center gap-1">
+                  <GitBranch className="h-4 w-4" />
+                  {repo?.forks}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Eye className="h-4 w-4" />
+                  {repo?.contributors.length}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-orange-500" />
+                <span className="text-sm font-medium">{repo?.openIssues} open issues</span>
+              </div>
+
+              <div className="flex gap-2">
+                <Button asChild size="sm" className="flex-1">
+                  <Link href={`/myProjects/Issues?repo=${repo?.project_repository}`}>View Issues</Link>
+                </Button>
+                
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      {
+        repoData.length === 0 && (
+          <div className="text-center py-10">
+                            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                            </svg>
+                            <h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-white">No projects found</h3>
+                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                You haven't created or been assigned to any projects yet.
+                            </p>
+                            {/* Optional: Add a button to create a new project if applicable */}
+                            {/* <div className="mt-6">
+                                <Link href="/create-project">
+                                    <a className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        Create new project
+                                    </a>
                                 </Link>
-                                <Link href={{
-                                    pathname: `/myProjects/${repo.project_repository}/Contributions`,
-                                    query: {
-                                        owner:repo.projectOwner,
-                                        repo: repo.project_repository,
-                                        issueNumber: repo.issue_number || '1' // Default to 1 if not available
-                                    }
-                                }}>
-                                    <button className='hover:scale-1.05 bg-white text-black px-3 py-2 rounded-xl'>Contributions</button>
-                                </Link>
-                                </div>  
+                            </div> */}
+                        </div>
+        )
+      }
 
-
-                                    </div>
-                                
-                            </div>
-                        );
-                    })}
-                </div>
-                
-            </div>
+      <div className="mt-8 text-center">
+        <div className="flex gap-4 justify-center">
+          {/* <Button asChild variant="outline" className="bg-white text-black">
+            <Link href="/issues">View All Issues</Link>
+          </Button>
+          <Button asChild variant="outline" className="bg-white text-black">
+            <Link href="/pull-requests">View All Pull Requests</Link>
+          </Button> */}
         </div>
-        </>
-    )
+      </div>
+    </div>
+    <div>
+
+    </div>
+    </div>
+    </div>
+  )
 }

@@ -1,0 +1,833 @@
+"use client";
+
+import React from "react";
+import Sidebar from "@/assets/components/sidebar";
+import Topbar from "@/assets/components/topbar";
+import { useSidebarContext } from "@/assets/components/SidebarContext";
+import { useSearchParams } from "next/navigation";
+import { Octokit } from "octokit";
+import { useCompletion } from "@ai-sdk/react";
+import ReactMarkdown from 'react-markdown'; 
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  useAccount,
+  useWriteContract,
+  useReadContract,
+  useWaitForTransactionReceipt,
+} from "wagmi";
+import { parseEther, formatEther } from "viem";
+import { config } from "@/config";
+
+import { Session } from "next-auth"; // Import Session type
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Suspense } from "react";
+
+const contractAbi = [
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "username",
+        type: "string",
+      },
+    ],
+    name: "deposit",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "sender",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "username",
+        type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "Deposited",
+    type: "event",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address payable",
+        name: "_recipient",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+      {
+        internalType: "string",
+        name: "username",
+        type: "string",
+      },
+    ],
+    name: "withdraw",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "receiver",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "string",
+        name: "username",
+        type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "Withdrawn",
+    type: "event",
+  },
+  {
+    inputs: [],
+    name: "getBalance",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "username",
+        type: "string",
+      },
+    ],
+    name: "getUsernameBalance",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "",
+        type: "string",
+      },
+    ],
+    name: "usernameToAddress",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "",
+        type: "string",
+      },
+    ],
+    name: "usernameToBalance",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+] as const; // Example: [{ "inputs": [], "name": "getBalance", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "string", "name": "username", "type": "string" } ], "name": "deposit", "outputs": [], "stateMutability": "payable", "type": "function" }] as const;
+const contractAddress =
+  "0xf213a3ac05EA11Ec4C6fEcAf2614893A84ccb8dD" as `0x${string}`;
+
+export default function PullRequestDetails() {
+  const {
+    completion,
+    complete,
+    isLoading: isCompletionLoading,
+  } = useCompletion({
+    api: "/api/completion",
+  });
+
+  const [ai,setAi] = useState<boolean>(false);
+  const { data: session } = useSession();
+  const [repoData, setRepoData] = useState<any>(null);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [hasRunCompletion, setHasRunCompletion] = useState(false);
+  const octokit = React.useMemo(
+    () =>
+      new Octokit({
+        auth: (session as any)?.accessToken,
+      }),
+    [session],
+  );
+  const { isShrunk } = useSidebarContext();
+  const searchParams = useSearchParams();
+const RewardAmount = searchParams?.get("RewardAmount") ?? '';
+  const issueNumber = searchParams?.get("issueNumber");
+  const project = searchParams?.get("project");
+  const owner = searchParams?.get("owner");
+
+
+  const [transactionState, setTransactionState] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
+  const [transactionHash, setTransactionHash] = useState<
+    `0x${string}` | undefined
+  >(undefined);
+  const { address, isConnected } = useAccount();
+  const { writeContractAsync } = useWriteContract();
+
+  //Get Contract Balance
+  const { data: contractBalance, refetch: refetchContractBalance } =
+    useReadContract({
+      address: contractAddress,
+      abi: contractAbi,
+      functionName: "getBalance",
+    });
+
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash: transactionHash,
+    });
+
+  useEffect(() => {
+    // Don't run if there's no session
+    if (!session?.user) return;
+
+    const fetchWalletAddress = async () => {
+      try {
+        const response = await fetch("/api/signup", { method: "GET" });
+
+        if (!response.ok) {
+          // Attempt to get more error details from the response body if possible
+          let errorDetails = "Failed to fetch user data";
+          try {
+            const errorData = await response.json();
+            errorDetails = errorData.message || errorDetails;
+          } catch (e) {
+            // Ignore if parsing error body fails, stick to generic message
+          }
+          throw new Error(errorDetails);
+        }
+
+        const fetchedData = await response.json(); // Correctly parse JSON data
+
+        // Assuming fetchedData has a structure like { users: [...] } or is the array itself
+        // Adjust 'fetchedData.users' if the structure is different (e.g., just 'fetchedData')
+        const usersArray = fetchedData.users;
+
+        if (!Array.isArray(usersArray)) {
+          console.warn(
+            "/api/signup did not return a valid users array. Data:",
+            fetchedData,
+          );
+          setWalletAddress(null);
+          setError("Invalid data format from server.");
+          return;
+        }
+
+        const currentUser = usersArray.find(
+          (user: any) => user.id == (session?.user as any)?.username,
+        );
+
+        if (currentUser && currentUser.metaMask) {
+          setWalletAddress(currentUser.metaMask);
+          setError(null); // Clear any previous error
+        } else {
+          console.warn(
+            "Logged-in user's wallet address not found in /api/signup response, user ID mismatch, or walletAddress is missing.",
+          );
+          setWalletAddress(null); // Explicitly set to null if not found or no walletAddress
+          // Optionally set an error message if this is an unexpected state
+          // setError("User wallet address not found.");
+        }
+      } catch (err) {
+        console.error("Error in fetchWalletAddress:", err);
+        setError(err instanceof Error ? err.message : "Unknown error occurred");
+        setWalletAddress(null); // Ensure walletAddress is reset on error
+      }
+    };
+
+    fetchWalletAddress();
+  }, [session]);
+
+  // Log wallet address in development mode
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("Wallet Address:", walletAddress);
+    }
+  }, [walletAddress]);
+
+  const handlePRMerge = React.useCallback(async () => {
+    if (!owner || !project || !issueNumber) return;
+
+    await octokit.request(
+      "PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge",
+      {
+        owner: owner as string,
+        repo: project as string,
+        pull_number: parseInt(issueNumber as string),
+      },
+    );
+    try{
+      await fetch(`/api/handlePR`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: issueNumber,
+          repository: project,
+          pullRequestId: issueNumber,
+          title: repoData?.title,
+          description: repoData?.body,
+          status: "merged",
+          createdAt: repoData?.created_at,
+          rewardedAt: new Date().toISOString(),
+          contributorId: session?.user?.name ,
+          projectName: project,
+          RewardAmount: RewardAmount ,
+          issue: repoData?.html_url,
+        }),
+      });
+    } catch (err) {
+      console.error("Error merging PR:", err);
+    }
+    
+  }, [octokit, owner, project, issueNumber]);
+
+  const handleWithdraw = React.useCallback(async () => {
+    if (!walletAddress || !session?.user?.name) return;
+
+    const withdrawAmount = parseEther(RewardAmount);
+    const customGasPrice = parseEther('0.000003'); // 300,000,000,000 Gwei
+
+    try {
+      setTransactionState("loading");
+      const hash = await writeContractAsync({
+        address: contractAddress,
+        abi: contractAbi,
+        functionName: "withdraw",
+        args: [
+          walletAddress as `0x${string}`,
+          withdrawAmount,
+          session?.user?.name || "",
+        ],
+        gasPrice: customGasPrice, // Add custom gas price here
+      });
+
+      setTransactionHash(hash);
+      setTransactionState("success");
+
+      if (process.env.NODE_ENV === "development") {
+        console.log("Transaction Hash:", hash);
+      }
+    } catch (err: any) {
+      console.error("Error withdrawing:", err);
+      setError(err.message || "Failed to withdraw");
+      setTransactionState("error");
+    }
+  }, [walletAddress, RewardAmount, writeContractAsync, session?.user?.name, contractAddress, contractAbi]); // Added contractAddress and contractAbi to dependency array
+
+
+  useEffect(() => {
+    const fetchPRDetails = async () => {
+      if (!session?.user || !owner || !project || !issueNumber) return;
+
+      try {
+        setLoading(true);
+        const request = await octokit.request(
+          "GET /repos/{owner}/{repo}/pulls/{pull_number}",
+          {
+            owner: owner as string,
+            repo: project as string,
+            pull_number: parseInt(issueNumber as string),
+          },
+        );
+
+        const response = await request;
+        setRepoData(response.data);
+      } catch (err) {
+        console.error("Error fetching PR details:", err);
+        setError("Failed to load pull request details");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPRDetails();
+    // We're using octokit from the useMemo hook which already depends on session
+  }, [session, owner, project, issueNumber]);
+
+  return (
+    <div className="flex">
+      <Sidebar />
+      <div
+        className={` ${isShrunk ? "ml-[4rem] w-[calc(100%_-_4rem)]" : "ml-[16rem] w-[calc(100%_-_16rem)]"}`}
+      >
+        <Topbar />
+        {!repoData ? (
+          <div className="z-10 p-4 mt-24 w-[80%] mx-auto min-h-screen animate-pulse">
+            {/* Header Skeleton */}
+            <div className="max-w-7xl mx-auto mt-8">
+              <div className="mb-4">
+                <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              </div>
+
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <div className="h-8 w-64 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                  <div className="h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                </div>
+                <div className="h-10 w-32 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+              </div>
+
+              {/* Main Content Skeleton */}
+              <div className="flex gap-6 mt-6">
+                {/* Left: PR Details Skeleton */}
+                <div className="flex-1">
+                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-6">
+                    <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded mb-4"></div>
+                    <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded mb-3"></div>
+                    <div className="flex items-center gap-6 mb-2">
+                      <div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      <div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                      <div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                    </div>
+                    <hr className="my-4 border-gray-200 dark:border-gray-700" />
+                    <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                    <div className="bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                      <div className="h-6 w-64 bg-gray-200 dark:bg-gray-600 rounded mb-2"></div>
+                      <div className="h-4 w-full bg-gray-200 dark:bg-gray-600 rounded mb-3"></div>
+                      <div className="flex flex-wrap gap-2">
+                        <div className="h-6 w-20 bg-gray-200 dark:bg-gray-600 rounded-full"></div>
+                        <div className="h-6 w-20 bg-gray-200 dark:bg-gray-600 rounded-full"></div>
+                        <div className="h-6 w-20 bg-gray-200 dark:bg-gray-600 rounded-full"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right: Review Actions Skeleton */}
+                <div className="w-80 flex-shrink-0">
+                  <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-4">
+                    <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded mb-3"></div>
+                    <div className="flex flex-col gap-2 mb-4">
+                      <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                      <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                      <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                    </div>
+                    <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-3">
+                      <div className="h-6 w-24 bg-gray-200 dark:bg-gray-600 rounded mb-2"></div>
+                      <div className="h-4 w-32 bg-gray-200 dark:bg-gray-600 rounded mb-1"></div>
+                      <div className="h-4 w-32 bg-gray-200 dark:bg-gray-600 rounded mb-1"></div>
+                      <div className="h-4 w-32 bg-gray-200 dark:bg-gray-600 rounded mb-1"></div>
+                      <div className="h-4 w-32 bg-gray-200 dark:bg-gray-600 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Files Changed Skeleton */}
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-0 mb-6">
+                <div className="flex border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex-1 py-3 text-center font-medium bg-gray-100 dark:bg-gray-800 rounded-tl-xl">
+                    <div className="h-6 w-32 mx-auto bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  </div>
+                  <div className="flex-1 py-3 text-center font-medium">
+                    <div className="h-6 w-32 mx-auto bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                  <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded mb-6"></div>
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800">
+                    <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
+                    <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded mb-3"></div>
+                    <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="p-4 mt-24 w-[80%] mx-auto min-h-screen">
+          <div className="max-w-7xl mx-auto mt-8">
+            <div className="mb-4">
+              <a
+                href="/PullRequests"
+                className="text-sm text-neutral-500 dark:text-neutral-400 hover:underline"
+              >
+                &larr; Back to Pull Requests
+              </a>
+            </div>
+
+            <div className="flex justify-between items-start mb-2">
+              <div>
+                <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
+                  {repoData?.title}
+                </h1>
+                <div className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                  #{repoData?.number} opened by {repoData?.user?.login} on{" "}
+                  {new Date(repoData?.created_at).toLocaleDateString()}{" "}
+                </div>
+              </div>
+              <a
+                href={repoData?.html_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-950 dark:hover:bg-custom-dark-neutral"
+              >
+                View on GitHub
+              </a>
+            </div>
+            <div className="flex gap-6 mt-6">
+              {/* Left: PR Details */}
+              <div className="flex-1">
+                <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-5 mb-6">
+                  <h2 className="font-semibold text-lg mb-2 flex items-center gap-2 dark:text-white">
+                    <svg
+                      width="20"
+                      height="20"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      viewBox="0 0 24 24"
+                      className="text-neutral-400 dark:text-neutral-300"
+                    >
+                      <path d="M16 17v1a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h6a3 3 0 013 3v1" />
+                      <path d="M9 12h12l-3-3m0 6l3-3" />
+                    </svg>
+                    Pull Request Details
+                  </h2>
+                  <div className="text-neutral-700 dark:text-neutral-300 mb-3">
+                    {repoData?.body || "No description provided"}
+                  </div>
+                  <div className="flex items-center gap-6 mb-2">
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium dark:text-white">
+                        Status:
+                      </span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                          repoData?.state === "open"
+                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                            : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
+                        }`}
+                      >
+                        {repoData?.state === "open" ? "Open" : "Closed"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium dark:text-white">
+                        Merged:
+                      </span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                          repoData?.merged
+                            ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
+                            : "bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300"
+                        }`}
+                      >
+                        {repoData?.merged ? "Merged" : "Not Merged"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium dark:text-white">
+                        Project:
+                      </span>
+                      <span className="text-neutral-800 dark:text-neutral-200">
+                        {repoData?.head?.repo?.name}
+                      </span>
+                    </div>
+                  </div>
+                  <hr className="my-4 border-neutral-200 dark:border-neutral-700" />
+                  <div>
+                    <div className="font-medium mb-2 dark:text-white">
+                      Associated Issue
+                    </div>
+                    <div className="bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-800 rounded-lg p-4">
+                      <div className="font-semibold text-neutral-900 dark:text-white mb-1">
+                        {repoData?.title}
+                      </div>
+                      <div className="text-sm text-neutral-600 dark:text-neutral-300 mb-2">
+                        {repoData?.body || "No description provided"}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="bg-blue-200 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-0.5 rounded-full text-xs">
+                          Changes: {repoData?.changed_files} files
+                        </span>
+                        <span className="bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-0.5 rounded-full text-xs">
+                          +{repoData?.additions} additions
+                        </span>
+                        <span className="bg-red-200 text-red-800 dark:bg-red-900 dark:text-red-200 px-2 py-0.5 rounded-full text-xs">
+                          -{repoData?.deletions} deletions
+                        </span>
+                        <span className="bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200 px-2 py-0.5 rounded-full text-xs">
+                          Commits: {repoData?.commits}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Right: Review Actions */}
+              <div className="w-80 flex-shrink-0">
+                <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-5 mb-4">
+                  <div className="font-semibold mb-3 dark:text-white">
+                    Review Actions
+                  </div>
+                  <div className="flex flex-col gap-2 mb-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleWithdraw();
+                        handlePRMerge();
+                      }}
+                      disabled={
+                        !walletAddress || transactionState === "loading"
+                      }
+                      className="w-full bg-black text-white py-2 rounded-lg flex items-center justify-center gap-2 font-medium dark:bg-white dark:text-black disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <svg
+                        width="18"
+                        height="18"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M5 13l4 4L19 7" />
+                      </svg>
+                      Approve
+                    </button>
+                    <a
+                      href={`${repoData?.html_url}#submit-review`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full border border-neutral-300 text-neutral-700 py-2 rounded-lg flex items-center justify-center gap-2 font-medium dark:border-neutral-600 dark:text-neutral-300"
+                    >
+                      <svg
+                        width="18"
+                        height="18"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M17 10.5V6a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2v-4.5" />
+                        <path d="M15 12l2-2-2-2" />
+                      </svg>
+                      Request Changes
+                    </a>
+                    <Link
+                      href="/PullRequests"
+                      className="w-full bg-red-500 text-white py-2 rounded-lg flex items-center justify-center gap-2 font-medium hover:bg-red-600"
+                    >
+                      <svg
+                        width="18"
+                        height="18"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      Back to List
+                    </Link>
+                  </div>
+                  <div className="bg-neutral-100 dark:bg-neutral-800 rounded-lg p-3 text-sm">
+                    <div className="font-medium dark:text-white">PR Stats</div>
+                    <div className="text-neutral-500 dark:text-neutral-400">
+                      Commits: {repoData?.commits}
+                    </div>
+                    <div className="text-neutral-500 dark:text-neutral-400">
+                      Comments: {repoData?.comments}
+                    </div>
+                    <div className="text-neutral-500 dark:text-neutral-400">
+                      Created:{" "}
+                      {new Date(repoData?.created_at).toLocaleDateString()}
+                    </div>
+                    <div className="text-neutral-500 dark:text-neutral-400">
+                      Last Updated:{" "}
+                      {new Date(repoData?.updated_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* Tabs for Files Changed and Comments */}
+          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-0 mb-6">
+            <div className="flex border-b border-neutral-200 dark:border-neutral-700">
+              <button onClick={() => {
+                setAi(false)
+              }} className="flex-1 py-3 text-center font-medium text-neutral-900 dark:text-white bg-neutral-100 dark:bg-neutral-900 rounded-tl-xl focus:outline-none">
+                Files Changed
+              </button>
+              <button
+                onClick={() => {
+                  setAi(true)
+                  if (
+                    !isCompletionLoading &&
+                    owner &&
+                    project &&
+                    issueNumber &&
+                    !hasRunCompletion
+                  ) {
+                    setHasRunCompletion(true);
+                    const prompt = `Analyze the changes made in a pull request https://github.com/${owner}/${project}/pull/${issueNumber}. Focus on a technical review: explain the purpose of the changes, evaluate the code quality, identify any potential issues or improvements, and assess if the modifications align with best coding practices. Assume the reader is familiar with programming concepts.`;
+
+                    // Use setTimeout to prevent React state update cycles
+                    setTimeout(() => {
+                      complete(prompt);
+                    }, 0);
+                  }
+                }}
+                disabled={
+                  isCompletionLoading ||
+                  !owner ||
+                  !project ||
+                  !issueNumber ||
+                  hasRunCompletion
+                }
+                className="flex-1 py-3 text-center font-medium text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white focus:outline-none"
+              >
+                {isCompletionLoading
+                  ? "Analyzing..."
+                  : hasRunCompletion
+                    ? "Analysis Complete"
+                    : "Analyze PR"}
+              </button>
+            </div>
+            {
+              ai ? 
+              <>
+              <div className="min-h-80 p-10">
+                {completion && (
+                  <div className="mt-4 prose dark:prose-invert max-w-none overflow-auto">
+                    <ReactMarkdown>{completion}</ReactMarkdown> {/* Use ReactMarkdown here */}
+                  </div>
+                  )}
+              </div>
+              </>
+              :
+              <>
+                   <div className="p-6">
+                    <div className="text-xl font-bold mb-1 dark:text-white">
+                      Files Changed
+                    </div>
+                    <div className="text-neutral-500 dark:text-neutral-400 text-sm mb-6">
+                      {`${repoData?.changed_files} ${repoData?.changed_files === 1 ? "file" : "files"} changed with ${repoData?.additions} addition${repoData?.additions === 1 ? "" : "s"} and ${repoData?.deletions} deletion${repoData?.deletions === 1 ? "" : "s"}`}
+                    </div>
+                    {/* File Cards */}
+                    <div className="space-y-6">
+                      {/* Show real file changes if available */}
+                      {repoData?.changed_files > 0 ? (
+                        <div className="border border-neutral-200 dark:border-neutral-800 rounded-lg p-4 bg-white dark:bg-neutral-800 flex flex-col gap-2 relative">
+                          <div className="flex items-center gap-2 font-medium text-neutral-900 dark:text-white">
+                            <svg
+                              className="w-5 h-5 text-neutral-400 dark:text-neutral-500"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              viewBox="0 0 24 24"
+                            >
+                              <path d="M4 4h16v16H4z" />
+                            </svg>
+                            README.md
+                            <span className="absolute right-4 top-4 bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300 text-xs font-semibold px-3 py-1 rounded-full">
+                              Modified
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-4 text-sm mt-1">
+                            <span className="text-green-600 dark:text-green-400 flex items-center gap-1">
+                              <span className="text-lg">+</span>
+                              {repoData?.additions} additions
+                            </span>
+                            <span className="text-red-500 dark:text-red-400 flex items-center gap-1">
+                              <span className="text-lg">-</span>
+                              {repoData?.deletions} deletions
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 mt-1">
+                            <a
+                              href={`${repoData?.html_url}/files`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 dark:text-blue-400 text-sm hover:underline mt-1"
+                            >
+                              View changes on GitHub
+                            </a>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-neutral-600 dark:text-neutral-400 border border-dashed border-neutral-200 dark:border-neutral-700 rounded-lg">
+                          No file changes available
+                        </div>
+                      )}
+                    </div>
+                  </div>
+              </>
+
+            }
+           
+          </div>
+          
+        </div>
+        )}
+      </div>
+    </div>
+  );
+}

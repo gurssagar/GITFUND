@@ -1,380 +1,438 @@
 'use client'
-import {useState,useMemo, useEffect} from "react";
-import Sidebar from "@/assets/components/sidebar";
+import { useState, useEffect, useMemo } from 'react'; // Added useMemo
+import { useSession } from 'next-auth/react';
+import { Octokit } from 'octokit';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { generateText } from "ai";
 import Topbar from "@/assets/components/topbar";
-import { useSession } from "next-auth/react";
-import { Octokit } from "octokit"
-import { Groq } from 'groq-sdk';
-import { ethers } from 'ethers';
-import { useWeb3 } from "../../assets/components/web3Context";
-import { getContract } from "../../assets/components/contract";
-import { useSidebarContext } from '@/assets/components/SidebarContext';
-export default function Project() {
-    const session = useSession();
-    const [token, setToken] = useState('');
-    const [user, setUser] = useState<any>();
-    const [selectedRepo, setSelectedRepo] = useState<any>();
-    const [data, setData] = useState<any[]>();
-    const [issues, setIssues] = useState<any[]>();
+import Sidebar from "@/assets/components/sidebar";
+import { useSidebarContext } from "@/assets/components/SidebarContext";
+
+// Define a type for your repository data for better type safety
+interface Repo {
+  id: number;
+  name: string;
+  // Add other relevant properties from the GitHub API response
+}
+
+export default function CreateProjects() {
+
+    const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+    const { data: sessionData } = useSession();
+    const [repoData, setRepoData] = useState<Repo[]>([]);
+    const [page, setPage] = useState(1);
+    const [alertMessage, setAlertMessage] = useState<string | null>(null);
+    const [selectedRepo, setSelectedRepo] = useState<string>('');
+    const [aiReply, setAiReply] = useState<string | undefined>();
+    const [repoValue, setRepoValue] = useState<string>('');
+    const [collabs, setCollabs] = useState<any[]>([]);
     const { isShrunk } = useSidebarContext();
-    const { provider, signer } = useWeb3(); // Removed unused account
-    const [contractBalance, setContractBalance] = useState("0");
+    const [languages, setLanguages] = useState<any>([]);
+    const [stars, setStars] = useState<number>(0);
+    const [forks, setForks] = useState<number>(0);
+    const [contributors, setContributors] = useState<any>([]);
+    const [comits, setComits] = useState<any>();
 
-
-    // Set token and user from session
-    useEffect(() => {
-        if(session.data) {
-            setToken((session.data as any)?.accessToken);
-            setUser((session.data as any)?.user?.username);
+    const octokit = useMemo(() => {
+        if ((sessionData as any)?.accessToken) {
+            return new Octokit({ auth: (sessionData as any)?.accessToken });
         }
-    }, [session.data]);
+        return null;
+    }, [sessionData]);
 
-    // Fetch repositories
+    // Effect to fetch user's repositories (runs once or when octokit changes)
     useEffect(() => {
-        if (!token) return;
-        
         const fetchRepos = async () => {
+            if (!octokit) return;
             try {
-                const octokit = new Octokit({ auth: token });
-                const response = await octokit.request('GET /user/repos', {
+                const response = await octokit.request("GET /user/repos", {
                     headers: {
-                        'X-GitHub-Api-Version': '2022-11-28'
-                    }
+                        "X-GitHub-Api-Version": "2022-11-28",
+                    },
                 });
-                setData(response.data);
-                console.log(response.data,"repois")
+                setRepoData(response.data as Repo[]);
             } catch (error) {
-                console.error('Error fetching repositories:', error);
+                console.error("Error fetching repositories:", error);
+                setAlertMessage("Failed to fetch repositories.");
             }
         };
         fetchRepos();
-    }, [token]);
+    }, [octokit]);
 
-    //fetch readme.md 
-    const [repoValue, setRepoValue] = useState<any>();
+    // Effect to fetch repo details (commits, maintainers, languages) when selectedRepo changes
     useEffect(() => {
-        const fetchProjectData = async () => {
-            if (!session) return;
-            const octokit = new Octokit({ auth: token });
-            try {
-                
-                await octokit.request(
-                    `GET /repos/${user}/${selectedRepo}/readme`,
-                    {
-                        owner:user,
-                        repo:selectedRepo,
-                        headers: {
-                            'X-GitHub-Api-Version': '2022-11-28'
-                        }
-                    } 
-                ).then(response => response.data).then(res => {
-                    console.log(res,'shhdttwebba')
-                    console.log(repoValue,"sdiewudu")
-                    setRepoValue(Buffer.from(res.content, 'base64').toString('utf-8'));
-                })                     
-            } 
-            catch (error) {
-                console.error('Error fetching project data:', error);
-            }
+        if (!selectedRepo || !octokit || !(sessionData?.user as any)?.username) {
+            // Clear related states if no repo is selected or session/octokit is unavailable
+            setComits(undefined);
+            setContributors([]);
+            setLanguages([]);
+            setStars(0);
+            setForks(0);
+            setCollabs([]);
+            return;
         }
-        fetchProjectData();
-    },[session, user, selectedRepo, token])
-    console.log(repoValue,"sdiewudu")
-    
-    //ai reply
-    const [aiReply, setAiReply] = useState<any>();
-    const groq = useMemo(() => new Groq({ 
-        apiKey: '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', 
-        dangerouslyAllowBrowser: true 
-    }), []);
 
-    useEffect(() => {
-        async function main() {
-            if (!repoValue) return;
-            
-            const chatCompletion = await groq.chat.completions.create({
-                messages: [
-                    {
-                        role: "user",
-                        content: `Read this and explain the project to a developer in 100 words ${JSON.stringify(repoValue)}`,
-                    },
-                ],
-                model: "llama-3.1-8b-instant",
-            });
-            setAiReply(chatCompletion.choices[0]?.message?.content || "");
-        }
-        
-        main();
-    }, [repoValue, groq]);
-
-
-
-    // Fetch issues for selected repo
-    useEffect(() => {
-        if (!token || !user || !selectedRepo) return;
-        
-        const fetchIssues = async () => {
+        const fetchAllRepoDetails = async () => {
+            const username = (sessionData?.user as any).username;
             try {
-                const octokit = new Octokit({ auth: token });
-                const response = await octokit.request(`GET /repos/${user}/${selectedRepo}/issues`, {
-                    headers: {
-                        'X-GitHub-Api-Version': '2022-11-28'
-                    }
+                // Fetch commits
+                const commitsData = await octokit.request(
+                    `/repos/${username}/${selectedRepo}/commits`,
+                    { owner: username, repo: selectedRepo, per_page: 10, page: 1 }
+                ).then(res => res.data);
+                setComits(commitsData);
+
+                // Fetch contributors (used as maintainers in your code)
+                const contributorsData = await octokit.request("GET /repos/{owner}/{repo}/contributors", {
+                    owner: username, repo: selectedRepo,
+                    headers: { "X-GitHub-Api-Version": "2022-11-28" },
+                }).then(res => res.data);
+                setContributors(contributorsData);
+
+                // Fetch languages
+                const languagesData = await octokit.request('GET /repos/{owner}/{repo}/languages', {
+                    owner: username, repo: selectedRepo,
+                    headers: { "X-GitHub-Api-Version": "2022-11-28" },
+                }).then(res => res.data);
+                setLanguages(languagesData);
+
+                // Fetch collaborators
+                const collabsResponse = await octokit.request('GET /repos/{owner}/{repo}/collaborators', {
+                    owner: username, repo: selectedRepo,
+                    headers: { 'X-GitHub-Api-Version': '2022-11-28' }
                 });
-                setIssues(response.data);
+                setCollabs(collabsResponse.data || []);
+
+                // Fetch forks count (simplified)
+                const repoDetailsResponse = await octokit.request('GET /repos/{owner}/{repo}', {
+                    owner: username, repo: selectedRepo,
+                    headers: { 'X-GitHub-Api-Version': '2022-11-28' }
+                });
+                setForks(repoDetailsResponse.data.forks_count || 0);
+                setStars(repoDetailsResponse.data.stargazers_count || 0);
+
             } catch (error) {
-                console.error('Error fetching issues:', error);
+                console.error(`Error fetching details for ${selectedRepo}:`, error);
+                setAlertMessage(`Failed to fetch some details for ${selectedRepo}.`);
             }
         };
-        fetchIssues();
-    }, [token, user, selectedRepo]);
 
-    const fetchBalance = async () => {
-        if (!provider) return;
-        try {
-          const contract = getContract(provider);
-          const balance = await contract.getBalance();
-          setContractBalance(ethers.formatEther(balance));
-        } catch (error) {
-          console.error("Fetch Balance Error:", error);
+        fetchAllRepoDetails();
+    }, [selectedRepo, octokit, sessionData]);
+
+    // Fetch README when selectedRepo changes
+    useEffect(() => {
+        const fetchReadme = async () => {
+            if (!selectedRepo || !octokit || !(sessionData?.user as any)?.username) {
+                setRepoValue('');
+                setAiReply(undefined); // Clear AI reply if repo is deselected
+                return;
+            }
+            // When a new repo is selected, disable the button until AI summary is ready
+            setIsButtonDisabled(true);
+            setAiReply(undefined); // Clear previous AI reply
+
+            try {
+                const response = await octokit.request('GET /repos/{owner}/{repo}/readme', {
+                    owner: (sessionData?.user as any).username,
+                    repo: selectedRepo,
+                    headers: { 'X-GitHub-Api-Version': '2022-11-28' }
+                });
+                if (response.data && typeof response.data.content === 'string') {
+                    const value = atob(response.data.content);
+                    setRepoValue(value);
+                } else {
+                    setRepoValue('');
+                    setAlertMessage(`README not found or is empty for ${selectedRepo}.`);
+                    setIsButtonDisabled(true); // Keep disabled if no README for AI summary
+                }
+            } catch (error) {
+                console.error("Error fetching README:", error);
+                setRepoValue('');
+                setAlertMessage(`Failed to fetch README for ${selectedRepo}.`);
+                setIsButtonDisabled(true); // Keep disabled on README fetch error
+            }
+        };
+
+        fetchReadme();
+    }, [selectedRepo, octokit, sessionData]);
+
+    // Generate AI reply when repoValue changes (README content)
+    useEffect(() => {
+        async function generateAiSummary() {
+            if (!repoValue) {
+                // If there's no repoValue (e.g. no README), ensure button remains disabled
+                // unless you want to allow submission without AI summary.
+                // For now, we assume AI summary is crucial, so button stays disabled.
+                setIsButtonDisabled(true);
+                return;
+            }
+
+            // Button is already set to disabled when repoValue changes (in previous useEffect)
+            // or will be set here if repoValue was initially empty.
+            console.log("Generating AI summary for repo value:", repoValue.substring(0,100) + "...");
+            try {
+              const response = await fetch('/api/ai-description', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ repoValue }),
+              });
+              const data = await response.json();
+              setAiReply(data.text || 'Failed to generate AI summary.');
+              if (data.text) {
+                setIsButtonDisabled(false); // Enable button ONLY if AI summary is successful
+              } else {
+                setIsButtonDisabled(true); // Keep disabled if AI summary failed
+              }
+            } catch (error) {
+              console.error('Error generating AI reply:', error);
+              setAiReply('Failed to generate AI summary. Please try again.');
+              setIsButtonDisabled(true); // Keep disabled on error
+            }
         }
-      };
 
+        generateAiSummary();
+    }, [repoValue]);
 
-   
-
+    // Additional effect to handle button disable state based on selectedRepo directly
+    useEffect(() => {
+        if (!selectedRepo) {
+            setIsButtonDisabled(true);
+            setAiReply(undefined); // Clear AI reply if no repo is selected
+            setRepoValue('');    // Clear repo value (README)
+        }
+        // If a repo is selected, the button's state is primarily managed by the AI summary loading process.
+        // However, if repoValue becomes empty (e.g. README fetch failed or no README), 
+        // the AI summary useEffect will handle disabling the button.
+    }, [selectedRepo]);
 
     const addProject = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        
-        const formData = new FormData(e.currentTarget);
-        const fileInput = formData.get('projectImage') as File;
-        const rewardAmount = formData.get('reward') as string;
-        
-        // Validate inputs
-        if (!repoValue) {
-            console.error('Repository content is not available');
+        if (!octokit || !(sessionData?.user as any)?.username || !selectedRepo) {
+            setAlertMessage("User session, Octokit, or selected repository is not available.");
             return;
         }
-        if (!rewardAmount || isNaN(Number(rewardAmount))) {
-            alert('Please enter a valid reward amount');
+
+        const formData = new FormData(e.currentTarget);
+        const fileInput = formData.get("projectImage") as File;
+
+        if (!fileInput || fileInput.size === 0) {
+            setAlertMessage("Project image is required.");
             return;
         }
 
         try {
-            // Handle deposit first
-            if (!signer) return alert("Connect your wallet first!");
-            try {
-                const contract = getContract(signer);
-                const value=ethers.parseEther(rewardAmount)
-                const username:string=((session.data as any)?.user as any)?.username
-                const tx = await contract.deposit(
-                    username,
-                    { value }
-                     // username as first argument
-                     // value as second argument
-                );           
-                await tx.wait();
-                await fetchBalance();
-            } catch (error) {
-                console.error("Deposit Error:");
-                throw new Error("Failed to deposit funds");
-            }
-
-            // Then proceed with project creation
-            const signedUrlResponse = await fetch('/api/s3', {
-                method: 'POST',
+            const signedUrlResponse = await fetch("/api/s3", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     fileName: fileInput.name,
                     fileType: fileInput.type,
                 }),
             });
-            
+
+            if (!signedUrlResponse.ok) {
+                throw new Error(`Failed to get signed URL: ${signedUrlResponse.statusText}`);
+            }
             const { signedUrl } = await signedUrlResponse.json();
-            
+
             await fetch(signedUrl, {
-                method: 'PUT',
+                method: "PUT",
                 body: fileInput,
                 headers: {
-                    'Content-Type': fileInput.type,
+                    "Content-Type": fileInput.type,
                 },
             });
             
-            const imageUrl = signedUrl.split('?')[0];
+            const imageUrl = signedUrl.split("?")[0];
             
-            await fetch('/api/add-issues', {
-                method: 'POST',
+            
+            
+
+            await fetch("/api/add-projects", { // Assuming this is your endpoint to add project details
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    contributors: {collabs},
-                    aiDescription: aiReply || '',
-                    projectOwner: user,
-                    projectName: formData.get('projectName'),
-                    shortdes: formData.get('shortDescription'),
-                    longdis: formData.get('longDescription'),
+                    contributors: collabs, 
+                    aiDescription: aiReply || "AI description not available.",
+                    projectOwner: (sessionData?.user as any).username,
+                    projectName: formData.get("projectName") as string,
+                    shortdes: formData.get("shortDescription") as string,
+                    longdis: formData.get("longDescription") as string,
                     image_url: imageUrl,
-                    project_repository: selectedRepo,
-                    project_issues: formData.get('projectIssue'),
-                    difficulty:formData.get('difficulty'),
-                    priority:formData.get('priority'),
-                    rewardAmount: rewardAmount,
-                    email:(session.data as any)?.user?.email,
+                    project_repository: selectedRepo,         
+                    email: sessionData?.user?.email,
+                    languages:languages,
+                    maintainers:contributors,
+                    stars:stars,
+                    forks:forks,
+                    comits:comits
                 }),
             });
+
+            console.log(collabs, "collabs");
+            console.log(aiReply, "aiReply");
+            console.log(selectedRepo, "selectedRepo");
+            console.log(repoValue, "repoValue");
+            console.log(sessionData?.user?.email, "email");
+            console.log(languages, "languages");
+            console.log(stars, "stars");
+            console.log(forks, "forks");
+            
+
+            console.log("Project creation initiated successfully!");
+            setAlertMessage("Project submitted successfully!");
+            // Optionally reset form or navigate user
+            setPage(1); // Or navigate to a success page
+            setSelectedRepo('');
+            setRepoValue('');
+            setAiReply(undefined);
+            // e.currentTarget.reset(); // Reset form fields
+
         } catch (error) {
-            console.error('Error in project creation:');
+            console.error("Error in project creation:", error);
+            if (error instanceof Error) {
+                setAlertMessage(`Error: ${error.message}`);
+            } else {
+                setAlertMessage("An unexpected error occurred during project creation.");
+            }
         }
-    }
-
-    //collab
-    const [collabs, setCollabs] = useState<any>();
-    useEffect(() => {
-    const fetchProjectData = async () => {
-        if (!session) return;
-        
-        try {
-            const octokit = new Octokit({ auth: token });
-            await octokit.request(
-                `GET /repos/${user}/${selectedRepo}/collaborators`,
-                {
-                    owner:user,
-                    repo:selectedRepo,
-                    headers: {
-                        'X-GitHub-Api-Version': '2022-11-28'
-                    }
-                } 
-            ).then(response => response.data).then(res => {
-                console.log(res,'collabs')
-                setCollabs(res) 
-            })     
-        } 
-        catch (error) {
-            console.error('Error fetching project data:', error);
-        }
-    }
-    fetchProjectData();
-    },[session, user, selectedRepo, token]);
-
-    
-    console.log(collabs,'collabs')
+    };
 
 
-    // Add selectedRepo as a dependency to log it whenever it change
-
-
-    return (
+    return(
         <>
-            <div className='flex'>
-            <Sidebar/>
-            <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
-                    <Topbar />
-                    <div className="mt-20  justify-center">
-                        <form onSubmit={addProject} className=" p-10 mx-auto space-y-4">
-                            <div className="text-3xl mb-6">
-                                Project Information
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[14px]" htmlFor="projectName">Project name</label>
-                                <input id="projectName" name="projectName" type="text" className="w-full p-2 border-1 border-gray-800 rounded-md"/>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[14px]" htmlFor="shortDescription">Short description</label>
-                                <input id="shortDescription" name="shortDescription" type="text" className="w-full p-2 border-1 border-gray-800 rounded-md"/>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-[14px]" htmlFor="longDescription">Long Description</label>
-                                <textarea id="longDescription" name="longDescription" className="w-full p-2 border-1 border-gray-800 rounded-md"/>
-                            </div>
-                            <div className="space-y-2 flex gap-4">
-                                <div className="w-1/3">
-                                <label className="text-[14px]" htmlFor="projectImage">Project image</label>
-                                <input id="projectImage" name="projectImage" type="file" className="w-full p-2 border-1 border-gray-800 rounded-md"/>
-                                </div>
-                                <div className="w-1/3">
-                                <label className="text-[14px]" htmlFor="projectImage">Reward Amount in Pharos</label>
-                                <input id="reward" name="reward" type="text" className="w-full p-2 border-1 border-gray-800 rounded-md"/>
-                                </div>
-                                <div className="space-y-2 w-1/3">
-                                <label className="text-[14px]" htmlFor="difficulty">Difficulty</label>
-                                <select 
-                                    id="difficulty" 
-                                    name="difficulty" 
-                                    className="bg-[#0a0a0a] text-[14px] w-full p-2 border-1 border-gray-800 rounded-md"
-                                    
-                                >
-                                    <option value="">Select difficulty</option>
-                                    <option value="low">Low</option>
-                                    <option value="medium">Medium</option>
-                                    <option value="hard">Hard</option>
-                                </select>
-                            </div>
-                            </div>
-                            
-                            <div className="flex gap-4 ">
-                            <div className="space-y-2 w-1/3">
-                                <label className="text-[14px]" htmlFor="priority">Priority</label>
-                                <select 
-                                    id="priority" 
-                                    name="priority" 
-                                    className="bg-[#0a0a0a] w-full p-2 border-1 border-gray-800 rounded-md"
-                                    
-                                >
-                                    <option value="">Select The Priority</option>
-                                    <option value="low">Low</option>
-                                    <option value="medium">Medium</option>
-                                    <option value="hard">Hard</option>
-                                </select>
-                            </div>
-                            <div className="space-y-2  w-1/3">
-                                <label className="text-[14px]" htmlFor="projectRepo">Project Repository</label>
-                                <select 
-                                    id="projectRepo" 
-                                    name="projectRepo" 
-                                    className="bg-[#0a0a0a] w-full p-2 border-1 border-gray-800 rounded-md"
-                                    onChange={(e) => setSelectedRepo(e.target.value)}
-                                    value={selectedRepo}
-                                >
-                                    <option value="">Select a repository</option>
-                                    {data?.map((repo: any) => (
-                                        <option value={repo.name} key={repo.id}>
-                                        
-                                        
-                                        
-                                            {repo.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="space-y-2  w-1/3">
-                                <label className="text-[14px]" htmlFor="projectIssue">Select Issue</label>
-                                <select 
-                                    id="projectIssue" 
-                                    name="projectIssue" 
-                                    className="bg-[#0a0a0a] w-full p-2 border-1 border-gray-800 rounded-md"
-                                >
-                                    <option value="">Select an issue</option>
-                                    {issues?.map((issue: any) => (
-                                        <option value={issue.number} key={issue.id}>
-                                            {issue.title}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            </div>
-                            <div className="mt-6 flex justify-end">
-                                <button type="submit" className="bg-[#29292c] text-white p-2 rounded-md hover:bg-[#222225] px-4">
-                                    Publish
-                                </button>
-                            </div>
-                        </form>
+        <div className="flex">
+          <Sidebar />
+          <div
+            className={`transition-all duration-300 ease-in-out ${isShrunk ? "ml-[4rem] w-[calc(100%_-_4rem)]" : "ml-[16rem] w-[calc(100%_-_16rem)]"}`}
+          >
+            <Topbar />
+            <div className='mt-17'> {/* Assuming mt-17 is a valid Tailwind class or custom utility */}
+            <form onSubmit={addProject} className="p-10 mx-auto space-y-4">
+              {
+                page===1?
+                <>
+                  <div>
+                  
+                    <div className="text-3xl mb-6">Project Information</div>
+                    <div className="space-y-2">
+                      <label className="text-[14px]" htmlFor="projectName">
+                        Project name
+                      </label>
+                      <input
+                        id="projectName"
+                        name="projectName"
+                        type="text"
+                        className="w-full p-2 border-2 dark:border-custom-dark-gray rounded-md"
+                        required // Added required for basic validation
+                      />
                     </div>
-                </div>
+                    <div className="space-y-2">
+                      <label className="text-[14px]" htmlFor="shortDescription">
+                        Short description
+                      </label>
+                      <input
+                        id="shortDescription"
+                        name="shortDescription"
+                        type="text"
+                        className="w-full p-2 border-2 dark:border-custom-dark-gray rounded-md"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[14px]" htmlFor="longDescription">
+                        Long Description
+                      </label>
+                      <textarea
+                        id="longDescription"
+                        name="longDescription"
+                        className="w-full p-2 border-2 dark:border-custom-dark-gray rounded-md"
+                        rows={4} // Added rows for better textarea appearance
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2 flex gap-4">
+                      <div className="w-full">
+                        <label className="text-[14px]" htmlFor="projectImage">
+                          Project image
+                        </label>
+                        <input
+                          id="projectImage"
+                          name="projectImage"
+                          type="file"
+                          accept="image/*" // Added accept attribute for better UX
+                          className="w-full p-2 border-2 dark:border-custom-dark-gray rounded-md"
+                          required
+                        />
+                      </div>
+                      
+                    </div>
+                    <div className="space-y-2  w-1/3">
+                    <label className="text-[14px]" htmlFor="projectRepo">
+                      Project Repository
+                    </label>
+                    <select
+                      id="projectRepo"
+                      name="projectRepo"
+                      className="dark:bg-[#0a0a0a] w-full p-2 border-2 dark:border-custom-dark-gray rounded-md"
+                      onChange={(e) => setSelectedRepo(e.target.value)}
+                      value={selectedRepo} // Value is controlled by selectedRepo state
+                      required
+                    >
+                      <option value="">Select a repository</option>
+                      {repoData?.map((repo: Repo) => ( // Use Repo type
+                        <option value={repo.name} key={repo.id}>
+                          {repo.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                    
+                    {/* Display AI Summary (Read-only) */}
+                    {aiReply && selectedRepo && (
+                        <div className="mt-6 p-4 border-2 dark:border-custom-dark-gray rounded-md">
+                            <h3 className="text-lg font-semibold mb-2">AI Generated Project Summary:</h3>
+                            <p className="text-sm whitespace-pre-wrap">{aiReply}</p>
+                        </div>
+                    )}
+
+                    {/* Alert Message Display */}
+                    {alertMessage && (
+                        <Alert className={`mt-4 ${alertMessage.startsWith("Error") || alertMessage.startsWith("Failed") ? "border-red-500 text-red-700" : "border-green-500 text-green-700"}`}>
+                            <AlertTitle>{alertMessage.startsWith("Error") || alertMessage.startsWith("Failed") ? "Error" : "Success"}</AlertTitle>
+                            <AlertDescription>{alertMessage}</AlertDescription>
+                        </Alert>
+                    )}
+
+                    <div className="mt-6 flex justify-end">
+                      <button
+                        type="submit"
+                        disabled={isButtonDisabled} // This will now correctly reflect loading state
+                        className="bg-[#29292c] text-white p-2 rounded-md hover:bg-[#222225] px-4 disabled:opacity-50"
+                      >
+                        Submit Project
+                      </button>
+                    </div>
+                  </div>
+                </>
+                :
+                <>
+                  {/* Content for page === 2 if you still need a multi-page form */}
+                  {/* For now, assuming submission happens on page 1 */}
+                  <div className="text-xl">Project Submitted! (Placeholder for page 2)</div>
+                  <button onClick={() => setPage(1)} className="mt-4 bg-blue-500 text-white p-2 rounded-md">Create Another Project</button>
+                </>
+              }
+              </form>
             </div>
+          </div>
+        </div>
         </>
     )
 }

@@ -1,12 +1,11 @@
-
 import NextAuth from "next-auth"
 import GitHub from "next-auth/providers/github"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  secret: process.env.AUTH_SECRET,
+  secret: process.env.AUTH_SECRET || 'your-auth-secret-key-at-least-32-chars-long',
   providers: [GitHub({
-    clientId: process.env.AUTH_GITHUB_ID,
-    clientSecret: process.env.AUTH_GITHUB_SECRET,
+    clientId: process.env.AUTH_GITHUB_ID || '',
+    clientSecret: process.env.AUTH_GITHUB_SECRET || '',
     authorization: {
       params: {
         scope: "read:user user:email repo admin:repo_hook write:issues write:pull_requests read:pull_requests"

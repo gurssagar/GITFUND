@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from 'next/link'
 export default function SignUp() {
     const session = useSession();
-    const [walletAddress, setWalletAddress] = useState<any>("");
+    const [walletAddress, setWalletAddress] = useState<string>("");
     const [isLoading, setIsLoading] = useState(false);
 
 interface SessionUser {
@@ -98,7 +98,7 @@ const id = (session?.data?.user as SessionUser)?.username;
         <>
         <div>
         <div className="flex items-center justify-center min-h-screen">
-            <div className="max-w-[900px] w-[40rem] p-6 rounded-lg shadow-md border-1 border-gray-600">
+            <div className="max-w-[900px] w-[40rem] p-6 rounded-lg shadow-md border-2 border-gray-600">
                 <h1 className="text-2xl font-bold mb-6">Sorry</h1>
                 <p className="mb-4">User Already Exists</p>
                 <form className="space-y-4" >
@@ -109,7 +109,7 @@ const id = (session?.data?.user as SessionUser)?.username;
                         <Link 
                         type="submit"
                         href="/homepage"
-                        className="w-full flex text-white bg-black dark:text-black justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium dark:bg-white hover:bg-white disabled:opacity-50"
+                        className="w-full flex text-white bg-black dark:text-black justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium dark:bg-white dark:hover:bg-white disabled:opacity-50"
                     >
                         {isLoading ? 'Processing...' : 'Continue'}
                     </Link>
@@ -122,7 +122,7 @@ const id = (session?.data?.user as SessionUser)?.username;
         </>:
         <>
         <div className="flex items-center justify-center min-h-screen">
-            <div className="max-w-[900px] w-[40rem] p-6 rounded-lg shadow-md border-1 border-gray-600">
+            <div className="max-w-[900px] w-[40rem] p-6 rounded-lg shadow-md border-2 border-gray-600">
                 <h1 className="text-2xl font-bold mb-6">Sign Up</h1>
                 <p className="mb-4">Fill In the Details Below to Complete The Sign up</p>
                 <form className="space-y-4" onSubmit={handleSignUp}>
@@ -144,7 +144,7 @@ const id = (session?.data?.user as SessionUser)?.username;
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full flex text-white bg-black dark:text-black justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium dark:bg-white hover:bg-white disabled:opacity-50"
+                        className="w-full flex text-white bg-black dark:text-black justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium dark:bg-white dark:hover:bg-white disabled:opacity-50"
                         onClick={async (e) => {
                             await handleSignUp(e);
                             if (!isLoading) {

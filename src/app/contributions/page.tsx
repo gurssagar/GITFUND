@@ -4,6 +4,7 @@ import Sidebar from '@/assets/components/sidebar';
 import Topbar from '@/assets/components/topbar'
 import { useSession } from 'next-auth/react';
 import { useSidebarContext } from '@/assets/components/SidebarContext';
+import {Suspense} from 'react';
 // Define the interface for the issue data (can be used for both applied and assigned)
 interface IssueData {
     projectName: string;
@@ -90,7 +91,9 @@ export default function Contributions() {
         const imageUrl = issue.image_url?.trim().replace(/`/g, '') || ''; // Handle potentially missing/empty URL
 
         return (
-            <div key={key} className='border border-gray-700 bg-[#181a1f] rounded p-3 mb-3 flex flex-col gap-2'>
+            
+                
+            <div key={key} className='border border-gray-700 dark:bg-[#181a1f] rounded p-3 mb-3 flex flex-col gap-2'>
                 {/* Top row: Project Name and Issue Number */}
                 <div className="flex justify-between items-center">
                     <h3 className='font-semibold text-md'>{issue.projectName}</h3>
@@ -120,13 +123,14 @@ export default function Contributions() {
 
     return (
         <>
+        <Suspense>
             <div>
                 <Sidebar />
                 <div className={` ${isShrunk?'ml-[4rem] w-[calc(100%_-_4rem)]':'ml-[16rem] w-[calc(100%_-_16rem)]'}`}>
                     <Topbar />
                     <div className={`flex w-[calc(100vw_-_17em)] my-[70px] px-4 gap-4`}>
                         {/* Applied Issues Column - Filtered */}
-                        <div className='min-h-[100vh] w-1/3 py-4 px-3 rounded border border-gray-800 overflow-y-auto  text-gray-200'>
+                        <div className='min-h-[100vh] w-1/3 py-4 px-3 rounded border dark:border-custom-dark-gray overflow-y-auto  text-black dark:text-gray-200'>
                             <h3 className='font-bold text-lg mb-4 px-2'>My Applied Issues</h3>
                             {userAppliedOnlyIssues.length > 0 ? (
                                 userAppliedOnlyIssues.map(renderIssueCard) // Use the helper function
@@ -136,7 +140,7 @@ export default function Contributions() {
                         </div>
 
                         {/* Assigned Issue Column */}
-                        <div className='min-h-[100vh] py-4 px-3 w-1/3 rounded border border-gray-800 overflow-y-auto  text-gray-200'> {/* Added styles */}
+                        <div className='min-h-[100vh] py-4 px-3 w-1/3 rounded border dark:border-custom-dark-gray overflow-y-auto  text-black dark:text-gray-200'> {/* Added styles */}
                             <h3 className='font-bold text-lg mb-4 px-2'>My Assigned Issues</h3> {/* Adjusted text */}
                             {userAssignedIssues.length > 0 ? (
                                 userAssignedIssues.map(renderIssueCard) // Use the helper function
@@ -146,7 +150,7 @@ export default function Contributions() {
                         </div>
 
                         {/* Pending Review Column */}
-                        <div className='min-h-[100vh] py-4 px-3 w-1/3 rounded border border-gray-800 overflow-y-auto text-gray-200'> {/* Added styles */}
+                        <div className='min-h-[100vh] py-4 px-3 w-1/3 rounded border dark:border-custom-dark-gray overflow-y-auto text-black dark:text-gray-200'> {/* Added styles */}
                             <h3 className='font-bold text-lg mb-4 px-2'>Pending Review</h3> {/* Adjusted text */}
                             {/* Content for Pending Review - Add logic similar to above */}
                              <p className="text-gray-400 px-2">No issues pending review.</p> {/* Placeholder */}
@@ -154,6 +158,7 @@ export default function Contributions() {
                     </div>
                 </div>
             </div>
+            </Suspense>
         </>
     );
 }
