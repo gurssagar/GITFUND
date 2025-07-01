@@ -2,7 +2,7 @@
 import { Icon } from '@iconify/react';
 
 import { Box, Lock, Search, Settings, Sparkles } from "lucide-react";
-import { GlowingEffect } from "../../components/ui/glowing-effect";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
 export default function Issue({image, Project, Fork, Stars, Contributors, shortDescription, languages}: {image: string, Project: string, Fork: number, Stars: number, Contributors: number, shortDescription: string, languages: any}) {
     const getLanguageIcon = (language: string) => {
         const iconMap: Record<string, string> = {
@@ -28,14 +28,15 @@ export default function Issue({image, Project, Fork, Stars, Contributors, shortD
 
     return (
         <>
-        <GlowingEffect
+        
+        <div className="p-4 rounded-xl border-2 border-gray-400 dark:dark:border-custom-dark-gray">
+            <GlowingEffect
           spread={40}
           glow={true}
           disabled={false}
           proximity={64}
           inactiveZone={0.01}
         />
-        <div className="p-4 rounded-xl border-2 border-gray-400 dark:dark:border-custom-dark-gray">
             <div className="flex">
                 <div className="mr-4">
                     <img src={image} className="rounded h-[48px]" width={48} height={48} alt="avatar" />
