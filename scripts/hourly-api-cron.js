@@ -22,8 +22,8 @@ cron.schedule('*/1 * * * * *', async () => {
   try {
     logger.info('Starting hourly API call');
     
-    const response = await axios.post(API_URL, {
-      // Include any required request body
+    const response = await axios.get(API_URL, {
+      
     });
 
     logger.info('API call successful', {
