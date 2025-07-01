@@ -1,5 +1,5 @@
-const axios = require('axios');
-const { createLogger, transports, format } = require('winston');
+import { NextResponse } from 'next/server'
+import { createLogger, transports, format } from 'winston'
 
 // Configure logging
 const logger = createLogger({
@@ -11,37 +11,38 @@ const logger = createLogger({
   transports: [
     new transports.File({ filename: 'logs/cron.log' })
   ]
-});
+})
 
 // API endpoint to call (update with your production endpoint)
-const API_URL = process.env.VERCEL_URL
+const API_URL = process.env.VERCEL_URL 
   ? `https://${process.env.VERCEL_URL}/api/rag`
-  : 'http://localhost:3000/api/rag';
+  : '/api/rag'
 
-module.exports = async (req, res) => {
+export async function GET() {
   try {
     logger.info('Starting hourly API call');
     
-    const response = await axios.get(API_URL);
+    const response = await fetch(API_URL);
+    const data = await response.json();
 
     logger.info('API call successful', {
       status: response.status,
-      data: response.data
+      data
     });
     
-    return res.status(200).json({
+    return NextResponse.json({ 
       success: true,
-      data: response.data
+      data
     });
   } catch (error) {
     logger.error('API call failed', {
-      error: error.message,
-      stack: error.stack
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
     });
     
-    return res.status(500).json({
+    return NextResponse.json({ 
       success: false,
-      error: error.message
-    });
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
-};
+}
