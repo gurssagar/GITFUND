@@ -1,7 +1,6 @@
 # GitFund
 
-
-
+* dsddsds
 *   **GitHub Integration:** Authenticate with GitHub, list your repositories, select issues, view collaborators, and manage pull requests.
 *   **Smart Contract Funding:** Project owners can deposit cryptocurrency into a dedicated smart contract to fund specific tasks.
 *   **Crypto Rewards:** Contributors receive cryptocurrency rewards directly to their wallets upon successful merging of their pull requests by the project owner.
