@@ -10,6 +10,13 @@ import { useCompletion } from "@ai-sdk/react";
 import ReactMarkdown from 'react-markdown'; 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+
+type MergeStatus = {
+  mergeable: boolean | null;
+  state: string;
+  has_conflicts: boolean;
+  is_clean: boolean;
+};
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -203,6 +210,8 @@ export default function PullRequestDetails() {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [hasRunCompletion, setHasRunCompletion] = useState(false);
+  const [mergeStatus, setMergeStatus] = useState<MergeStatus | null>(null);
+  const [contractStatus, setContractStatus] = useState<Boolean>(false);
   const octokit = React.useMemo(
     () =>
       new Octokit({
@@ -307,6 +316,48 @@ const RewardAmount = searchParams?.get("RewardAmount") ?? '';
       console.log("Wallet Address:", walletAddress);
     }
   }, [walletAddress]);
+
+
+  useEffect(() => {
+  const checkMergeStatus = async () => {
+    try {
+      const { data: pr } = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
+        owner: owner as string,
+        repo: project as string,
+        pull_number: parseInt(issueNumber as string),
+        headers: {
+          'X-GitHub-Api-Version': '2022-11-28'
+        }
+      });
+
+      setMergeStatus({
+        mergeable: pr.mergeable,
+        state: pr.mergeable_state,
+        has_conflicts: pr.mergeable === false,
+        is_clean: pr.mergeable_state === 'clean'
+      });
+
+      console.log("Merge Status:", {
+        mergeable: pr.mergeable,
+        state: pr.mergeable_state,
+        has_conflicts: pr.mergeable === false,
+        is_clean: pr.mergeable_state === 'clean'
+      });
+    } catch (err) {
+      console.error("Error checking PR merge status:", err);
+      setError(err instanceof Error ? err.message : "Unknown error occurred");
+    }
+  };
+
+  checkMergeStatus();
+}, [owner, project, issueNumber]); // Add all dependencies here
+
+
+  useEffect(() => {
+    if(contractStatus=== true) {
+      handlePRMerge();
+    }
+  },[contractStatus])
 
   const handlePRMerge = React.useCallback(async () => {
     if (!owner || !project || !issueNumber) return;
@@ -631,11 +682,12 @@ const RewardAmount = searchParams?.get("RewardAmount") ?? '';
                     <button
                       type="button"
                       onClick={() => {
-                        handleWithdraw();
-                        handlePRMerge();
+                        handleWithdraw().then(() => setContractStatus(true));
                       }}
                       disabled={
-                        !walletAddress || transactionState === "loading"
+                        !walletAddress ||
+                        transactionState === "loading" ||
+                        (mergeStatus?.mergeable === false && mergeStatus?.mergeable === null)
                       }
                       className="w-full bg-black text-white py-2 rounded-lg flex items-center justify-center gap-2 font-medium dark:bg-white dark:text-black disabled:opacity-50 disabled:cursor-not-allowed"
                     >
