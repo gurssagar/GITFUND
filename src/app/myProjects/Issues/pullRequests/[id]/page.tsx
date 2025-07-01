@@ -10,6 +10,7 @@ import { useCompletion } from "@ai-sdk/react";
 import ReactMarkdown from 'react-markdown'; 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import {useParams} from "next/navigation";
 
 type MergeStatus = {
   mergeable: boolean | null;
@@ -201,7 +202,8 @@ export default function PullRequestDetails() {
   } = useCompletion({
     api: "/api/completion",
   });
-
+  const params= useParams();
+  console.log("Params:", params);
   const [ai,setAi] = useState<boolean>(false);
   const { data: session } = useSession();
   const [repoData, setRepoData] = useState<any>(null);
@@ -221,8 +223,9 @@ export default function PullRequestDetails() {
   );
   const { isShrunk } = useSidebarContext();
   const searchParams = useSearchParams();
-const RewardAmount = searchParams?.get("RewardAmount") ?? '';
-  const issueNumber = searchParams?.get("issueNumber");
+const [RewardAmount,setRewardAmount] = useState<string>(); 
+  const issueNumber = params.id as string | undefined;
+  const pullRequestId = searchParams.get("pullRequestID");
   const project = searchParams?.get("project");
   const owner = searchParams?.get("owner");
 
@@ -248,6 +251,25 @@ const RewardAmount = searchParams?.get("RewardAmount") ?? '';
     useWaitForTransactionReceipt({
       hash: transactionHash,
     });
+
+
+  useEffect(() => {
+   const getIssueData= async () => {
+    await fetch(`/api/getissueForPR?project_repository=${project}&issueNumber=${issueNumber}`, {
+      method: "GET",
+    }).then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to fetch issue data");
+      }
+      return response.json();
+    }
+  ).then((data) => {
+    console.log("Fetched Issue Data:", data);
+    setRewardAmount(data.projects[0].rewardAmount);
+  })
+  }
+  getIssueData();
+  })
 
   useEffect(() => {
     // Don't run if there's no session
@@ -324,7 +346,7 @@ const RewardAmount = searchParams?.get("RewardAmount") ?? '';
       const { data: pr } = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
         owner: owner as string,
         repo: project as string,
-        pull_number: parseInt(issueNumber as string),
+        pull_number: parseInt(pullRequestId as string),
         headers: {
           'X-GitHub-Api-Version': '2022-11-28'
         }
@@ -350,7 +372,7 @@ const RewardAmount = searchParams?.get("RewardAmount") ?? '';
   };
 
   checkMergeStatus();
-}, [owner, project, issueNumber]); // Add all dependencies here
+}, [owner, project, pullRequestId]); // Add all dependencies here
 
 
   useEffect(() => {
@@ -360,14 +382,14 @@ const RewardAmount = searchParams?.get("RewardAmount") ?? '';
   },[contractStatus])
 
   const handlePRMerge = React.useCallback(async () => {
-    if (!owner || !project || !issueNumber) return;
+    if (!owner || !project || !pullRequestId) return;
 
     await octokit.request(
       "PUT /repos/{owner}/{repo}/pulls/{pull_number}/merge",
       {
         owner: owner as string,
         repo: project as string,
-        pull_number: parseInt(issueNumber as string),
+        pull_number: parseInt(pullRequestId as string),
       },
     );
     try{
@@ -395,7 +417,7 @@ const RewardAmount = searchParams?.get("RewardAmount") ?? '';
                   {
                     owner: owner as string,
                     repo: project as string,
-                    issue_number: parseInt(issueNumber as string),
+                    issue_number: parseInt(pullRequestId as string),
                     state: "closed",
                   },
                 );
@@ -409,7 +431,7 @@ const RewardAmount = searchParams?.get("RewardAmount") ?? '';
       console.error("Error merging PR:", err);
     }
     
-  }, [octokit, owner, project, issueNumber]);
+  }, [octokit, owner, project, pullRequestId]);
 
   const handleWithdraw = React.useCallback(async () => {
     if (!walletAddress || !session?.user?.name) return;
@@ -447,7 +469,7 @@ const RewardAmount = searchParams?.get("RewardAmount") ?? '';
 
   useEffect(() => {
     const fetchPRDetails = async () => {
-      if (!session?.user || !owner || !project || !issueNumber) return;
+      if (!session?.user || !owner || !project || !pullRequestId) return;
 
       try {
         setLoading(true);
@@ -456,7 +478,7 @@ const RewardAmount = searchParams?.get("RewardAmount") ?? '';
           {
             owner: owner as string,
             repo: project as string,
-            pull_number: parseInt(issueNumber as string),
+            pull_number: parseInt(pullRequestId as string),
           },
         );
 
@@ -472,7 +494,7 @@ const RewardAmount = searchParams?.get("RewardAmount") ?? '';
 
     fetchPRDetails();
     // We're using octokit from the useMemo hook which already depends on session
-  }, [session, owner, project, issueNumber]);
+  }, [session, owner, project, pullRequestId]);
 
   return (
     <div className="flex">
@@ -789,11 +811,11 @@ const RewardAmount = searchParams?.get("RewardAmount") ?? '';
                     !isCompletionLoading &&
                     owner &&
                     project &&
-                    issueNumber &&
+                    pullRequestId &&
                     !hasRunCompletion
                   ) {
                     setHasRunCompletion(true);
-                    const prompt = `Analyze the changes made in a pull request https://github.com/${owner}/${project}/pull/${issueNumber}. Focus on a technical review: explain the purpose of the changes, evaluate the code quality, identify any potential issues or improvements, and assess if the modifications align with best coding practices. Assume the reader is familiar with programming concepts.`;
+                    const prompt = `Analyze the changes made in a pull request https://github.com/${owner}/${project}/pull/${pullRequestId}. Focus on a technical review: explain the purpose of the changes, evaluate the code quality, identify any potential issues or improvements, and assess if the modifications align with best coding practices. Assume the reader is familiar with programming concepts.`;
 
                     // Use setTimeout to prevent React state update cycles
                     setTimeout(() => {
@@ -805,7 +827,7 @@ const RewardAmount = searchParams?.get("RewardAmount") ?? '';
                   isCompletionLoading ||
                   !owner ||
                   !project ||
-                  !issueNumber ||
+                  !pullRequestId ||
                   hasRunCompletion
                 }
                 className="flex-1 py-3 text-center font-medium text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white focus:outline-none"

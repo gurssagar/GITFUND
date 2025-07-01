@@ -282,10 +282,9 @@ export default function IssuePullRequestsPage({ params }: PageProps) {
                 <div>
                   <Link
                     href={{
-                      pathname: `/myProjects/Issues/pullRequests/${pr.source.issue.number}`,
+                      pathname: `/myProjects/Issues/pullRequests/${issueNumber}`,
                       query: {
-                        rewardAmount: issue?.rewardAmount,
-                        issueNumber: pr.source.issue.number,
+                        pullRequestID: pr.source.issue.number,
                         project: repository,
                         owner: owner,
                       },
