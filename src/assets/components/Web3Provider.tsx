@@ -1,6 +1,6 @@
 "use client"
 import { WagmiProvider, createConfig, http } from "wagmi";
-import { mainnet } from "wagmi/chains"; // Keep mainnet or remove if only BNB is needed
+import { mainnet } from "wagmi/chains"; // Keep mainnet or remove if only Pharos is needed
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -21,10 +21,10 @@ const pharosDevnet = {
   // testnet: true, 
 };
 
-const BnbTestnet = {
+const PharosTestnet = {
   id: 97,
-  name: 'BNB Smart Chain Testnet',
-  nativeCurrency: { name: 'TBNB', symbol: 'TBNB', decimals: 18 }, // Adjust if necessary
+  name: 'Pharos Smart Chain Testnet',
+  nativeCurrency: { name: 'TPharos', symbol: 'TPharos', decimals: 18 }, // Adjust if necessary
   rpcUrls: {
     default: { http: ['https://bsc-testnet.drpc.org'] },
     public: { http: ['https://bsc-testnet.drpc.org'] },

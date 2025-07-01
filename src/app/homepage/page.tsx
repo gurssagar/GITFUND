@@ -78,6 +78,7 @@ export default function Home() {
         .then((res) => res.json())
         .then((data) => {
           setRepoData(data.project);
+          console.log(data.project, "data.project");
           setIsLoading(true);
         });
     };
@@ -207,7 +208,7 @@ export default function Home() {
                             key={repo.projectName}
                             className="hover:scale-[1.02] transition-transform duration-200"
                           >
-                            <a href={`/projects/${repo.project_repository}`}>
+                            
                               <Issue
                                 image={repo.image_url || "back_2.jpg"}
                                 Project={repo.projectName}
@@ -221,8 +222,10 @@ export default function Home() {
                                 }
                                 shortDescription={repo.shortdes}
                                 languages={repo.languages}
+                                Likes={repo.likes ? repo.likes : 0}
+                                Tag={repo.Tag ? repo.Tag : "General"}
                               />
-                            </a>
+                          
                           </div>
                         );
                       })}

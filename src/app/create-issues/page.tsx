@@ -596,7 +596,7 @@ export default function Project() {
                   </div>
                   <div className="w-1/3">
                     <label className="text-[14px]" htmlFor="rewardAmount">
-                      Reward Amount in BNB
+                      Reward Amount in Pharos
                     </label>{" "}
                     {/* Changed htmlFor to rewardAmount to match id */}
                     <input

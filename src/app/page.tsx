@@ -284,7 +284,7 @@ export default function LandingPage() {
                   development and decentralized finance by integrating GitHub
                   repositories with blockchain smart contracts. This allows
                   project maintainers to post issues with pre-funded bounties
-                  and enables developers to earn cryptocurrency—such as BNB upon
+                  and enables developers to earn cryptocurrency—such as Pharos upon
                   successful code contributions, like merged pull requests. By
                   removing intermediaries and ensuring instant, transparent
                   payouts, GitFund creates a sustainable, trustless incentive
@@ -375,10 +375,10 @@ export default function LandingPage() {
                   </CardHeader>
                   <CardContent>
                     <p>
-                      Choose an open issue and lock your bounty in BNB/ via
+                      Choose an open issue and lock your bounty in Pharos/ via
                       smart contract escrow.
                     </p>
-                    <Badge className="mt-2">BNB </Badge>
+                    <Badge className="mt-2">Pharos </Badge>
                   </CardContent>
                 </Card>
 

@@ -750,7 +750,7 @@ export default function Project() {
                                 </div>
                                 <div>
                                   <div className="dark:text-gray-300 text-gray-900 text-bold">
-                                    {issue.rewardAmount} BNB
+                                    {issue.rewardAmount} Pharos
                                   </div>
                                 </div>
                               </div>

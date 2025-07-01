@@ -19,13 +19,13 @@ const pharosDevnet = {
   },
 };
 
-const BnbTestnet = {
+const PharosTestnet = {
   id: 97,
-  name: 'BNB Smart Chain Testnet',
-  nativeCurrency: { name: 'tBNB', symbol: 'tBNB', decimals: 18 },
+  name: 'Pharos Smart Chain Testnet',
+  nativeCurrency: { name: 'tPharos', symbol: 'tPharos', decimals: 18 },
   rpcUrls: {
-    default: { http: ['https://bsc-testnet.bnbchain.org/'] },
-    public: { http: ['https://bsc-testnet.bnbchain.org/'] },
+    default: { http: ['https://bsc-testnet.Pharoschain.org/'] },
+    public: { http: ['https://bsc-testnet.Pharoschain.org/'] },
   },
   blockExplorers: {
     default: { name: 'Binance Smart Chain Testnet', url: 'https://testnet.bscscan.com' },
@@ -45,7 +45,7 @@ const pharosTestnet = {
   }
 };
 
-export const networks = [sepolia, pharosDevnet, pharosTestnet, BnbTestnet];
+export const networks = [sepolia, pharosDevnet, pharosTestnet, PharosTestnet];
 
 // Set up the Wagmi Adapter (Config)
 export const wagmiAdapter = new WagmiAdapter({

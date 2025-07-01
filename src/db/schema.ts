@@ -9,6 +9,7 @@ import {
   doublePrecision ,
 } from "drizzle-orm/pg-core";
 import { sql, relations } from "drizzle-orm";
+import { Tag } from "lucide-react";
 
 // Conversations Table
 export const conversations = pgTable("conversations", {
@@ -99,10 +100,10 @@ export const project = pgTable("project", {
   languages: json("languages"),
   stars: varchar("stars"),
   forks: varchar("forks"),
-  likes: integer("likes"),
+  likes: integer("likes").default(0),
   owner: json("owner"),
-  language: json("language"),
   comits: json("comits"),
+  Tag: varchar("Tag", { length: 256 }),
 });
 
 // Projects Table
