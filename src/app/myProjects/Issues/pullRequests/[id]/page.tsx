@@ -371,26 +371,40 @@ const RewardAmount = searchParams?.get("RewardAmount") ?? '';
       },
     );
     try{
-      await fetch(`/api/handlePR`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: issueNumber,
-          repository: project,
-          pullRequestId: issueNumber,
-          title: repoData?.title,
-          description: repoData?.body,
-          status: "merged",
-          createdAt: repoData?.created_at,
-          rewardedAt: new Date().toISOString(),
-          contributorId: session?.user?.name ,
-          projectName: project,
-          RewardAmount: RewardAmount ,
-          issue: repoData?.html_url,
-        }),
-      });
+      const reward = async () => {
+            await fetch("/api/rewards", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                projectName: project,
+                Contributor_id: session?.user?.name,
+                issue: repoData?.html_url,
+                rewardAmount: RewardAmount,
+                date: new Date().toISOString(),
+                projectDescription: repoData?.body,
+                projectOwner: owner,
+                project_repository: repoData?.head?.repo?.name,
+                transactionHash: transactionHash,
+              }),
+            }).then(() => {
+              const closeIssue = async () => {
+                await octokit.request(
+                  "PATCH /repos/{owner}/{repo}/issues/{issue_number}",
+                  {
+                    owner: owner as string,
+                    repo: project as string,
+                    issue_number: parseInt(issueNumber as string),
+                    state: "closed",
+                  },
+                );
+              }
+              closeIssue();
+            });
+          }
+      reward();
+       
     } catch (err) {
       console.error("Error merging PR:", err);
     }
