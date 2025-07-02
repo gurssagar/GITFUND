@@ -349,6 +349,7 @@ export default function Project() {
           {
             owner: user, // Added owner explicitly, though often included in user/repo format
             repo: selectedRepo,
+            state: 'open',
             headers: {
               "X-GitHub-Api-Version": "2022-11-28",
             },
@@ -589,9 +590,9 @@ export default function Project() {
                       required
                     >
                       <option value="">Select The Priority</option>
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="hard">High</option>
+                      <option value="Low">Low</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
                     </select>
                   </div>
                   <div className="w-1/3">
