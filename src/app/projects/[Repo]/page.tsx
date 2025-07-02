@@ -48,7 +48,8 @@ export default function Project() {
   const [isIssueNumber, setIssueNumber] = useState<string>();
   const [issueData, setIssueData] = useState<string>(" ");
   const [status, setStatus] = useState<string>();
-  
+  const [likes, setLikes] = useState<number>(0);
+    const [liked, setLiked] = useState(false);
   // Create octokit instance with timeout
   const octokit = new Octokit({
     auth: (session?.data as any)?.accessToken,
@@ -85,6 +86,7 @@ export default function Project() {
         }
 
         const repoData = await repoResponse.json();
+        console.log(repoData, "repoDatassss");
         const issuesData = await issuesResponse.json();
         
         // Set repo data
@@ -108,6 +110,9 @@ export default function Project() {
     fetchRepoData();
   }, [Repo]);
   // Helper Functions
+
+
+  
 
   const fetchWithRetry = useCallback(
     async (fn: () => Promise<any>, retries = 3, delay = 1000) => {
@@ -265,13 +270,166 @@ export default function Project() {
     fetchRepositoryDetails();
   }, [repoData, octokit]);
 
+
+  useEffect(() => {
+      // Check if the user has already liked the project
+      const fetchLikes = async () => {
+        try {
+          const response = await fetch(`/api/likes?userId=${session?.data?.user?.username}&projectName=${Repo}`,
+            {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }
+          );
+          const data = await response.json();
+          console.log("Fetched likes data:", data);
+          if (data && data.projects) {
+            setLikes(data.projects.length);
+            setLiked(data.projects.some((like: any) => like.userId === session?.data?.user?.username));
+          }
+        } catch (error) {
+          console.error("Error fetching likes:", error);
+        }
+      };
+  
+      fetchLikes();
+    }, [likes,session,Repo]);
+
+
+
+
+
+  
+  
+    
+
   // Fetch issues from GitHub API
   // We already fetch issues in the first useEffect, so we don't need this one
   // This removes one API request
 
   if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  return (
+    <div className="flex">
+      <Sidebar />
+      <div className={`${isShrunk ? "ml-[4rem] w-[calc(100%_-_4rem)]" : "ml-[16rem] w-[calc(100%_-_16rem)]"}`}>
+        <Topbar />
+        <div className="px-4 py-8 flex pt-20">
+          {/* Left sidebar skeleton */}
+          <div className="w-[300px]">
+            <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+            
+            <div className="mt-6 space-y-4">
+              {/* Owner section */}
+              <div>
+                <div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                <div className="mt-2 flex space-x-2">
+                  {[...Array(2)].map((_, i) => (
+                    <div key={i} className="flex items-center">
+                      <div className="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+                      <div className="w-16 h-4 ml-2 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Contributors section */}
+              <div className="mt-6">
+                <div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Languages section */}
+              <div className="mt-6">
+                <div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                <div className="mt-2 w-full h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                <div className="mt-2 flex flex-wrap gap-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="flex items-center">
+                      <div className="w-2.5 h-2.5 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+                      <div className="w-12 h-4 ml-1 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Main content skeleton */}
+          <div className="w-[calc(98%_-_320px)] pt-4 ml-[20px]">
+            <div className="space-y-6">
+              {/* Title and description */}
+              <div>
+                <div className="h-8 w-64 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                <div className="mt-4 h-4 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                <div className="mt-2 h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              </div>
+              
+              {/* AI Summary */}
+              <div className="p-4 border-2 dark:border-custom-dark-gray rounded-md">
+                <div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                <div className="mt-2 space-y-2">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="h-3 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                  ))}
+                </div>
+                <div className="mt-3 h-4 w-20 mx-auto bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+              </div>
+              
+              {/* Issues section */}
+              <div className="border-2 dark:border-custom-dark-gray rounded-xl p-4">
+                <div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                <div className="mt-4 space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="p-4 border-2 dark:border-custom-dark-gray rounded-xl">
+                      <div className="flex justify-between">
+                        <div className="h-5 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                        <div className="flex">
+                          <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+                          <div className="w-6 h-6 -ml-2 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+                        </div>
+                      </div>
+                      <div className="mt-2 flex justify-between">
+                        <div className="h-4 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                        <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                      </div>
+                      <div className="mt-4 flex justify-between">
+                        <div className="h-8 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                        <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Recent activity */}
+              <div className="border border-gray-300 dark:border-custom-dark-gray rounded-lg p-4">
+                <div className="h-6 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                <div className="mt-4 space-y-2">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-md animate-pulse"></div>
+                        <div className="ml-3 h-4 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                      </div>
+                      <div className="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
   if (!repoData) {
     return <div>Project not found</div>;
@@ -345,6 +503,77 @@ export default function Project() {
       );
     }
   }
+
+
+
+  
+  
+    const addLikes = async () => {
+      try{
+        const response = await fetch('/api/likes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: session?.data?.user?.username,
+            projectName: Repo,
+          }),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Failed to add like');
+        }
+  
+        const data = await response.json();
+        console.log("Like added successfully:", data);
+        setLikes(likes + 1);
+        setLiked(true);
+      }
+      catch(error) {
+        console.error("Error adding likes:", error);
+      }
+    }
+    const deleteLike = async () => {
+      try{
+        const response = await fetch('/api/likes', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: session?.data?.user?.username,
+            projectName: Repo,
+          }),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Failed to delete like');
+        }
+  
+        const data = await response.json();
+        console.log("Like deleted successfully:", data);
+        setLikes(likes - 1);
+        setLiked(false);
+      }
+      catch(error) {
+        console.error("Error deleting like:", error);
+      }
+    }
+
+
+    const handleLikeClick = () => {
+    if (liked) {
+      setLikes(likes - 1);
+      deleteLike();
+    } else {
+      setLikes(likes + 1);
+      addLikes();
+    }
+    setLiked(!liked);
+  };
+
+
 
   return (
     <>
@@ -587,9 +816,30 @@ export default function Project() {
                 <div>
                   <div>
                     <div>
-                      <h1 className="text-3xl font-bold">
-                        {repoData?.project_repository}
-                      </h1>
+                      <div className="flex justify-between items-center">
+                        <h1 className="text-3xl font-bold">
+                          {repoData?.project_repository}
+                        </h1>
+                        <div onClick={handleLikeClick} className="flex items-center cursor-pointer">
+                          
+                          {liked ? (
+                            <>
+                            <Icon
+                              icon="mdi:heart"
+                              className="dark:text-red-300 text-red-800 "
+                              width="24"
+                              height="24"
+                            />
+                            
+                            </>
+                          ) : (
+                            <Icon icon="mdi:heart-outline" className="text-neutral-400" width="24" height="24" />
+                          )}
+                          <p className="text-xl ml-2">{likes}</p>
+                        </div>
+
+                      </div>
+                      
                     </div>
                     <div
                       className={`dark:text-gray-300 text-gray-600 pt-4 h-[${width}] overflow-hidden`}
