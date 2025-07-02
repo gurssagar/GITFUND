@@ -604,7 +604,7 @@ export default function Project() {
                   <div>
                     <h2 className="text-xl font-bold pt-4">Owner</h2>
                     <div className="flex pt-2 space-x-2">
-                      {repoData.contributors.filter(
+                      {repoData?.contributors?.filter(
                           (collab: any) =>
                             collab.permissions?.admin === true ||
                             collab.permissions?.maintain === true
