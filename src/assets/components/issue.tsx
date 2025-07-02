@@ -174,13 +174,22 @@ export default function IssueCard({
       </div>
       <div className="flex">
               
-              <div className="flex px-1 text-gray-400 cursor-pointer" onClick={() => {handleLikeClick();}}>
+              <div className="flex px-1 text-gray-400 cursor-pointer" onClick={() => {}}>
                 {liked ? (
-                  <Icon icon="mdi:heart" className="text-neutral-500" width="16" height="16" />
+                  <>
+                  <Icon
+                    icon="mdi:heart"
+                    className="dark:text-red-300 text-red-800 "
+                    width="16"
+                    height="16"
+                  />
+                  
+                  </>
                 ) : (
                   <Icon icon="mdi:heart-outline" className="text-neutral-400" width="16" height="16" />
                 )}
                 <p className="text-[12px] text-neutral-400 ml-1">{likes}</p>
+                
               </div>
             </div>
       </div>
