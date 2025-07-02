@@ -100,10 +100,18 @@ export const project = pgTable("project", {
   languages: json("languages"),
   stars: varchar("stars"),
   forks: varchar("forks"),
-  likes: integer("likes").default(0),
   owner: json("owner"),
   comits: json("comits"),
   Tag: varchar("Tag", { length: 256 }),
+});
+
+export const likes= pgTable("likes", {
+  id: varchar("id", { length: 256 })
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  projectName: varchar("projectName", { length: 256 }),
+  userId: varchar("userId", { length: 256 }),
+  likedAt: timestamp("likedAt").default(sql`now()`),
 });
 
 // Projects Table

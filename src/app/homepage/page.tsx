@@ -222,7 +222,7 @@ export default function Home() {
                                 }
                                 shortDescription={repo.shortdes}
                                 languages={repo.languages}
-                                Likes={repo.likes ? repo.likes : 0}
+                                activeUser={session?.data?.user?.username || ""}
                                 Tag={repo.Tag ? repo.Tag : "General"}
                               />
                           

@@ -617,7 +617,7 @@ export default function Project() {
                       <div className="text-center">
                         <button
                           onClick={handleResize}
-                          className="text-center dark:bg-white bg-black text-white dark:text-gray-900 rounded px-2 py-1 "
+                          className="text-center mt-3 text-blue-500 dark:text-blue-100 rounded px-2 py-1 "
                         >
                           {isExpanded ? "Show Less" : "Show More"}
                         </button>
@@ -626,7 +626,8 @@ export default function Project() {
                   </div>
 
                   <div className="border-gray-300 dark:dark:border-custom-dark-gray border-2 rounded-xl p-4 mt-7">
-                    <div>
+                    <div className="flex gap-2 my-auto">
+                      <Icon icon="mdi--alert"  width={16} height={16}/>
                       <h1 className="text-xl font-bold">Issues</h1>
                     </div>
                     {issues && issues.length > 0 ? (
@@ -708,7 +709,7 @@ export default function Project() {
                             </div>
                             <div>
                               <div className="flex justify-between pt-1">
-                                <p className="text-[14px] text-gray-400">
+                                <p className="text-[14px] text-neutral-700 dark:text-neutral-300">
                                   {Math.floor(
                                     (new Date().getTime() -
                                       new Date(issue.issue_date).getTime()) /
@@ -716,7 +717,7 @@ export default function Project() {
                                   )}{" "}
                                   days ago
                                 </p>
-                                <p className="text-[14px] text-gray-400 flex px-1">
+                                <p className="text-[14px] text-neutral-700 dark:text-neutral-300 flex px-1">
                                   Assigned to{" "}
                                   {issue.assignees && issue.assignees.length > 0
                                     ? issue.assignees

@@ -3,33 +3,118 @@
 import { Box, Lock, Search, Settings, Sparkles } from "lucide-react";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { Icon } from "@iconify/react";
-import { useState } from "react";
+import { useState ,useEffect} from "react";
 
 interface IssueCardProps {
   image: string;
   Project: string;
+  activeUser?: string;
   Stars: string;
   Fork: string;
   Contributors: number;
   shortDescription: string;
   languages?: Record<string, number>;
-  Likes?: number;
   Tag?: string;
 }
 
+interface Likes{
+  userId: string;
+  projectName: string;
+  likedAt: Date;
+}
 export default function IssueCard({
   image,
   Project,
   Stars,
+  activeUser,
   Fork,
   Contributors,
   shortDescription,
   languages,
-  Likes ,
   Tag = "General"
 }: IssueCardProps) {
-  const [likes, setLikes] = useState<number>(Likes as number);
+  const [likes, setLikes] = useState<number>(0);
   const [liked, setLiked] = useState(false);
+
+  useEffect(() => {
+    // Check if the user has already liked the project
+    const fetchLikes = async () => {
+      try {
+        const response = await fetch(`/api/likes?userId=${activeUser}&projectName=${Project}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+        const data = await response.json();
+        console.log("Fetched likes data:", data);
+        if (data && data.projects) {
+          setLikes(data.projects.length);
+          setLiked(data.projects.some((like: Likes) => like.userId === activeUser));
+        }
+      } catch (error) {
+        console.error("Error fetching likes:", error);
+      }
+    };
+
+    fetchLikes();
+  }, [likes]);
+
+
+  const addLikes = async () => {
+    try{
+      const response = await fetch('/api/likes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: activeUser,
+          projectName: Project,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add like');
+      }
+
+      const data = await response.json();
+      console.log("Like added successfully:", data);
+      setLikes(likes + 1);
+      setLiked(true);
+    }
+    catch(error) {
+      console.error("Error adding likes:", error);
+    }
+  }
+  const deleteLike = async () => {
+    try{
+      const response = await fetch('/api/likes', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: activeUser,
+          projectName: Project,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete like');
+      }
+
+      const data = await response.json();
+      console.log("Like deleted successfully:", data);
+      setLikes(likes - 1);
+      setLiked(false);
+    }
+    catch(error) {
+      console.error("Error deleting like:", error);
+    }
+  }
 
   const getLanguageIcon = (language: string) => {
     // Simple fallback for language icons
@@ -52,8 +137,10 @@ export default function IssueCard({
   const handleLikeClick = () => {
     if (liked) {
       setLikes(likes - 1);
+      deleteLike();
     } else {
       setLikes(likes + 1);
+      addLikes();
     }
     setLiked(!liked);
   };
@@ -87,7 +174,7 @@ export default function IssueCard({
       </div>
       <div className="flex">
               
-              <div className="flex px-1 text-gray-400 cursor-pointer" onClick={handleLikeClick}>
+              <div className="flex px-1 text-gray-400 cursor-pointer" onClick={() => {handleLikeClick();}}>
                 {liked ? (
                   <Icon icon="mdi:heart" className="text-neutral-500" width="16" height="16" />
                 ) : (
@@ -98,7 +185,7 @@ export default function IssueCard({
             </div>
       </div>
       
-      <div className="py-2">
+      <div className="pt-2">
         <div>
           <h3 className="text-[13px] text-gray-400">
             {shortDescription}
