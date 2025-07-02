@@ -30,12 +30,12 @@
     "@radix-ui/react-separator": "^1.1.6",
     "@radix-ui/react-slot": "^1.2.2",
     "@radix-ui/react-tabs": "^1.1.12",
-    "@reown/appkit": "^1.7.6",
-    "@reown/appkit-adapter-wagmi": "^1.7.6",
+    "@reown/appkit": "^1.7.12",
+    "@reown/appkit-adapter-wagmi": "^1.7.12",
     "@splinetool/react-spline": "^4.0.0",
     "@splinetool/runtime": "^1.9.82",
     "@tabler/icons-react": "^3.34.0",
-    "@tanstack/react-query": "^5.76.1",
+    "@tanstack/react-query": "^5.81.5",
     "ai": "^4.3.10",
     "amqplib": "^0.10.3",
     "axios": "^1.10.0",
@@ -75,14 +75,13 @@
     "tailwind": "^4.0.0",
     "tailwind-merge": "^3.3.0",
     "valtio": "^2.1.5",
-    "viem": "^2.29.4",
-    "wagmi": "^2.15.4",
+    "viem": "^2.31.6",
+    "wagmi": "^2.15.6",
     "winston": "^3.17.0",
     "zod": "^3.24.3"
   },
   "overrides": {
     "@noble/curves": "1.8.1"
-    
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

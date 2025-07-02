@@ -5,7 +5,6 @@ import { useSidebarContext } from "./SidebarContext";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useWeb3 } from "./web3Context";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
@@ -34,7 +33,6 @@ export default function Topbar() {
   console.log(pathname);
   const searchParams = useSearchParams();
   console.log(searchParams);
-  const { account, connectWallet } = useWeb3();
   const session = useSession();
   const [visible, setVisible] = useState(false);
   const [image, updateImage] = useState("");

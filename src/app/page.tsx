@@ -9,7 +9,6 @@ import GitHubIssueList from "../components/issue";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { useWeb3 } from "@/assets/components/web3Context";
 import MetaMaskButton from "@/assets/components/metamask";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import heroImage from "@/assets/components/bg-1.jpg";
@@ -75,7 +74,6 @@ interface GrowthDataPoint {
 export default function LandingPage() {
   const { address, isConnected } = useAccount(); // Added isConnected here
   const { data: ensName, error, status } = useEnsName({ address });
-  const { account, connectWallet } = useWeb3();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annually">(
     "monthly",
   );

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { SessionProvider } from "next-auth/react";
-import { Web3Provider } from "../assets/components/web3Context";
 import { SidebarProvider } from "@/assets/components/SidebarContext";
 import { ChatSidebarProvider } from "@/assets/components/chats/chatSiderbarContext";
 import { ThemeProvider } from "next-themes";
@@ -38,7 +37,6 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <SidebarProvider>
-            <Web3Provider>
               <SessionProvider>
                 <SearchProvider>
                   <ChatSidebarProvider>
@@ -52,7 +50,6 @@ export default async function RootLayout({
                   </ChatSidebarProvider>
                 </SearchProvider>
               </SessionProvider>
-            </Web3Provider>
           </SidebarProvider>
         </ThemeProvider>
       </body>
