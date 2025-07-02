@@ -544,10 +544,10 @@ export default function LandingPage() {
           </div>
         </motion.div>
         <div className="grid grid-cols-2 h-full px-10 lg:grid-cols-3 gap-4 lg:px-32">
-          {repoData.length > 0 ? (
+          {repoData?.length > 0 ? (
             <>
               {repoData.slice(0, 6).map((repo: any) => {
-                if (!repo.image_url?.trim()) return null;
+                if (!repo?.image_url?.trim()) return null;
 
                 return (
                   <>

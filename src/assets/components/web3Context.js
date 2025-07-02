@@ -7,7 +7,7 @@ const Web3Context = createContext();
 
 export const Web3Provider = ({ children }) => {
   const { address } = useAppKitAccount();
-  const { walletProvider } = useAppKitProvider("eip155");
+  const { walletProvider } = useAppKitProvider("eip155") || {};
 
   // Get provider and signer from AppKit
   const getProvider = async () => {
@@ -30,7 +30,7 @@ export const Web3Provider = ({ children }) => {
 
   return (
     <Web3Context.Provider value={{ 
-      provider: walletProvider, 
+      provider: walletProvider || null,
       getProvider, 
       getSigner, 
       account: address, 
