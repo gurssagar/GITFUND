@@ -174,7 +174,7 @@ export default function IssueCard({
       </div>
       <div className="flex">
               
-              <div className="flex px-1 text-gray-400 cursor-pointer" onClick={() => {}}>
+              <div className="flex px-1 text-gray-400 cursor-pointer" onClick={() => handleLikeClick()}>
                 {liked ? (
                   <>
                   <Icon
