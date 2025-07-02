@@ -316,7 +316,7 @@ export default function Project() {
         } else {
           console.error(
             "Error fetching repositories:",
-            responseData.error || response.statusText,
+            responseData.error || response.statusText
           );
           setData([]); // Set to empty array on error
         }
@@ -352,7 +352,7 @@ export default function Project() {
             headers: {
               "X-GitHub-Api-Version": "2022-11-28",
             },
-          },
+          }
         );
         console.log(response.data, "issuess"); // Corrected log key for issue
         setIssues(response.data as Issue[]); // Cast to Issue[]
@@ -372,7 +372,7 @@ export default function Project() {
           owner: user,
           repo: selectedRepo,
           issue_number: selectedissue,
-        },
+        }
       );
       const issue = response.data;
       setIssueTitle(issue.title);
@@ -395,12 +395,12 @@ export default function Project() {
     if (confirmationError) {
       // Type assertion for error to access message property safely
       setAlertMessage(
-        `Deposit failed: ${(confirmationError as Error).message}`,
+        `Deposit failed: ${(confirmationError as Error).message}`
       );
     }
     if (writeError) {
       setAlertMessage(
-        `Transaction submission failed: ${(writeError as Error).message}`,
+        `Transaction submission failed: ${(writeError as Error).message}`
       );
     }
   }, [isConfirmed, confirmationError, writeError]);
@@ -442,7 +442,7 @@ export default function Project() {
 
     try {
       const currentSession = session.data as CustomSession; // Use CustomSession type
-      const username : string = currentSession?.user?.username as string;
+      const username: string = currentSession?.user?.username as string;
       if (!username) {
         setAlertMessage("User session not found.");
         return;
@@ -491,7 +491,7 @@ export default function Project() {
         setAlertMessage(`Error: ${error.message}`);
       } else {
         setAlertMessage(
-          "An unexpected error occurred during project creation.",
+          "An unexpected error occurred during project creation."
         );
       }
     }
@@ -524,16 +524,16 @@ export default function Project() {
                 isConfirmed
                   ? "bg-green-100 border-green-400 text-green-700"
                   : confirmationError || writeError
-                    ? "bg-red-100 border-red-400 text-red-700"
-                    : ""
+                  ? "bg-red-100 border-red-400 text-red-700"
+                  : ""
               }
             >
               <AlertTitle>
                 {isConfirmed
                   ? "Success"
                   : confirmationError || writeError
-                    ? "Error"
-                    : "Notice"}
+                  ? "Error"
+                  : "Notice"}
               </AlertTitle>
               <AlertDescription>{alertMessage}</AlertDescription>
             </Alert>
@@ -553,7 +553,11 @@ export default function Project() {
         <div className="flex">
           <Sidebar />
           <div
-            className={`transition-all duration-300 ease-in-out ${isShrunk ? "ml-[4rem] w-[calc(100%_-_4rem)]" : "ml-[16rem] w-[calc(100%_-_16rem)]"}`}
+            className={`transition-all duration-300 ease-in-out ${
+              isShrunk
+                ? "ml-[4rem] w-[calc(100%_-_4rem)]"
+                : "ml-[16rem] w-[calc(100%_-_16rem)]"
+            }`}
           >
             <Topbar />
 
@@ -591,7 +595,7 @@ export default function Project() {
                       <option value="">Select The Priority</option>
                       <option value="low">Low</option>
                       <option value="medium">Medium</option>
-                      <option value="hard">High</option>
+                      <option value="high">High</option>
                     </select>
                   </div>
                   <div className="w-1/3">
@@ -628,12 +632,12 @@ export default function Project() {
                       <option value="">Select a repository</option>
                       {data?.map(
                         (
-                          repo: any, // data here refers to the list of projects/repos fetched from /api/add-projects
+                          repo: any // data here refers to the list of projects/repos fetched from /api/add-projects
                         ) => (
                           <option value={repo.name} key={repo.id}>
                             {repo.project_repository}
                           </option>
-                        ),
+                        )
                       )}
                     </select>
                   </div>
