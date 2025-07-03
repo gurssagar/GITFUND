@@ -1,0 +1,10 @@
+version: 1
+
+services:
+  github-mcp-server:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+    restart: unless-stopped

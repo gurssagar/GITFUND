@@ -32,7 +32,7 @@ async function getPRDiff(owner, repo, pullNumber, token) {
 
 class GithubServer {
     constructor() {
-        const token = process.env.GITHUB_TOKEN ;
+        const token = "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" ;
         if (!token) {
             throw new Error('GITHUB_TOKEN environment variable is required')
         }
