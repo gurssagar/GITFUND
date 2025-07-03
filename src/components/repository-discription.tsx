@@ -1,19 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  FileText,
-  ExternalLink,
-  CheckCircle,
-  Code,
-  FolderTree,
-  Settings,
-  Users,
-  AlertCircle,
-  Sparkles,
-} from "lucide-react";
 
 interface RepositoryDescriptionProps {
   description: string;
@@ -30,39 +21,38 @@ export function RepositoryDescription({
   description,
   repoData,
 }: RepositoryDescriptionProps) {
-  // Check if this is an AI analysis request
-  const isAnalysisRequest =
-    description.includes("Please provide the link to the repository") ||
-    description.includes("I need the repository's URL");
+  const [expanded, setExpanded] = useState(false);
 
-  // Check if this is a generic/placeholder description
-  const isGenericDescription =
-    description.includes("Open for contributions") && description.length < 200;
+  const toggleExpanded = () => setExpanded((prev) => !prev);
 
-  // Regular description - render with better formatting
   const formatDescription = (text: string) => {
-    // Remove all occurrences of **
     const cleanedText = text.replace(/\*\*/g, "");
+    const lines = cleanedText.split(/\n+/);
+    const formatted: any[] = [];
 
-    // Split by numbered lists
-    const parts = cleanedText.split(/(\d+\.\s+)/g);
-    const formatted = [];
+    for (let line of lines) {
+      line = line.trim();
 
-    for (let i = 0; i < parts.length; i++) {
-      const part = parts[i];
-      if (/^\d+\.\s+/.test(part)) {
-        // This is a number
-        const nextPart = parts[i + 1] || "";
+      if (line.match(/^[A-Z].*:$/)) {
+        formatted.push({ type: "section", content: line });
+      } else if (line.match(/^\d+\.\s+/)) {
+        const numberMatch = line.match(/^(\d+)\.\s+(.*)/);
+        if (numberMatch) {
+          formatted.push({
+            type: "listItem",
+            number: numberMatch[1],
+            content: numberMatch[2],
+          });
+        }
+      } else if (line.startsWith("* ")) {
         formatted.push({
-          type: "listItem",
-          number: part.replace(/\.\s+/, ""),
-          content: nextPart,
+          type: "bullet",
+          content: line.replace(/^\*\s+/, ""),
         });
-        i++; // Skip the next part as we've already processed it
-      } else if (part.trim()) {
+      } else if (line) {
         formatted.push({
           type: "text",
-          content: part,
+          content: line,
         });
       }
     }
@@ -81,37 +71,74 @@ export function RepositoryDescription({
               <FileText className="w-5 h-5 text-neutral-600 dark:text-neutral-400" />
             </div>
           </div>
+
           <div className="flex-1 space-y-4">
             <h3 className="font-medium text-neutral-900 dark:text-neutral-100">
               Repository Description
             </h3>
 
-            <div className="prose prose-sm dark:prose-invert max-w-none">
+            <div
+              className={`prose prose-sm dark:prose-invert max-w-none transition-all ${
+                expanded ? "max-h-full" : "max-h-[300px] overflow-hidden"
+              }`}
+            >
               {formattedContent.map((item, index) => {
-                if (item.type === "listItem") {
-                  return (
-                    <div key={index} className="flex gap-3 mb-3">
-                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-xs font-medium text-blue-600 dark:text-blue-400">
-                        {item.number}
+                switch (item.type) {
+                  case "section":
+                    return (
+                      <h4
+                        key={index}
+                        className="text-sm font-semibold text-neutral-900 dark:text-neutral-100 mt-4"
+                      >
+                        {item.content}
+                      </h4>
+                    );
+                  case "listItem":
+                    return (
+                      <div key={index} className="flex gap-3 mb-3">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-xs font-medium text-blue-600 dark:text-blue-400">
+                          {item.number}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed m-0">
+                            {item.content}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed m-0">
-                          {item.content}
-                        </p>
-                      </div>
-                    </div>
-                  );
+                    );
+                  case "bullet":
+                    return (
+                      <ul
+                        key={index}
+                        className="list-disc list-inside pl-4 text-sm text-neutral-700 dark:text-neutral-300"
+                      >
+                        <li>{item.content}</li>
+                      </ul>
+                    );
+                  case "text":
+                  default:
+                    return (
+                      <p
+                        key={index}
+                        className="text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed"
+                      >
+                        {item.content}
+                      </p>
+                    );
                 }
-                return (
-                  <p
-                    key={index}
-                    className="text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed"
-                  >
-                    {item.content}
-                  </p>
-                );
               })}
             </div>
+
+            {formattedContent.length > 10 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleExpanded}
+                className="mt-2 text-blue-600 dark:text-blue-400"
+              >
+                {expanded ? "Show less" : "Show more"}
+              </Button>
+            )}
 
             {repoData?.languages &&
               Object.keys(repoData.languages).length > 0 && (
