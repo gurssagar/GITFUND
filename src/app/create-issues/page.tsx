@@ -1,25 +1,40 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+
+import type React from "react";
+
+import { useState, useEffect } from "react";
 import Sidebar from "@/assets/components/sidebar";
 import Topbar from "@/assets/components/topbar";
 import { useSession } from "next-auth/react";
 import { Octokit } from "octokit";
-import { google } from "@ai-sdk/google";
-import { generateText } from "ai";
-// import { ethers } from 'ethers'; // ethers is still used by Octokit, but not directly for wallet interactions
-// import { useWeb3 } from "../../assets/components/web3Context"; // Removed
-// import { getContract } from "../../assets/components/contract"; // Removed
 import {
   useAccount,
   useWriteContract,
   useWaitForTransactionReceipt,
-} from "wagmi"; // Added Wagmi hooks
+} from "wagmi";
 import { parseEther } from "viem";
-import { Session } from "next-auth"; // Import Session type
-
+import type { Session } from "next-auth";
 import { useSidebarContext } from "@/assets/components/SidebarContext";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Suspense } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Loader2, Wallet, AlertCircle, CheckCircle } from "lucide-react";
 
 const contractAbi = [
   {
@@ -178,17 +193,17 @@ const contractAbi = [
     stateMutability: "view",
     type: "function",
   },
-] as const; // Example: [{ "inputs": [], "name": "getBalance", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "string", "name": "username", "type": "string" } ], "name": "deposit", "outputs": [], "stateMutability": "payable", "type": "function" }] as const;
+] as const;
+
 const contractAddress =
   "0xf213a3ac05EA11Ec4C6fEcAf2614893A84ccb8dD" as `0x${string}`;
 
-// Define a custom session type that includes accessToken and a more specific user type
 interface CustomUser {
   name?: string | null;
   email?: string | null;
   image?: string | null;
-  username?: string | null; // Assuming username might be part of the user object
-  id?: string; // Or whatever type your user ID is
+  username?: string | null;
+  id?: string;
 }
 
 interface CustomSession extends Session {
@@ -196,11 +211,9 @@ interface CustomSession extends Session {
   user?: CustomUser;
 }
 
-// Define interfaces for better type safety with Octokit and session data
 interface GitHubUser {
   login: string;
   id: number;
-  // Add other relevant user properties if needed
 }
 
 interface Repo {
@@ -211,24 +224,15 @@ interface Repo {
   description: string | null;
   stargazers_count: number;
   forks_count: number;
-  // Add other relevant repo properties
 }
 
 interface Issue {
   id: number;
   title: string;
   html_url: string;
-  // Add other relevant issue properties
-}
-
-interface LanguageData {
-  [language: string]: number;
-}
-
-interface Collaborator {
-  login: string;
-  id: number;
-  // Add other relevant collaborator properties
+  number: number;
+  body: string;
+  created_at: string;
 }
 
 interface SessionData {
@@ -236,7 +240,6 @@ interface SessionData {
   user?: {
     username?: string;
     email?: string;
-    // Add other user properties from session if needed
   };
 }
 
@@ -244,26 +247,36 @@ export default function Project() {
   const session = useSession();
   const [token, setToken] = useState<string>("");
   const [user, setUser] = useState<string | undefined>();
-  const [selectedRepo, setSelectedRepo] = useState<string | undefined>(); // Changed from any to string | undefined
-  const [data, setData] = useState<Repo[]>([]); // Typed as an array of Repo objects
+  const [selectedRepo, setSelectedRepo] = useState<string | undefined>();
+  const [data, setData] = useState<Repo[]>([]);
   const [issues, setIssues] = useState<Issue[]>([]);
-  const [selectedissue, setSelectedIssue] = useState<string | null>(); // Typed as an array of Issue objects
+  const [selectedissue, setSelectedIssue] = useState<string | null>();
   const { isShrunk } = useSidebarContext();
   const { address, isConnected } = useAccount();
-  const [issueTitle, setIssueTitle] = useState<string>(""); // Unused
-  const [issueDescription, setIssueDescription] = useState<string>(""); // Unused
-  const [issueCreatedAt, setIssueCreatedAt] = useState<string>(""); // Unused
-  // const [contractBalance, setContractBalance] = useState<string>("0"); // Unused
+  const [issueTitle, setIssueTitle] = useState<string>("");
+  const [issueDescription, setIssueDescription] = useState<string>("");
+  const [issueCreatedAt, setIssueCreatedAt] = useState<string>("");
   const [rewardAmount, setRewardAmount] = useState<string>("");
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [issueData, setIssueData] = useState<any>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [difficulty, setDifficulty] = useState<string>("");
+  const [priority, setPriority] = useState<string>("");
+  console.log(selectedRepo, "SelectedRepo");
   const octokit = new Octokit({ auth: token });
 
-  // const [languages, setLanguages] = useState<LanguageData | undefined>(); // Removed
-  // const [stars, setStars] = useState<number>(0); // Removed
-  // const [forks, setForks] = useState<number>(0); // Removed
-  // const [page,setPage]=useState<number>(1) // Unused
-  // const [selectedRepos, setSelectedRepos] = useState<string[]>([]); // Removed, using selectedRepo for single selection
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const {
     data: writeData,
     writeContract,
@@ -303,40 +316,28 @@ export default function Project() {
 
     const fetchRepos = async () => {
       try {
-        // const octokit = new Octokit({ auth: token }); // Octokit not needed if fetching from own API
         const response = await fetch("/api/add-projects", {
-          // Removed leading space
           method: "GET",
         });
-
         const responseData = await response.json();
         if (response.ok) {
-          setData(responseData.project as Repo[]); // Cast to Repo[]
-          console.log(responseData.project, "repos"); // Corrected log key
+          setData(responseData.project as Repo[]);
+          console.log(responseData.project, "repos");
         } else {
           console.error(
             "Error fetching repositories:",
             responseData.error || response.statusText
           );
-          setData([]); // Set to empty array on error
+          setData([]);
         }
       } catch (error) {
         console.error("Error fetching repositories:", error);
-        setData([]); // Set to empty array on error
+        setData([]);
       }
     };
 
     fetchRepos();
-    // Removed fetchRepoLanguages as languages state is removed
-  }, [token]); // Removed user and selectedRepo as dependencies as they are not used in this specific fetchRepos
-
-  //fetch readme.md - REMOVED
-  // const [repoValue, setRepoValue] = useState<string | undefined>();
-  // useEffect(() => { ... });
-
-  //ai reply - REMOVED
-  // const [aiReply, setAiReply] = useState<string | undefined>();
-  // useEffect(() => { ... });
+  }, [token]);
 
   // Fetch issues for selected repo
   useEffect(() => {
@@ -347,54 +348,57 @@ export default function Project() {
         const response = await octokit.request(
           `GET /repos/${user}/${selectedRepo}/issues`,
           {
-            owner: user, // Added owner explicitly, though often included in user/repo format
+            owner: user,
             repo: selectedRepo,
-            state: 'open',
+            state: "open",
             headers: {
               "X-GitHub-Api-Version": "2022-11-28",
             },
           }
         );
-        console.log(response.data, "issuess"); // Corrected log key for issue
-        setIssues(response.data as Issue[]); // Cast to Issue[]
+        console.log(response.data, "issuess");
+        setIssues(response.data as Issue[]);
       } catch (error) {
         console.error("Error fetching issues:", error);
-        setIssues([]); // Set to empty array on error
+        setIssues([]);
       }
     };
+
     fetchIssues();
   }, [token, user, selectedRepo]);
 
   useEffect(() => {
+    if (!selectedissue || !user || !selectedRepo) return;
+
     const fetchIssueData = async () => {
-      const response = await octokit.request(
-        `GET /repos/${user}/${selectedRepo}/issues/${selectedissue}`,
-        {
-          owner: user,
-          repo: selectedRepo,
-          issue_number: selectedissue,
-        }
-      );
-      const issue = response.data;
-      setIssueTitle(issue.title);
-      setIssueDescription(issue.body);
-      setIssueCreatedAt(issue.created_at);
-      console.log("Issue Data:", issue);
+      try {
+        const response = await octokit.request(
+          `GET /repos/${user}/${selectedRepo}/issues/${selectedissue}`,
+          {
+            owner: user,
+            repo: selectedRepo,
+            issue_number: Number.parseInt(selectedissue),
+          }
+        );
+
+        const issue = response.data;
+        setIssueTitle(issue.title);
+        setIssueDescription(issue.body || "");
+        setIssueCreatedAt(issue.created_at);
+        console.log("Issue Data:", issue);
+      } catch (error) {
+        console.error("Error fetching issue data:", error);
+      }
     };
+
     fetchIssueData();
-  }, [selectedissue]);
-  console.log("Issue Title:", issueTitle);
-  console.log("Issue Description:", issueDescription);
-  console.log("Issue Created At:", issueCreatedAt);
+  }, [selectedissue, user, selectedRepo]);
+
   useEffect(() => {
     if (isConfirmed) {
       setAlertMessage("Deposit successful and project creation initiated!");
-      // Potentially trigger the rest of the project creation logic here if it depends on successful deposit
-      // For now, assuming the API call for add-issues will be part of the form submission logic after deposit.
-      // fetchBalance(); // Re-fetch balance if implemented
     }
     if (confirmationError) {
-      // Type assertion for error to access message property safely
       setAlertMessage(
         `Deposit failed: ${(confirmationError as Error).message}`
       );
@@ -409,14 +413,6 @@ export default function Project() {
   const addProject = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const formData = new FormData(e.currentTarget);
-    // const fileInput = formData.get("projectImage") as File; // Removed, no image upload for issues
-
-    // if (!repoValue) { // Removed, repoValue is removed
-    //   console.error("Repository content is not available");
-    //   setAlertMessage("Repository content is not available");
-    //   return;
-    // }
     if (
       !rewardAmount ||
       isNaN(Number(rewardAmount)) ||
@@ -441,9 +437,15 @@ export default function Project() {
       return;
     }
 
+    if (!difficulty || !priority || !selectedRepo || !selectedissue) {
+      setAlertMessage("Please fill in all required fields");
+      return;
+    }
+
     try {
-      const currentSession = session.data as CustomSession; // Use CustomSession type
+      const currentSession = session.data as CustomSession;
       const username: string = currentSession?.user?.username as string;
+
       if (!username) {
         setAlertMessage("User session not found.");
         return;
@@ -475,19 +477,18 @@ export default function Project() {
           issue_name: issueTitle,
           issue_description: issueDescription,
           issue_date: issueCreatedAt,
-          difficulty: formData.get("difficulty") as string,
-          project_issues: formData.get("projectIssue") as string, // Corrected: form field name is projectIssue
-          rewardAmount: rewardAmount, // This is from state, ensure it's what you intend
-          priority: formData.get("priority") as string,
-          project_repository: selectedRepo, // Use selectedRepo (single string) instead of selectedRepos (array)
+          difficulty: difficulty,
+          project_issues: selectedissue,
+          rewardAmount: rewardAmount,
+          priority: priority,
+          project_repository: selectedRepo,
           email: currentSession?.user?.email,
         }),
       });
-      // Removed console.log with unused variables
-      setAlertMessage("Issue submitted (after deposit initiated)!"); // Update message
+
+      setAlertMessage("Issue submitted (after deposit initiated)!");
     } catch (error) {
       console.error("Error in project creation or deposit:", error);
-      // Check if error is an instance of Error to safely access message
       if (error instanceof Error) {
         setAlertMessage(`Error: ${error.message}`);
       } else {
@@ -498,51 +499,51 @@ export default function Project() {
     }
   };
 
-  //collab - REMOVED
-  // const [collabs, setCollabs] = useState<Collaborator[] | undefined>();
-  // useEffect(() => { ... });
-
-  // console.log(collabs, "collabs"); // Removed
-
-  // const handleRepoSelection = (repoName: string) => { // Removed, as selectedRepos (plural) is removed
-  //   setSelectedRepos(prevSelectedRepo =>
-  //     prevSelectedRepo.includes(repoName)
-  //       ? prevSelectedRepo.filter(name => name !== repoName)
-  //       : [...prevSelectedRepo, repoName]
-  //   );
-  // };
-  // Add selectedRepo as a dependency to log it whenever it change
-
   return (
     <>
       <Suspense>
-        <div className="fixed bottom-20 right-10 z-[100]">
-          {" "}
-          {/* Ensure alert is on top */}
+        {/* Alert Messages - Responsive positioning */}
+        <div className="fixed bottom-4 right-4 z-[100] max-w-sm w-full">
           {alertMessage && (
             <Alert
-              className={
+              className={`mb-2 ${
                 isConfirmed
                   ? "bg-green-100 border-green-400 text-green-700"
                   : confirmationError || writeError
                   ? "bg-red-100 border-red-400 text-red-700"
                   : ""
-              }
+              }`}
             >
-              <AlertTitle>
-                {isConfirmed
-                  ? "Success"
-                  : confirmationError || writeError
-                  ? "Error"
-                  : "Notice"}
-              </AlertTitle>
-              <AlertDescription>{alertMessage}</AlertDescription>
+              <div className="flex items-center gap-2">
+                {isConfirmed ? (
+                  <CheckCircle className="h-4 w-4" />
+                ) : confirmationError || writeError ? (
+                  <AlertCircle className="h-4 w-4" />
+                ) : (
+                  <AlertCircle className="h-4 w-4" />
+                )}
+                <AlertTitle className="text-sm">
+                  {isConfirmed
+                    ? "Success"
+                    : confirmationError || writeError
+                    ? "Error"
+                    : "Notice"}
+                </AlertTitle>
+              </div>
+              <AlertDescription className="text-sm mt-1">
+                {alertMessage}
+              </AlertDescription>
             </Alert>
           )}
           {(isWritePending || isConfirming) && (
             <Alert className="bg-blue-100 border-blue-400 text-blue-700">
-              <AlertTitle>Processing Transaction</AlertTitle>
-              <AlertDescription>
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <AlertTitle className="text-sm">
+                  Processing Transaction
+                </AlertTitle>
+              </div>
+              <AlertDescription className="text-sm mt-1">
                 {isWritePending &&
                   !isConfirming &&
                   "Please confirm in your wallet..."}
@@ -551,129 +552,269 @@ export default function Project() {
             </Alert>
           )}
         </div>
-        <div className="flex">
+
+        <div className="flex min-h-screen">
           <Sidebar />
           <div
-            className={`transition-all duration-300 ease-in-out ${
-              isShrunk
-                ? "ml-[4rem] w-[calc(100%_-_4rem)]"
-                : "ml-[16rem] w-[calc(100%_-_16rem)]"
-            }`}
+            className={`
+              flex-1 transition-all duration-300 ease-in-out
+              ${
+                isMobile
+                  ? "ml-0 w-full"
+                  : isShrunk
+                  ? "ml-16 w-[calc(100%-4rem)]"
+                  : "ml-64 w-[calc(100%-16rem)]"
+              }
+            `}
           >
             <Topbar />
 
-            <div className="mt-20 justify-center">
-              <form onSubmit={addProject} className="p-10 mx-auto space-y-4">
-                <div className="text-3xl mb-6">Issue Information</div>
-
-                <div className="space-y-2 flex gap-4">
-                  <div className="space-y-2 w-1/3">
-                    <label className="text-[14px]" htmlFor="difficulty">
-                      Difficulty
-                    </label>
-                    <select
-                      id="difficulty"
-                      name="difficulty"
-                      className="dark:bg-[#0a0a0a] text-[14px] w-full p-2 border-2 dark:border-custom-dark-gray rounded-md"
-                      required
-                    >
-                      <option value="">Select difficulty</option>
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="hard">Hard</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2 w-1/3">
-                    <label className="text-[14px]" htmlFor="priority">
-                      Priority
-                    </label>
-                    <select
-                      id="priority"
-                      name="priority"
-                      className="dark:bg-[#0a0a0a] w-full p-2 border-2 dark:border-custom-dark-gray rounded-md"
-                      required
-                    >
-                      <option value="">Select The Priority</option>
-                      <option value="Low">Low</option>
-                      <option value="Medium">Medium</option>
-                      <option value="High">High</option>
-                    </select>
-                  </div>
-                  <div className="w-1/3">
-                    <label className="text-[14px]" htmlFor="rewardAmount">
-                      Reward Amount in Pharos
-                    </label>{" "}
-                    {/* Changed htmlFor to rewardAmount to match id */}
-                    <input
-                      id="rewardAmount" // Changed id to rewardAmount
-                      name="rewardAmount" // Changed name to rewardAmount
-                      type="text" // Keep as text to allow decimal input, validation handles number conversion
-                      className="w-full p-2 border-2 dark:border-custom-dark-gray rounded-md"
-                      value={rewardAmount}
-                      onChange={(e) => setRewardAmount(e.target.value)}
-                      placeholder="e.g., 10.5"
-                      required
-                    />
-                  </div>
+            <div className="mt-16 md:mt-20 p-4 sm:p-6 lg:p-8">
+              <div className="max-w-4xl mx-auto">
+                {/* Header */}
+                <div className="mb-6 lg:mb-8">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+                    Create Issue Bounty
+                  </h1>
+                  <p className="text-sm sm:text-base text-muted-foreground">
+                    Set up a reward for contributors to solve your GitHub issues
+                  </p>
                 </div>
 
-                <div className="flex gap-4 ">
-                  <div className="space-y-2  w-1/3">
-                    <label className="text-[14px]" htmlFor="projectRepo">
-                      Project Repository
-                    </label>
-                    <select
-                      id="projectRepo"
-                      name="projectRepo"
-                      className="dark:bg-[#0a0a0a] w-full p-2 border-2 dark:border-custom-dark-gray rounded-md"
-                      onChange={(e) => setSelectedRepo(e.target.value)} // This sets selectedRepo (singular)
-                      value={selectedRepo || ""} // Ensure value is not undefined
-                      required
-                    >
-                      <option value="">Select a repository</option>
-                      {data?.map(
-                        (
-                          repo: any // data here refers to the list of projects/repos fetched from /api/add-projects
-                        ) => (
-                          <option value={repo.name} key={repo.id}>
-                            {repo.project_repository}
-                          </option>
-                        )
-                      )}
-                    </select>
-                  </div>
-                  <div className="space-y-2  w-1/3">
-                    <label className="text-[14px]" htmlFor="projectIssue">
-                      Select Issue
-                    </label>
-                    <select
-                      id="projectIssue" // This is the ID for the issue dropdown
-                      name="projectIssue" // This is the name attribute for FormData
-                      className="dark:bg-[#0a0a0a] w-full p-2 border-2 dark:border-custom-dark-gray rounded-md"
-                      onChange={(e) => setSelectedIssue(e.target.value)}
-                      required
-                    >
-                      <option value="">Select an issue</option>
-                      {issues?.map((issue: any) => (
-                        <option value={issue.number} key={issue.id}>
-                          {issue.title}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                <div className="mt-6 flex justify-end">
-                  <button
-                    type="submit"
-                    className="bg-[#29292c] text-white p-2 rounded-md hover:bg-[#222225] px-4 disabled:opacity-50"
-                    disabled={isWritePending || isConfirming}
-                  >
-                    {isWritePending || isConfirming
-                      ? "Processing..."
-                      : "Publish"}
-                  </button>
-                </div>
-              </form>
+                {/* Wallet Connection Status */}
+                {!isConnected && (
+                  <Card className="mb-6 border-amber-200 bg-amber-50 dark:bg-amber-950/20">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3">
+                        <Wallet className="h-5 w-5 text-amber-600" />
+                        <div>
+                          <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                            Wallet Not Connected
+                          </p>
+                          <p className="text-xs text-amber-700 dark:text-amber-300">
+                            Please connect your wallet to create issue bounties
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Main Form */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg sm:text-xl">
+                      Issue Information
+                    </CardTitle>
+                    <CardDescription>
+                      Fill in the details for your issue bounty
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={addProject} className="space-y-6">
+                      {/* Repository and Issue Selection */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="projectRepo"
+                            className="text-sm font-medium"
+                          >
+                            Project Repository *
+                          </Label>
+                          <select
+                            id="projectRepo"
+                            name="projectRepo"
+                            className="dark:bg-neutral-800 w-full p-2 border-2 dark:border-custom-dark-gray rounded-md"
+                            onChange={(e) => setSelectedRepo(e.target.value)} // This sets selectedRepo (singular)
+                            value={selectedRepo || ""} // Ensure value is not undefined
+                            required
+                          >
+                            <option value="">Select a repository</option>
+                            {data?.map(
+                              (
+                                repo: any // data here refers to the list of projects/repos fetched from /api/add-projects
+                              ) => (
+                                <option value={repo.name} key={repo.id}>
+                                  {repo.project_repository}
+                                </option>
+                              )
+                            )}
+                          </select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="projectIssue"
+                            className="text-sm font-medium"
+                          >
+                            Select Issue *
+                          </Label>
+                          <Select
+                            value={selectedissue || ""}
+                            onValueChange={(value) => setSelectedIssue(value)}
+                            disabled={!selectedRepo}
+                            required
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select an issue" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {issues?.map((issue: any) => (
+                                <SelectItem
+                                  value={issue.number.toString()}
+                                  key={issue.id}
+                                >
+                                  {issue.title}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      {/* Difficulty, Priority, and Reward */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="difficulty"
+                            className="text-sm font-medium"
+                          >
+                            Difficulty *
+                          </Label>
+                          <Select
+                            value={difficulty}
+                            onValueChange={setDifficulty}
+                            required
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select difficulty" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="low">Low</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="hard">Hard</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="priority"
+                            className="text-sm font-medium"
+                          >
+                            Priority *
+                          </Label>
+                          <Select
+                            value={priority}
+                            onValueChange={setPriority}
+                            required
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select priority" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Low">Low</SelectItem>
+                              <SelectItem value="Medium">Medium</SelectItem>
+                              <SelectItem value="High">High</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-2 sm:col-span-2 lg:col-span-1">
+                          <Label
+                            htmlFor="rewardAmount"
+                            className="text-sm font-medium"
+                          >
+                            Reward Amount (PHAROS) *
+                          </Label>
+                          <Input
+                            id="rewardAmount"
+                            name="rewardAmount"
+                            type="text"
+                            className="w-full"
+                            value={rewardAmount}
+                            onChange={(e) => setRewardAmount(e.target.value)}
+                            placeholder="e.g., 10.5"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      {/* Submit Button */}
+                      <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t">
+                        <div className="flex-1">
+                          <p className="text-xs sm:text-sm text-muted-foreground">
+                            By creating this bounty, you agree to deposit the
+                            reward amount to the smart contract. The funds will
+                            be released when the issue is successfully resolved.
+                          </p>
+                        </div>
+                        <Button
+                          type="submit"
+                          className="w-full sm:w-auto px-6 py-2"
+                          disabled={
+                            isWritePending || isConfirming || !isConnected
+                          }
+                        >
+                          {isWritePending || isConfirming ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Processing...
+                            </>
+                          ) : (
+                            "Create Bounty"
+                          )}
+                        </Button>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
+
+                {/* Help Section */}
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle className="text-base sm:text-lg">
+                      How it works
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-xs font-medium text-blue-600 dark:text-blue-400">
+                        1
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Select a repository and issue from your GitHub projects
+                      </p>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-xs font-medium text-blue-600 dark:text-blue-400">
+                        2
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Set the difficulty, priority, and reward amount for the
+                        issue
+                      </p>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-xs font-medium text-blue-600 dark:text-blue-400">
+                        3
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Deposit the reward amount to the smart contract
+                      </p>
+                    </div>
+                    <div className="flex gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-xs font-medium text-blue-600 dark:text-blue-400">
+                        4
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Contributors can work on the issue and submit pull
+                        requests
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
         </div>
