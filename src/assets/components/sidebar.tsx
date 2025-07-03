@@ -25,10 +25,10 @@ export default function Sidebar() {
   };
 
   return (
-    <div>
+    <div className="hidden md:block">
       <div
         className={
-          (isShrunk ? "w-[4rem] mx-auto px-1" : "w-[16rem] px-4") +
+          (isShrunk ? "w-[4rem] mx-auto px-1" : "w-[16rem] px-4") + " " +
           " top-0 z-50 bg-white dark:bg-black fixed h-screen border-r-[1px] dark:border-custom-dark-gray py-4 transition-all duration-400 ease-in-out"
         }
         style={{ transitionProperty: "width, padding" }}

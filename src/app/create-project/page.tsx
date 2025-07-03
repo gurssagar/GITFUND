@@ -47,10 +47,11 @@ export default function CreateProjects() {
             if (!octokit) return;
             try {
                 const response = await octokit.request("GET /user/repos", {
-                    headers: {
-                        "X-GitHub-Api-Version": "2022-11-28",
-                    },
-                });
+                                    headers: {
+                                        "X-GitHub-Api-Version": "2022-11-28",
+                                    },
+                                    visibility: 'public',
+                                });
                 setRepoData(response.data as Repo[]);
             } catch (error) {
                 console.error("Error fetching repositories:", error);

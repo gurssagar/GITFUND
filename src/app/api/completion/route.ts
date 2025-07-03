@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     clientTwo = await experimental_createMCPClient({
       transport: {
         type: "sse",
-        url: "http://209.38.122.42/sse",
+        url: "http://209.38.122.42:8000/sse",
       },
     });
 
