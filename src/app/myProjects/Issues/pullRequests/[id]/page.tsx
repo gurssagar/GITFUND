@@ -498,14 +498,16 @@ const [RewardAmount,setRewardAmount] = useState<string>();
   }, [session, owner, project, pullRequestId]);
 
   return (
-    <div className="flex">
+    <div className="flex flex-col md:flex-row">
       <Sidebar />
       <div
-        className={` ${isShrunk ? "md:ml-[4rem] md:w-[calc(100%_-_4rem)]" : "md:ml-[16rem] md:w-[calc(100%_-_16rem)]"}`}
+        className={`w-full transition-all duration-300 ${
+          isShrunk ? "md:ml-[4rem]" : "md:ml-[16rem]"
+        }`}
       >
         <Topbar />
         {!repoData ? (
-          <div className="z-10 p-4 mt-24 w-[80%] mx-auto min-h-screen animate-pulse">
+          <div className="z-10 p-4 mt-24 w-full md:w-[90%] lg:w-[80%] mx-auto min-h-screen animate-pulse">
             {/* Header Skeleton */}
             <div className="max-w-7xl mx-auto mt-8">
               <div className="mb-4">
@@ -521,7 +523,7 @@ const [RewardAmount,setRewardAmount] = useState<string>();
               </div>
 
               {/* Main Content Skeleton */}
-              <div className="flex gap-6 mt-6">
+              <div className="flex flex-col lg:flex-row gap-6 mt-6">
                 {/* Left: PR Details Skeleton */}
                 <div className="flex-1">
                   <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-6">
@@ -547,7 +549,7 @@ const [RewardAmount,setRewardAmount] = useState<string>();
                 </div>
 
                 {/* Right: Review Actions Skeleton */}
-                <div className="w-80 flex-shrink-0">
+                <div className="w-full lg:w-80 flex-shrink-0 order-first lg:order-none">
                   <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 mb-4">
                     <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded mb-3"></div>
                     <div className="flex flex-col gap-2 mb-4">
@@ -589,9 +591,9 @@ const [RewardAmount,setRewardAmount] = useState<string>();
             </div>
           </div>
         ) : (
-          <div className="p-4 mt-24 w-[80%] mx-auto min-h-screen">
-          <div className="max-w-7xl mx-auto mt-8">
-            <div className="mb-4">
+          <div className="p-4 mt-24 w-full md:w-[90%] lg:w-[80%] mx-auto min-h-screen">
+          <div className="max-w-7xl mx-auto mt-4 md:mt-8">
+            <div className="mb-4 px-2 md:px-0">
               <a
                 href="/PullRequests"
                 className="text-sm text-neutral-500 dark:text-neutral-400 hover:underline"
@@ -600,12 +602,12 @@ const [RewardAmount,setRewardAmount] = useState<string>();
               </a>
             </div>
 
-            <div className="flex justify-between items-start mb-2">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-2 px-2 md:px-0">
               <div>
-                <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">
+                <h1 className="text-xl md:text-2xl font-bold text-neutral-900 dark:text-white">
                   {repoData?.title}
                 </h1>
-                <div className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                <div className="text-xs md:text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                   #{repoData?.number} opened by {repoData?.user?.login} on{" "}
                   {new Date(repoData?.created_at).toLocaleDateString()}{" "}
                 </div>
@@ -614,7 +616,7 @@ const [RewardAmount,setRewardAmount] = useState<string>();
                 href={repoData?.html_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-950 dark:hover:bg-custom-dark-neutral"
+                className="px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-950 dark:hover:bg-custom-dark-neutral w-full md:w-auto text-center"
               >
                 View on GitHub
               </a>
@@ -622,7 +624,7 @@ const [RewardAmount,setRewardAmount] = useState<string>();
             <div className="flex gap-6 mt-6">
               {/* Left: PR Details */}
               <div className="flex-1">
-                <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-5 mb-6">
+                <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-4 md:p-5 mb-6">
                   <h2 className="font-semibold text-lg mb-2 flex items-center gap-2 dark:text-white">
                     <svg
                       width="20"
@@ -711,7 +713,7 @@ const [RewardAmount,setRewardAmount] = useState<string>();
               </div>
               {/* Right: Review Actions */}
               <div className="w-80 flex-shrink-0">
-                <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-5 mb-4">
+                <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-4 md:p-5 mb-4">
                   <div className="font-semibold mb-3 dark:text-white">
                     Review Actions
                   </div>

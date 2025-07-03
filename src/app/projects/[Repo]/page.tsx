@@ -313,7 +313,7 @@ export default function Project() {
   return (
     <div className="flex">
       <Sidebar />
-      <div className={`${isShrunk ? "ml-[4rem] w-[calc(100%_-_4rem)]" : "ml-[16rem] w-[calc(100%_-_16rem)]"}`}>
+      <div className={`{` ${isShrunk ? "md:ml-[4rem] md:w-[calc(100%_-_4rem)]" : "md:ml-[16rem] md:w-[calc(100%_-_16rem)]"}`}>
         <Topbar />
         <div className="px-4 py-8 flex pt-20">
           {/* Left sidebar skeleton */}

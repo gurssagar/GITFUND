@@ -311,7 +311,7 @@ export default function CreateProjects() {
         <div className="flex">
           <Sidebar />
           <div
-            className={`transition-all duration-300 ease-in-out ${isShrunk ? "ml-[4rem] w-[calc(100%_-_4rem)]" : "ml-[16rem] w-[calc(100%_-_16rem)]"}`}
+            className={`transition-all duration-300 ease-in-out ${isShrunk ? "md:ml-[4rem] md:w-[calc(100%_-_4rem)]" : "md:ml-[16rem] md:w-[calc(100%_-_16rem)]"}`}
           >
             <Topbar />
             <div className='mt-17'> {/* Assuming mt-17 is a valid Tailwind class or custom utility */}
