@@ -1,23 +1,18 @@
 "use client";
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  useCallback,
-  useMemo,
-} from "react";
+
+import type React from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { signIn, useSession } from "next-auth/react";
-import { io, Socket } from "socket.io-client";
+import { io, type Socket } from "socket.io-client";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import Sidebar from "@/assets/components/chats/chatSidebar";
 import Topbar from "@/assets/components/chats/chatTopbar";
 import { usechatSidebarContext } from "@/assets/components/chats/chatSiderbarContext";
+
 interface ChatMessage {
   text: string;
   timestamp: string;
@@ -37,14 +32,25 @@ type ConnectionStatus = "disconnected" | "connecting" | "connected";
 
 export default function OptimizedChatPage() {
   const { data: session } = useSession();
-
   const [databaseMessages, setDatabaseMessages] = useState([]);
   const memoizedSession = useMemo(() => session, [session]);
-
   const { theme } = useTheme();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Context from sidebar
   const { isShrunk, selectedUser, isLoadingUsers, refreshUsers } =
@@ -61,7 +67,7 @@ export default function OptimizedChatPage() {
       try {
         const username = memoizedSession?.user?.username;
         const response = await fetch(
-          `/api/chat${username ? `?username=${username}` : ""}`,
+          `/api/chat${username ? `?username=${username}` : ""}`
         );
         const data = await response.json();
         console.log(data, "yeyyyy messages");
@@ -74,7 +80,7 @@ export default function OptimizedChatPage() {
     };
 
     fetchMessages();
-  }, []);
+  }, [memoizedSession]);
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeUsers, setActiveUsers] = useState<string[]>([]);
@@ -96,7 +102,7 @@ export default function OptimizedChatPage() {
   // Auto-scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, databaseMessages]);
 
   // Clear error message after 5 seconds
   useEffect(() => {
@@ -129,7 +135,6 @@ export default function OptimizedChatPage() {
       setConnectionStatus("connected");
       setErrorMessage(null);
       setIsReconnecting(false);
-
       // Clear any pending reconnection timeout
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
@@ -140,7 +145,6 @@ export default function OptimizedChatPage() {
     socket.on("disconnect", (reason) => {
       console.log(`❌ Disconnected: ${reason}`);
       setConnectionStatus("disconnected");
-
       if (reason === "io server disconnect") {
         setErrorMessage("Server disconnected. Attempting to reconnect...");
         setIsReconnecting(true);
@@ -217,7 +221,6 @@ export default function OptimizedChatPage() {
 
   const sendMessage = useCallback(() => {
     const socket = socketRef.current;
-
     if (
       !socket?.connected ||
       !selectedUser ||
@@ -259,8 +262,8 @@ export default function OptimizedChatPage() {
                   failed: !!response.error,
                   timestamp: response.timestamp || msg.timestamp,
                 }
-              : msg,
-          ),
+              : msg
+          )
         );
 
         if (response.error) {
@@ -281,7 +284,7 @@ export default function OptimizedChatPage() {
             timestamp: response.timestamp || newMessage.timestamp,
           });
         }
-      },
+      }
     );
   }, [
     selectedUser,
@@ -297,7 +300,7 @@ export default function OptimizedChatPage() {
         sendMessage();
       }
     },
-    [sendMessage],
+    [sendMessage]
   );
 
   const retryFailedMessage = useCallback((failedMessage: ChatMessage) => {
@@ -306,8 +309,8 @@ export default function OptimizedChatPage() {
     // Remove failed flag and mark as pending
     setMessages((prev) =>
       prev.map((msg) =>
-        msg === failedMessage ? { ...msg, pending: true, failed: false } : msg,
-      ),
+        msg === failedMessage ? { ...msg, pending: true, failed: false } : msg
+      )
     );
 
     // Retry sending
@@ -323,18 +326,18 @@ export default function OptimizedChatPage() {
           prev.map((msg) =>
             msg.timestamp === failedMessage.timestamp
               ? { ...msg, pending: false, failed: !!response.error }
-              : msg,
-          ),
+              : msg
+          )
         );
-      },
+      }
     );
   }, []);
 
   // Show sign-in if not authenticated
   if (!memoizedSession) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-100 dark:bg-neutral-900">
-        <p className="mb-4 text-lg text-neutral-700 dark:text-neutral-300">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-100 dark:bg-neutral-900 p-4">
+        <p className="mb-4 text-base lg:text-lg text-neutral-700 dark:text-neutral-300 text-center">
           Please sign in to access the chat.
         </p>
         <Button
@@ -353,7 +356,7 @@ export default function OptimizedChatPage() {
       (msg.from === memoizedSession.user?.username &&
         msg.to === selectedUser?.id) ||
       (msg.from === selectedUser?.id &&
-        msg.to === memoizedSession.user?.username),
+        msg.to === memoizedSession.user?.username)
   );
 
   const dbMessages = databaseMessages.filter(
@@ -361,317 +364,312 @@ export default function OptimizedChatPage() {
       (msg.sender_id === memoizedSession.user?.username &&
         msg.reciever_id === selectedUser?.id) ||
       (msg.sender_id === selectedUser?.id &&
-        msg.reciever_id === memoizedSession.user?.username),
+        msg.reciever_id === memoizedSession.user?.username)
   );
 
   console.log("Final Messages", dbMessages);
+
   return (
     <div className="flex h-screen overflow-hidden bg-neutral-100 dark:bg-neutral-900">
       <Sidebar />
-
       <div
         className={cn(
-          "flex-1 flex flex-col transition-all duration-300",
-          isShrunk ? "ml-16" : "ml-64",
+          "flex-1 flex flex-col transition-all duration-300 min-w-0",
+          isMobile
+            ? "ml-0 w-full"
+            : isShrunk
+            ? "ml-16 w-[calc(100%-4rem)]"
+            : "ml-64 w-[calc(100%-16rem)]"
         )}
       >
         <Topbar />
-
-        <main className="flex-1 flex flex-col p-4 pt-[70px]">
-          {/* Status indicators */}
-
-          {/* Main content */}
-          {!selectedUser ? (
-            <div className="flex flex-col items-center justify-center flex-1">
-              <Image
-                src={theme === "dark" ? "/astro-dark.svg" : "/astro.svg"}
-                alt="Select a user"
-                width={200}
-                height={200}
-                className="mb-4"
-              />
-              <p className="text-lg text-neutral-600 dark:text-neutral-400">
-                Select a user to start chatting
-              </p>
-              {isLoadingUsers && (
-                <p className="mt-2 text-sm text-neutral-500">
-                  Loading users...
-                </p>
-              )}
+        <main className="flex-1 flex flex-col overflow-hidden">
+          {/* Connection Status Bar */}
+          {connectionStatus !== "connected" && (
+            <div className="bg-yellow-100 dark:bg-yellow-900 border-b border-yellow-200 dark:border-yellow-800 px-4 py-2">
+              <div className="flex items-center justify-center">
+                <div className="flex items-center gap-2 text-sm text-yellow-800 dark:text-yellow-200">
+                  {connectionStatus === "connecting" && (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-600"></div>
+                      <span>Connecting to chat server...</span>
+                    </>
+                  )}
+                  {connectionStatus === "disconnected" && (
+                    <>
+                      <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+                      <span>Disconnected from chat server</span>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
-          ) : (
-            <div className="flex-1 flex flex-col">
-              <div className="flex-1 flex flex-col p-0">
-                {/* Chat header */}
-                <div className="p-4 ">
-                  <h2 className="text-xl font-semibold">{selectedUser.id}</h2>
-                  <p className="text-sm">
-                    {activeUsers.includes(selectedUser.id) ? (
-                      <span className="text-green-500 flex items-center">
-                        <div className="w-2 h-2 bg-green-500 rounded-full mr-1" />
-                        Online
-                      </span>
-                    ) : (
-                      <span className="text-neutral-500 flex items-center">
-                        <div className="w-2 h-2 bg-neutral-400 rounded-full mr-1" />
-                        Offline
-                      </span>
-                    )}
+          )}
+
+          {/* Error Message */}
+          {errorMessage && (
+            <div className="bg-red-100 dark:bg-red-900 border-b border-red-200 dark:border-red-800 px-4 py-2">
+              <div className="flex items-center justify-center">
+                <span className="text-sm text-red-800 dark:text-red-200">
+                  {errorMessage}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Main Chat Content */}
+          <div className="flex-1 flex flex-col overflow-hidden mt-16 md:mt-20">
+            {!selectedUser ? (
+              <div className="flex flex-col items-center justify-center flex-1 px-4">
+                <Image
+                  src={theme === "dark" ? "/astro-dark.svg" : "/astro.svg"}
+                  alt="Select a user"
+                  width={isMobile ? 120 : 200}
+                  height={isMobile ? 120 : 200}
+                  className="mb-4"
+                />
+                <p className="text-base lg:text-lg text-neutral-600 dark:text-neutral-400 text-center">
+                  Select a user to start chatting
+                </p>
+                {isLoadingUsers && (
+                  <p className="mt-2 text-sm text-neutral-500">
+                    Loading users...
                   </p>
-                </div>
-
-                {/* Messages */}
-                <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-                  {dbMessages?.length === 0 ? (
-                    <></>
-                  ) : (
-                    <>
-                      {dbMessages?.map((msg, id) => (
-                        <div
-                          key={`${msg.timestamp}-${id}`}
-                          className={cn(
-                            "flex flex-col p-3 rounded-lg shadow-sm",
-                            msg.sender_id === memoizedSession.user?.username
-                              ? "ml-auto justify-end"
-                              : "mr-auto justify-start",
-                          )}
-                        >
-                          <div className="flex ">
-                            {msg.sender_id ===
-                            memoizedSession.user?.username ? (
-                              <>
-                                <div>
-                                  <Image
-                                    src={memoizedSession.user?.image}
-                                    width={40}
-                                    height={40}
-                                    alt={`user`}
-                                    className="rounded-full mx-4"
-                                  />
-                                </div>
-                              </>
-                            ) : (
-                              <>
-                                <div>
-                                  <Image
-                                    src={selectedUser.image_url}
-                                    width={40}
-                                    height={40}
-                                    alt={`user`}
-                                    className="rounded-full mx-4"
-                                  />
-                                </div>
-                              </>
-                            )}
-
-                            <div>
-                              <div className="flex gap-3">
-                                {msg.sender_id ===
-                                memoizedSession.user?.username ? (
-                                  <>
-                                    <h3 className={`my-1 font-bold`}>
-                                      {memoizedSession.user?.name}
-                                    </h3>
-                                    <div className="my-1 text-neutral-400">
-                                      {new Date(
-                                        msg.timestamp,
-                                      ).toLocaleTimeString([], {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                      })}
-                                    </div>
-                                  </>
-                                ) : (
-                                  <>
-                                    <h3 className={`my-1 text-neutral-400`}>
-                                      {selectedUser.fullName}
-                                    </h3>
-                                    <span className="">
-                                      {new Date(
-                                        msg.timestamp,
-                                      ).toLocaleTimeString([], {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                      })}
-                                    </span>
-                                  </>
-                                )}
-                              </div>
-                              <p
-                                className={cn(
-                                  "text-sm whitespace-pre-wrap",
-                                  msg.sender_id ===
-                                    memoizedSession.user?.username
-                                    ? "bg-neutral-700 text-white p-2 rounded-b-lg rounded-tr-lg"
-                                    : " bg-neutral-200 dark:bg-neutral-700 p-2  rounded-b-lg rounded-tr-lg text-neutral-800 dark:text-neutral-200",
-                                )}
-                              >
-                                {msg.text}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="mt-1 text-xs opacity-75 self-end flex items-center">
-                            {msg.pending && <span className="ml-1">⏳</span>}
-                            {msg.failed && (
-                              <button
-                                onClick={() => retryFailedMessage(msg)}
-                                className="ml-1 text-red-300 hover:text-red-100"
-                                title="Click to retry"
-                              >
-                                ⚠️
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </>
-                  )}
-                  {conversationMessages.length === 0 ? (
-                    <div className="text-center text-neutral-500 mt-8">
-                      <p>No messages yet. Start the conversation!</p>
+                )}
+              </div>
+            ) : (
+              <div className="flex-1 flex flex-col overflow-hidden">
+                {/* Chat header */}
+                <div className="flex-shrink-0 p-3 sm:p-4 border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800">
+                  <div className="flex items-center gap-3">
+                    <Image
+                      src={selectedUser.image_url || "/placeholder.svg"}
+                      width={isMobile ? 32 : 40}
+                      height={isMobile ? 32 : 40}
+                      alt="User avatar"
+                      className="rounded-full flex-shrink-0"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-lg sm:text-xl font-semibold truncate">
+                        {selectedUser.id}
+                      </h2>
+                      <p className="text-xs sm:text-sm">
+                        {activeUsers.includes(selectedUser.id) ? (
+                          <span className="text-green-500 flex items-center">
+                            <div className="w-2 h-2 bg-green-500 rounded-full mr-1 flex-shrink-0" />
+                            Online
+                          </span>
+                        ) : (
+                          <span className="text-neutral-500 flex items-center">
+                            <div className="w-2 h-2 bg-neutral-400 rounded-full mr-1 flex-shrink-0" />
+                            Offline
+                          </span>
+                        )}
+                      </p>
                     </div>
-                  ) : (
-                    <>
-                      {conversationMessages?.map((msg, id) => (
-                        <div
-                          key={`${msg.timestamp}-${id}`}
-                          className={cn(
-                            "flex flex-col max-w-[75%] p-3 rounded-lg shadow-sm",
-                            msg.sender_id === memoizedSession.user?.username
-                              ? "ml-auto justify-end"
-                              : "mr-auto justify-start",
-                          )}
-                        >
-                          <div className="flex ">
-                            {msg.sender_id ===
-                            memoizedSession.user?.username ? (
-                              <>
-                                <div>
-                                  <Image
-                                    src={memoizedSession.user?.image}
-                                    width={40}
-                                    height={40}
-                                    alt={`user`}
-                                    className="rounded-full mx-4"
-                                  />
-                                </div>
-                              </>
-                            ) : (
-                              <>
-                                <div>
-                                  <Image
-                                    src={selectedUser.image_url}
-                                    width={40}
-                                    height={40}
-                                    alt={`user`}
-                                    className="rounded-full mx-4"
-                                  />
-                                </div>
-                              </>
-                            )}
-
-                            <div>
-                              <div className="flex gap-3">
-                                {msg.sender_id ===
-                                memoizedSession.user?.username ? (
-                                  <>
-                                    <h3 className={`my-1 font-bold`}>
-                                      {memoizedSession.user?.name}
-                                    </h3>
-                                    <div className="my-1 text-neutral-400">
-                                      {new Date(
-                                        msg.timestamp,
-                                      ).toLocaleTimeString([], {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                      })}
-                                    </div>
-                                  </>
-                                ) : (
-                                  <>
-                                    <h3 className={`my-1 text-neutral-400`}>
-                                      {selectedUser.fullName}
-                                    </h3>
-                                    <span className="">
-                                      {new Date(
-                                        msg.timestamp,
-                                      ).toLocaleTimeString([], {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                      })}
-                                    </span>
-                                  </>
-                                )}
-                              </div>
-                              <p
-                                className={cn(
-                                  "text-sm whitespace-pre-wrap",
-                                  msg.sender_id ===
-                                    memoizedSession.user?.username
-                                    ? "bg-neutral-700 text-white p-2 rounded-b-lg rounded-tr-lg"
-                                    : " bg-neutral-200 dark:bg-neutral-700 p-2  rounded-b-lg rounded-tr-lg text-neutral-800 dark:text-neutral-200",
-                                )}
-                              >
-                                {msg.text}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="mt-1 text-xs opacity-75 self-end flex items-center">
-                            {msg.pending && <span className="ml-1">⏳</span>}
-                            {msg.failed && (
-                              <button
-                                onClick={() => retryFailedMessage(msg)}
-                                className="ml-1 text-red-300 hover:text-red-100"
-                                title="Click to retry"
-                              >
-                                ⚠️
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </>
-                  )}
-                  <div ref={messagesEndRef} />
+                  </div>
                 </div>
 
-                <Separator />
+                {/* Messages Container - Scrollable */}
+                <div className="flex-1 overflow-y-auto bg-neutral-50 dark:bg-neutral-900">
+                  <div className="p-3 sm:p-4 space-y-3 sm:space-y-4 min-h-full">
+                    {/* Database Messages */}
+                    {dbMessages?.map((msg, id) => (
+                      <div
+                        key={`db-${msg.timestamp}-${id}`}
+                        className={cn(
+                          "flex gap-2 sm:gap-3",
+                          msg.sender_id === memoizedSession.user?.username
+                            ? "flex-row-reverse"
+                            : "flex-row"
+                        )}
+                      >
+                        <div className="flex-shrink-0">
+                          <Image
+                            src={
+                              msg.sender_id === memoizedSession.user?.username
+                                ? memoizedSession.user?.image
+                                : selectedUser.image_url
+                            }
+                            width={isMobile ? 28 : 32}
+                            height={isMobile ? 28 : 32}
+                            alt="User avatar"
+                            className="rounded-full"
+                          />
+                        </div>
+                        <div
+                          className={cn(
+                            "flex flex-col max-w-[75%] sm:max-w-[70%]",
+                            msg.sender_id === memoizedSession.user?.username
+                              ? "items-end"
+                              : "items-start"
+                          )}
+                        >
+                          <div
+                            className={cn(
+                              "flex items-center gap-2 mb-1",
+                              msg.sender_id === memoizedSession.user?.username
+                                ? "flex-row-reverse"
+                                : "flex-row"
+                            )}
+                          >
+                            <h3 className="text-xs sm:text-sm font-medium">
+                              {msg.sender_id === memoizedSession.user?.username
+                                ? memoizedSession.user?.name
+                                : selectedUser.fullName}
+                            </h3>
+                            <span className="text-xs text-neutral-400">
+                              {new Date(msg.timestamp).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </span>
+                          </div>
+                          <div
+                            className={cn(
+                              "p-2 sm:p-3 rounded-lg text-sm sm:text-base break-words",
+                              msg.sender_id === memoizedSession.user?.username
+                                ? "bg-blue-500 text-white rounded-br-sm"
+                                : "bg-white dark:bg-neutral-700 text-neutral-800 dark:text-neutral-200 rounded-bl-sm border border-neutral-200 dark:border-neutral-600"
+                            )}
+                          >
+                            {msg.text}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
 
-                {/* Message input */}
-                <div className="p-4">
-                  <div className="flex space-x-2">
+                    {/* Real-time Messages */}
+                    {conversationMessages?.map((msg, id) => (
+                      <div
+                        key={`rt-${msg.timestamp}-${id}`}
+                        className={cn(
+                          "flex gap-2 sm:gap-3",
+                          msg.from === memoizedSession.user?.username
+                            ? "flex-row-reverse"
+                            : "flex-row"
+                        )}
+                      >
+                        <div className="flex-shrink-0">
+                          <Image
+                            src={
+                              msg.from === memoizedSession.user?.username
+                                ? memoizedSession.user?.image
+                                : selectedUser.image_url
+                            }
+                            width={isMobile ? 28 : 32}
+                            height={isMobile ? 28 : 32}
+                            alt="User avatar"
+                            className="rounded-full"
+                          />
+                        </div>
+                        <div
+                          className={cn(
+                            "flex flex-col max-w-[75%] sm:max-w-[70%]",
+                            msg.from === memoizedSession.user?.username
+                              ? "items-end"
+                              : "items-start"
+                          )}
+                        >
+                          <div
+                            className={cn(
+                              "flex items-center gap-2 mb-1",
+                              msg.from === memoizedSession.user?.username
+                                ? "flex-row-reverse"
+                                : "flex-row"
+                            )}
+                          >
+                            <h3 className="text-xs sm:text-sm font-medium">
+                              {msg.from === memoizedSession.user?.username
+                                ? memoizedSession.user?.name
+                                : selectedUser.fullName}
+                            </h3>
+                            <span className="text-xs text-neutral-400">
+                              {new Date(msg.timestamp).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </span>
+                          </div>
+                          <div
+                            className={cn(
+                              "p-2 sm:p-3 rounded-lg text-sm sm:text-base break-words",
+                              msg.from === memoizedSession.user?.username
+                                ? "bg-blue-500 text-white rounded-br-sm"
+                                : "bg-white dark:bg-neutral-700 text-neutral-800 dark:text-neutral-200 rounded-bl-sm border border-neutral-200 dark:border-neutral-600"
+                            )}
+                          >
+                            {msg.text}
+                          </div>
+                          {(msg.pending || msg.failed) && (
+                            <div className="mt-1 text-xs opacity-75 flex items-center">
+                              {msg.pending && <span className="ml-1">⏳</span>}
+                              {msg.failed && (
+                                <button
+                                  onClick={() => retryFailedMessage(msg)}
+                                  className="ml-1 text-red-300 hover:text-red-100"
+                                  title="Click to retry"
+                                >
+                                  ⚠️
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Empty State */}
+                    {conversationMessages.length === 0 &&
+                      dbMessages?.length === 0 && (
+                        <div className="flex items-center justify-center h-full min-h-[200px]">
+                          <div className="text-center text-neutral-500 px-4">
+                            <p className="text-sm sm:text-base">
+                              No messages yet. Start the conversation!
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                    {/* Auto-scroll anchor */}
+                    <div ref={messagesEndRef} />
+                  </div>
+                </div>
+
+                {/* Message Input - Fixed at bottom */}
+                <div className="flex-shrink-0 p-3 sm:p-4 bg-white dark:bg-neutral-800 border-t border-neutral-200 dark:border-neutral-700">
+                  <div className="flex gap-2 sm:gap-3">
                     <Input
                       type="text"
-                      placeholder={`Message ${selectedUser.username || selectedUser.id}...`}
+                      placeholder={`Message ${
+                        selectedUser.username || selectedUser.id
+                      }...`}
                       value={messageInput}
                       onChange={(e) => setMessageInput(e.target.value)}
                       onKeyPress={handleKeyPress}
                       disabled={connectionStatus !== "connected"}
-                      className="flex-1"
+                      className="flex-1 text-sm sm:text-base"
                     />
                     <Button
                       onClick={sendMessage}
                       disabled={
                         !messageInput.trim() || connectionStatus !== "connected"
                       }
-                      className="bg-neutral-500 hover:bg-neutral-600 disabled:opacity-50"
+                      className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 px-3 sm:px-4 text-sm sm:text-base flex-shrink-0"
                     >
                       Send
                     </Button>
                   </div>
-
                   {selectedUser && !activeUsers.includes(selectedUser.id) && (
-                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                    <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-2">
                       ⚠️ User appears offline. Messages may not be delivered
                       immediately.
                     </p>
                   )}
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </main>
       </div>
     </div>
