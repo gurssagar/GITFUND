@@ -8,9 +8,10 @@
 *   **AI-Powered Descriptions:** Automatically generates project descriptions using AI based on the repository's README content.
 *   **S3 Image Storage:** Project images are uploaded and stored securely using AWS S3 and other s3 providers.
 
+
 ## How It Works
 
-1.  **Project Creation:** Project owners connect their GitHub account and Web3 wallet. They create a project listing on GitFund, selecting a repository, an issue, and setting a reward amount.
+1.  **Project Creation:** Project owners connect their GitHub account and Web3 wallet. They create a project listing on GitFund, selecting a repository, an issue, and setting a reward amount.Just for testing
 2.  **Funding:** The owner deposits the specified reward amount into the project's associated smart contract.
 3.  **Contribution:** Developers browse listed projects/issues. They can apply to work on an issue (feature might exist or be planned).
 4.  **Development & PR:** The contributor works on the issue and submits a Pull Request on GitHub.
