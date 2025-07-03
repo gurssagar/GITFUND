@@ -437,7 +437,7 @@ const [RewardAmount,setRewardAmount] = useState<string>();
   const handleWithdraw = React.useCallback(async () => {
     if (!walletAddress || !session?.user?.name) return;
 
-    const withdrawAmount = parseEther(RewardAmount);
+    const withdrawAmount = RewardAmount ? parseEther(RewardAmount) : undefined;
     const customGasPrice = parseEther('0.000003'); // 300,000,000,000 Gwei
 
     try {
@@ -578,7 +578,7 @@ const [RewardAmount,setRewardAmount] = useState<string>();
                     <div className="h-6 w-32 mx-auto bg-gray-200 dark:bg-gray-700 rounded"></div>
                   </div>
                 </div>
-                <div className="p-6">
+                <div className="p-3 sm:p-4 md:p-6">
                   <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded mb-2"></div>
                   <div className="h-4 w-64 bg-gray-200 dark:bg-gray-700 rounded mb-6"></div>
                   <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-white dark:bg-gray-800">
@@ -591,9 +591,9 @@ const [RewardAmount,setRewardAmount] = useState<string>();
             </div>
           </div>
         ) : (
-          <div className="p-4 mt-24 w-full md:w-[90%] lg:w-[80%] mx-auto min-h-screen">
-          <div className="max-w-7xl mx-auto mt-4 md:mt-8">
-            <div className="mb-4 px-2 md:px-0">
+          <div className="px-2 sm:px-4 py-4 mt-16 sm:mt-24 w-full mx-auto min-h-screen">
+                    <div className="w-full max-w-7xl mx-auto mt-2 sm:mt-4 md:mt-8">
+                      <div className="mb-2 sm:mb-4 px-0">
               <a
                 href="/PullRequests"
                 className="text-sm text-neutral-500 dark:text-neutral-400 hover:underline"
@@ -602,7 +602,7 @@ const [RewardAmount,setRewardAmount] = useState<string>();
               </a>
             </div>
 
-            <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-2 px-2 md:px-0">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4 mb-2 px-0">
               <div>
                 <h1 className="text-xl md:text-2xl font-bold text-neutral-900 dark:text-white">
                   {repoData?.title}
@@ -621,9 +621,9 @@ const [RewardAmount,setRewardAmount] = useState<string>();
                 View on GitHub
               </a>
             </div>
-            <div className="flex gap-6 mt-6">
+            <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 mt-4 sm:mt-6">
               {/* Left: PR Details */}
-              <div className="flex-1">
+              <div className="w-full lg:flex-1">
                 <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-4 md:p-5 mb-6">
                   <h2 className="font-semibold text-lg mb-2 flex items-center gap-2 dark:text-white">
                     <svg
@@ -643,7 +643,7 @@ const [RewardAmount,setRewardAmount] = useState<string>();
                   <div className="text-neutral-700 dark:text-neutral-300 mb-3">
                     {repoData?.body || "No description provided"}
                   </div>
-                  <div className="flex items-center gap-6 mb-2">
+                  <div className="md:flex grid grid-cols-2 items-center gap-6 mb-2">
                     <div className="flex items-center gap-1">
                       <span className="font-medium dark:text-white">
                         Status:
@@ -712,7 +712,7 @@ const [RewardAmount,setRewardAmount] = useState<string>();
                 </div>
               </div>
               {/* Right: Review Actions */}
-              <div className="w-80 flex-shrink-0">
+              <div className="w-full lg:w-80 flex-shrink-0 mt-4 lg:mt-0">
                 <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-4 md:p-5 mb-4">
                   <div className="font-semibold mb-3 dark:text-white">
                     Review Actions
@@ -800,11 +800,11 @@ const [RewardAmount,setRewardAmount] = useState<string>();
             </div>
           </div>
           {/* Tabs for Files Changed and Comments */}
-          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-0 mb-6">
-            <div className="flex border-b border-neutral-200 dark:border-neutral-700">
+          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl mb-4 sm:mb-6">
+            <div className="flex flex-col sm:flex-row border-b border-neutral-200 dark:border-neutral-700">
               <button onClick={() => {
                 setAi(false)
-              }} className="flex-1 py-3 text-center font-medium text-neutral-900 dark:text-white bg-neutral-100 dark:bg-neutral-900 rounded-tl-xl focus:outline-none">
+              }} className="flex-1 py-2 sm:py-3 text-center font-medium text-neutral-900 dark:text-white bg-neutral-100 dark:bg-neutral-900 rounded-tl-xl sm:rounded-tl-xl focus:outline-none">
                 Files Changed
               </button>
               <button
@@ -833,7 +833,7 @@ const [RewardAmount,setRewardAmount] = useState<string>();
                   !pullRequestId ||
                   hasRunCompletion
                 }
-                className="flex-1 py-3 text-center font-medium text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white focus:outline-none"
+                className="flex-1 py-2 sm:py-3 text-center font-medium text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white focus:outline-none"
               >
                 {isCompletionLoading
                   ? "Analyzing..."
@@ -845,7 +845,7 @@ const [RewardAmount,setRewardAmount] = useState<string>();
             {
               ai ? 
               <>
-              <div className="min-h-80 p-10">
+              <div className="min-h-80 p-4 sm:p-6 md:p-8 lg:p-10">
                 {completion && (
                   <div className="mt-4 prose dark:prose-invert max-w-none overflow-auto">
                     <ReactMarkdown>{completion}</ReactMarkdown> {/* Use ReactMarkdown here */}
