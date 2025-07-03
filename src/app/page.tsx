@@ -82,7 +82,7 @@ export default function LandingPage() {
   const [isMobileNavOpen,setMobileNavOpen] = useState(false);
   const { data: ensName, error, status } = useEnsName({ address });
   const { open } = useAppKit();
-   
+   console.log(isMobileNavOpen, "isMobileNavOpen");
     const {
       data: balanceData,
       error: balanceError,
@@ -273,13 +273,21 @@ export default function LandingPage() {
               >
                 {
   isMobileNavOpen ? (
-    <div onClick={() => setMobileNavOpen(false)}>
-      <Icon icon="maki:cross" width="15" height="15" />
-    </div>
+    <button
+      onClick={() => setMobileNavOpen(false)}
+      aria-label="Close navigation menu"
+      className="p-2 hover:bg-gray-100 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      <Icon icon="maki:cross" width="24" height="24" />
+    </button>
   ) : (
-    <div onClick={() => setMobileNavOpen(true)}>
+    <button
+      onClick={() => setMobileNavOpen(true)}
+      aria-label="Open navigation menu"
+      className="p-2 hover:bg-gray-100 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
       <Icon icon="fluent:navigation-16-filled" width="24" height="24" />
-    </div>
+    </button>
   )
 }
 
@@ -293,9 +301,9 @@ export default function LandingPage() {
       {
         isMobileNavOpen?
         <>
-          <div className="z-50 fixed h-[calc(100%-_64px)] w-full">
+          <div className="z-50 mt-16 bg-white   dark:bg-black fixed h-[calc(100%-_64px)] w-full">
             <div>
-              <div className="px-4 mt-16 dark:bg-black bg-white flex flex-col h-[calc(100%-_64px)] justify-between">
+              <div className="px-4 mt-16 flex flex-col h-[calc(100%-_64px)] justify-between">
                         <div className="pb-28">
                           
                           <div>
