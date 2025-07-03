@@ -587,7 +587,7 @@ export default function Project() {
         <div className="flex">
           <Sidebar />
           <div
-            className={` ${isShrunk ? "ml-[4rem] w-[calc(100%_-_4rem)]" : "ml-[16rem] w-[calc(100%_-_16rem)]"}`}
+            className={` ${isShrunk ? "md:ml-[4rem] md:w-[calc(100%_-_4rem)]" : "md:ml-[16rem] md:w-[calc(100%_-_16rem)]"}`}
           >
             <Topbar />
             <div

@@ -4,7 +4,11 @@ import { Box, Lock, Search, Settings, Sparkles } from "lucide-react";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 import { Icon } from "@iconify/react";
 import { useState ,useEffect} from "react";
-
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Star, GitFork, Users } from "lucide-react"
+import Link from "next/link"
+import Image from "next/image"
 interface IssueCardProps {
   image: string;
   Project: string;
@@ -146,7 +150,7 @@ export default function IssueCard({
   };
 
   return (
-    <div className="relative h-full rounded-xl border p-2 md:rounded-xl md:p-3">
+    <div className="relative h-full rounded-xl border md:rounded-xl  cursor-pointer transition-all duration-300">
       <GlowingEffect
         spread={40}
         glow={true}
@@ -154,25 +158,25 @@ export default function IssueCard({
         proximity={64}
         inactiveZone={0.01}
       />
-      <div className="flex justify-between ">
-        <div className="flex">
-        <div className="mr-4">
-          <img src={image} className="rounded h-[48px]" width={48} height={48} alt="avatar" />
-        </div>
-        <div>
-          <h3>
-            {Project}
-          </h3>
-          <div className="mt-1 flex items-center justify-between ">
-            <span className="text-xs bg-gray-200 dark:bg-neutral-900 dark:border-neutral-600 px-2 py-1 rounded-full mr-2">
-              {Tag}
-            </span>
-            
+        <CardHeader className="p-0">
+          <div className="relative h-48 w-full overflow-hidden rounded-t-lg">
+            <Image
+              src={image || "/placeholder.svg"}
+              alt={Project}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+            <div className="absolute top-3 right-3">
+              <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm">
+                {Tag}
+              </Badge>
+            </div>
           </div>
-        </div>
-        
-      </div>
-      <div className="flex">
+        </CardHeader>
+        <CardContent className="p-4">
+          <div className="flex justify-between items-start mb-2">
+            <h3 className="font-semibold text-lg mb-2 line-clamp-1">{Project}</h3>
+            <div className="flex">
               
               <div className="flex px-1 text-gray-400 cursor-pointer" onClick={() => handleLikeClick()}>
                 {liked ? (
@@ -191,33 +195,29 @@ export default function IssueCard({
                 <p className="text-[12px] text-neutral-400 ml-1">{likes}</p>
                 
               </div>
+          </div>
+          </div>
+          
+          <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{shortDescription}</p>
+
+          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+            <div className="flex items-center gap-1">
+              <Star className="h-4 w-4" />
+              <span>{Stars}</span>
             </div>
-      </div>
-      
-      <div className="pt-2">
-        <div>
-          <h3 className="text-[13px] text-gray-400">
-            {shortDescription}
-          </h3>
-        </div>
-      </div>
-      <div className='flex justify-between'>
-        <div className="flex items-center text-gray-400 py-1">
-          <div className="flex text-gray-400 px-1">
-                <svg xmlns="http://www.w3.org/2000/svg" className="my-auto" width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="m12 17.275l-4.15 2.5q-.275.175-.575.15t-.525-.2t-.35-.437t-.05-.588l1.1-4.725L3.775 10.8q-.25-.225-.312-.513t.037-.562t.3-.45t.55-.225l4.85-.425l1.875-4.45q.125-.3.388-.45t.537-.15t.537.15t.388.45l1.875 4.45l4.85.425q.35.05.55.225t.3.45t.038.563t-.313.512l-3.675 3.175l1.1 4.725q.075.325-.05.588t-.35.437t-.525.2t-.575-.15z"/></svg>
-                <p className="text-[12px]">{Stars}</p>
-              </div>
-              <div className="flex px-1 text-gray-400">
-                <svg xmlns="http://www.w3.org/2000/svg" className="my-auto"  width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M22 5a3 3 0 1 0-4 2.816V11H6V7.816a3 3 0 1 0-2 0V11a2 2 0 0 0 2 2h5v4.184a3 3 0 1 0 2 0V13h5a2 2 0 0 0 2-2V7.816A2.99 2.99 0 0 0 22 5"/></svg>                        
-                <p className="text-[12px]">{Fork}</p>
-              </div>
-              <div className="flex px-1 text-gray-400">
-                <svg xmlns="http://www.w3.org/2000/svg" className="my-auto" width="16" height="16" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20.75a1 1 0 0 0 1-1v-1.246c.004-2.806-3.974-5.004-8-5.004s-8 2.198-8 5.004v1.246a1 1 0 0 0 1 1zM15.604 6.854a3.604 3.604 0 1 1-7.208 0a3.604 3.604 0 0 1 7.208 0"/></svg>                       
-                <p className="text-[12px]">{Contributors}</p>
-              </div>
-        </div>
-        <div>
-          {languages && typeof languages === 'object' && Object.keys(languages).map((language: string) => {
+            <div className="flex items-center gap-1">
+              <GitFork className="h-4 w-4" />
+              <span>{Fork}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Users className="h-4 w-4" />
+              <span>{Contributors}</span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-1">
+            
+            {languages && typeof languages === 'object' && Object.keys(languages).map((language: string) => {
             const iconName = getLanguageIcon(language);
             return (
               <div key={language} className="inline-flex text-[20px] text-white py-1">
@@ -225,8 +225,10 @@ export default function IssueCard({
               </div>
             );
           })}
-        </div>
-      </div>
+            
+          </div>
+        </CardContent>
+      
     </div>
   );
 }

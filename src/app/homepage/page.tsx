@@ -27,8 +27,15 @@ interface ProjectsResponse {
   project: Project[];
 }
 
+interface UserSession {
+  user?: {
+    username?: string;
+    image?: string;
+  };
+}
+
 export default function Home() {
-  const {session} = useSession();
+  const { data: session } = useSession() as { data: UserSession };
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filteredRepos, setFilteredRepos] = useState<Project[]>([]);
   const { isShrunk } = useSidebarContext();
@@ -86,10 +93,10 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (session?.data?.user?.image) {
-      updateImage(session?.data?.user?.image);
+    if (session?.user?.image) {
+      updateImage(session.user.image);
     }
-  }, [session?.data?.user?.image]);
+  }, [session?.user?.image]);
   console.log(repoData);
   return (
     <>
@@ -101,23 +108,23 @@ export default function Home() {
           >
             <Topbar />
 
-            <div className="flex pt-20">
-              <div className="w-1/2 px-4">
-                <div className="pt-3  text-center dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r from-white to-gray-500 text-3xl font-bold">
+            <div className="flex flex-col lg:flex-row pt-10 md:pt-20">
+              <div className="w-full lg:w-1/2 px-4 mb-8 lg:mb-0">
+                <div className="pt-3 text-center dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r from-white to-gray-500 text-2xl md:text-3xl font-bold">
                   Start Contributing
                 </div>
-                <div className="text-center dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r from-white to-gray-500 text-3xl font-bold">
+                <div className="text-center dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r from-white to-gray-500 text-2xl md:text-3xl font-bold">
                   Begin Earning
                 </div>
-                <h4 className="text-center pt-4 dark:text-gray-400 text-[15px]">
+                <h4 className="text-center pt-3 md:pt-4 dark:text-gray-400 text-sm md:text-[15px]">
                   Get recommendations based on your profile and past
                   contributions.
                 </h4>
-                <h4 className="text-center pt-2 dark:text-gray-400 text-[15px]">
-                  Didn’t find what you’re looking for?
+                <h4 className="text-center pt-2 dark:text-gray-400 text-sm md:text-[15px]">
+                  Didn't find what you're looking for?
                 </h4>
-                <div className="flex mt-4 space-x-5">
-                  <div className="w-1/2">
+                <div className="flex flex-col sm:flex-row mt-4 gap-4 sm:gap-5">
+                  <div className="w-full sm:w-1/2">
                     <a href="/Browse">
                       <div className="p-4  rounded-xl border-gray-400 dark:dark:border-custom-dark-gray border-2">
                         <h3 className="text-[14px] flex">
@@ -146,7 +153,7 @@ export default function Home() {
                       </div>
                     </a>
                   </div>
-                  <div className="w-1/2">
+                  <div className="w-full sm:w-1/2">
                     <a href="/GitBot">
                       <div className="p-4 rounded-xl border-gray-400 dark:dark:border-custom-dark-gray border-2">
                         <h3 className="text-[14px] flex">
@@ -180,11 +187,11 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              <div className="w-1/2 rounded-xl px-4 ">
+              <div className="w-full lg:w-1/2 rounded-xl px-4">
                 <img
                   src="/home_back.jpg"
                   alt=""
-                  className="rounded-2xl h-[20em] object-cover w-full "
+                  className="rounded-2xl h-[16em] md:h-[20em] object-cover w-full"
                 />
               </div>
             </div>
@@ -197,7 +204,7 @@ export default function Home() {
                   Discover projects that match the languages you love to code
                   in.
                 </p>
-                <div className=" py-5 grid grid-cols-3 gap-4">
+                <div className="py-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {isLoading ? (
                     <>
                       {repoData.map((repo: any) => {
@@ -212,7 +219,7 @@ export default function Home() {
                               <Issue
                                 image={repo.image_url || "back_2.jpg"}
                                 Project={repo.projectName}
-                                activeUser={session?.data?.user?.username}
+                                activeUser={session?.user?.username || undefined}
                                 Fork={repo.forks ? repo.forks : 0}
                                 Stars={repo.stars ? repo.stars : 0}
                                 Contributors={

@@ -721,8 +721,8 @@ const UserProfilePage: NextPage = () => {
     switch (activeTab) {
       case "Overview":
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-            <div className="lg:col-span-2 bg-white dark:bg-neutral-800 p-6 rounded-lg shadow">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mt-4 sm:mt-6">
+            <div className="lg:col-span-2 bg-white dark:bg-neutral-800 p-4 sm:p-6 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-4 text-neutral-900 dark:text-white">
                 GitHub Contributions (Last Year)
               </h2>
@@ -742,7 +742,7 @@ const UserProfilePage: NextPage = () => {
                     <Component />
                   </div>
 
-                  <div className="grid grid-cols-4 gap-4 mt-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-3 sm:mt-4">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-neutral-900 dark:text-white">{ rewardData.filter((pr) => pr.status === "completed").length}</div>
                       <div className="text-sm text-neutral-500 dark:text-neutral-400">Pull Requests</div>
@@ -765,7 +765,7 @@ const UserProfilePage: NextPage = () => {
                 </div>
               )}
             </div>
-            <div className="lg:col-span-1 bg-white dark:bg-neutral-800 p-6 rounded-lg shadow">
+            <div className="lg:col-span-1 bg-white dark:bg-neutral-800 p-4 sm:p-6 rounded-lg shadow">
               <h2 className="text-xl font-semibold mb-4 text-neutral-900 dark:text-white">
                 Recent Pull Requests
               </h2>
@@ -789,7 +789,7 @@ const UserProfilePage: NextPage = () => {
         );
       case "Pull Requests":
         return (
-          <div className="mt-6 bg-white dark:bg-neutral-800 p-6 rounded-lg shadow">
+          <div className="mt-4 sm:mt-6 bg-white dark:bg-neutral-800 p-4 sm:p-6 rounded-lg shadow">
             <h2 className="text-xl font-semibold mb-4 text-neutral-900 dark:text-white">
               Completed Pull Requests
             </h2>
@@ -877,7 +877,7 @@ const UserProfilePage: NextPage = () => {
             <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-6">
               Badges and milestones you've unlocked
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {achievementsData.map((ach) => (
                 <div
                   key={ach.id}
@@ -911,17 +911,17 @@ const UserProfilePage: NextPage = () => {
     <div>
       <Sidebar />
       <div
-        className={` ${isShrunk ? "ml-[4rem] w-[calc(100%_-_4rem)]" : "ml-[16rem] w-[calc(100%_-_16rem)]"}`}
+        className={` ${isShrunk ? "md:ml-[4rem] md:w-[calc(100%_-_4rem)]" : "md:ml-[16rem] md:w-[calc(100%_-_16rem)]"}`}
       >
         <Topbar />
         {users.length > 0 ? <>
-        <div className="mt-20 z-10 min-h-screen  p-4 sm:p-6 lg:p-8">
+        <div className="mt-16 md:mt-20 z-10 min-h-screen p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
             {/* User Info Header */}
             <div className="bg-white dark:bg-neutral-800 shadow rounded-lg p-6 mb-6">
-              <div className="flex flex-col sm:flex-row items-center">
+              <div className="flex flex-col md:flex-row items-center">
                 <img
-                    className="w-24 h-24 sm:w-32 sm:h-32 rounded-full mr-0 sm:mr-6 mb-4 sm:mb-0 border-4 border-neutral-200 dark:border-neutral-700"
+                    className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full mr-0 md:mr-6 mb-4 md:mb-0 border-4 border-neutral-200 dark:border-neutral-700"
                     src={(currentUser?.image_url as string) || users[0]?.image_url}
                     alt={(currentUser?.fullName as string) || users[0]?.id}
                   />
@@ -990,7 +990,7 @@ const UserProfilePage: NextPage = () => {
                 <h3 className="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-2">
                   Skills
                 </h3>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1 sm:gap-2">
                    {users[0].skills?.languages?.map((lang: {name: string, proficiency: string, yearsOfExperience: number}) => (
                         <span
                           key={lang.name}
@@ -1005,7 +1005,7 @@ const UserProfilePage: NextPage = () => {
             </div>
 
             {/* Stats Bar */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
               {[
                 {
                   icon: <Image src="/pharos_small.png"width={40} height={40} className="w-6 h-6 " alt="Earnings" />,
@@ -1036,7 +1036,7 @@ const UserProfilePage: NextPage = () => {
                   key={stat.label}
                   className="bg-white dark:bg-neutral-800 shadow rounded-lg p-4 flex items-start space-x-3"
                 >
-                  <div className="flex-shrink-0 p-2 bg-neutral-100 dark:bg-neutral-700 rounded-full">
+                  <div className="flex-shrink-0 p-1 sm:p-2 bg-neutral-100 dark:bg-neutral-700 rounded-full">
                     {stat.icon}
                   </div>
                   <div>
@@ -1058,7 +1058,7 @@ const UserProfilePage: NextPage = () => {
             <div className="mb-6">
               <div className="border-b border-neutral-200 dark:border-neutral-700">
                 <nav
-                  className="-mb-px flex space-x-4 sm:space-x-8"
+                  className="-mb-px flex flex-wrap gap-x-2 sm:gap-x-4 md:space-x-8"
                   aria-label="Tabs"
                 >
                   {(
@@ -1072,7 +1072,7 @@ const UserProfilePage: NextPage = () => {
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
-                      className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm
+                      className={`whitespace-nowrap py-2 sm:py-3 px-1 border-b-2 font-medium text-xs sm:text-sm
                     ${
                       activeTab === tab
                         ? "border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-300"
