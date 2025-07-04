@@ -7,6 +7,7 @@ import {
   integer,
   unique,
   doublePrecision ,
+  boolean
 } from "drizzle-orm/pg-core";
 import { sql, relations } from "drizzle-orm";
 import { Tag } from "lucide-react";
@@ -33,6 +34,7 @@ export const users = pgTable("users", {
   Linkedin: varchar("Linkedin", { length: 256 }),
   rating: integer("rating").default(5),
   skills: json("skills"),
+  formFilled:boolean("formFilled").default(false),
 });
 
 

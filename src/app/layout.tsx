@@ -6,12 +6,13 @@ import { ThemeProvider } from "next-themes";
 import Kbar from "../assets/components/kbar";
 import ContextProvider from "../context";
 import { headers } from 'next/headers'; // Import headers for server-side cookie access
-
+import { ShowSignupProvider } from "@/context/showSignupContext"; // Import ShowSignupProvider
 import { SearchProvider } from "@/assets/components/SearchContext"; // Import SearchProvider
+import { SignupProvider } from "@/context/SignupContext";
 import "./globals.css";
 // import ChatPage from "../assets/components/chatPage"; // Assuming ChatPage is not globally needed here
 import KbarBlurWrapper from "@/assets/components/KbarBlurWrapper"; // Import the new wrapper
-
+import MultiStepSignup from "@/assets/components/MultiStepSignup"; // Import MultiStepSignup component
 // Removed direct font constant declarations as GeistSans and GeistMono handle this
 
 export const metadata: Metadata = {
@@ -36,6 +37,7 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+
           <SidebarProvider>
               <SessionProvider>
                 <SearchProvider>
@@ -44,6 +46,11 @@ export default async function RootLayout({
                     <ContextProvider cookies={cookies}>
                     <KbarBlurWrapper> {/* Wrap children with the new component */}
                       {children}
+                     <ShowSignupProvider>
+                      <SignupProvider >
+                        <MultiStepSignup/>
+                      </SignupProvider>
+                      </ShowSignupProvider>
                     </KbarBlurWrapper>
                     </ContextProvider>
                     
@@ -51,6 +58,7 @@ export default async function RootLayout({
                 </SearchProvider>
               </SessionProvider>
           </SidebarProvider>
+          
         </ThemeProvider>
       </body>
     </html>
