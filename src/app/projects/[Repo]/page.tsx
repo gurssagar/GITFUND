@@ -169,7 +169,7 @@ export default function Project() {
     
     // Set project data directly from repoData
     setProjectData({
-      projectOwner: repoData.projectOwner,
+      projectOwner: session?.user?.username,
       project_repository: repoData.project_repository,
     });
     
@@ -192,7 +192,7 @@ export default function Project() {
         // Common request headers
         const headers = { "X-GitHub-Api-Version": "2022-11-28" };
         const baseParams = {
-          owner: repoData.projectOwner,
+          owner: session?.user?.username,
           repo: repoData.project_repository,
           headers
         };
@@ -205,18 +205,18 @@ export default function Project() {
         ] = await Promise.all([
           // 1. Fetch collaborators
           octokit.request(
-            `GET /repos/${repoData.projectOwner}/${repoData.project_repository}/collaborators`,
+            `GET /repos/${session?.user?.username}/${repoData.project_repository}/collaborators`,
             {
-              owner: repoData.projectOwner,
+              owner: session?.user?.username,
               repo: repoData.project_repository,
             }
           ),
           
           // 2. Fetch languages
           octokit.request(
-            `/repos/${repoData.projectOwner}/${repoData.project_repository}/languages`,
+            `/repos/${session?.user?.username}/${repoData.project_repository}/languages`,
             {
-              owner: repoData.projectOwner,
+              owner: session?.user?.username,
               repo: repoData.project_repository,
             }
             
@@ -226,9 +226,9 @@ export default function Project() {
           
           // 4. Fetch commits (limited to 10)
           octokit.request(
-            `/repos/${repoData.projectOwner}/${repoData.project_repository}/commits`,
+            `/repos/${session?.user?.username}/${repoData.project_repository}/commits`,
             {
-              owner: repoData.projectOwner,
+              owner: session?.user?.username,
               repo: repoData.project_repository,
             }
           )
