@@ -20,17 +20,17 @@ const users: User[] = [];
 
 // Find a user by their username
 const findUserByUsername = (username: string): User | undefined => {
-  return users.find(user => user.username === username);
+  return users.find((user) => user.username === username);
 };
 
 // Find a user by their socket ID
 const findUserBySocketId = (socketId: string): User | undefined => {
-  return users.find(user => user.socketId === socketId);
+  return users.find((user) => user.socketId === socketId);
 };
 
 // Remove a user when they disconnect
 const removeUser = (socketId: string): void => {
-  const index = users.findIndex(user => user.socketId === socketId);
+  const index = users.findIndex((user) => user.socketId === socketId);
   if (index !== -1) {
     users.splice(index, 1);
   }
@@ -42,12 +42,12 @@ app.prepare().then(() => {
   const io = new Server(httpServer, {
     cors: {
       origin: "*",
-      methods: ["GET", "POST"]
+      methods: ["GET", "POST"],
     },
     connectionStateRecovery: {
       // Enable socket state recovery
       maxDisconnectionDuration: 2 * 60 * 1000, // 2 minutes
-    }
+    },
   });
 
   io.use((socket, next) => {
@@ -69,35 +69,35 @@ app.prepare().then(() => {
 
   io.on("connection", (socket) => {
     const username = socket.data.username;
-    
+
     // Create a new user
     const newUser = {
       userId: socket.id, // Using socket.id as userId for simplicity
       username,
-      socketId: socket.id
+      socketId: socket.id,
     };
-    
+
     // Add to users array
     users.push(newUser);
-    
+
     // Send authentication confirmation
     socket.emit("authenticated", { username });
-    
+
     // Broadcast to all clients that user list has changed
     io.emit("usersUpdated");
-    
+
     console.log(`User ${username} connected. Total users: ${users.length}`);
-    
+
     // Handle getUsers request
     socket.on("getUsers", (callback) => {
       try {
         // Map users to a simplified format with online status
-        const usersList = users.map(user => ({
+        const usersList = users.map((user) => ({
           username: user.username,
           isOnline: true,
-          id: user.userId
+          id: user.userId,
         }));
-        
+
         // Send the list via callback
         callback({ users: usersList });
       } catch (error) {
@@ -105,54 +105,55 @@ app.prepare().then(() => {
         callback({ error: "Failed to get users" });
       }
     });
-    
+
     // Handle private messages
     socket.on("privateMessage", async (data, callback) => {
       try {
         const { to, text } = data;
         const from = socket.data.username;
-        
+
         // Find recipient
         const recipient = findUserByUsername(to);
-        
+
         if (!recipient) {
           return callback({ error: "Recipient not available" });
         }
-        
+
         // Create message with timestamp
         const timestamp = new Date().toISOString();
-        const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        
+        const messageId = `msg_${Date.now()}_${Math.random()
+          .toString(36)
+          .substr(2, 9)}`;
+
         const message = {
           from,
           to,
           text,
           timestamp,
-          id: messageId
+          id: messageId,
         };
-        
+
         // Send to recipient
         io.to(recipient.socketId).emit("privateMessage", message);
-        
+
         // Acknowledge successful delivery
         callback({ messageId });
-        
+
         // Notify sender that message was delivered
         socket.emit("messageDelivered", { to, timestamp });
-        
       } catch (error) {
         console.error("Error sending private message:", error);
         callback({ error: "Failed to send message" });
       }
     });
-    
+
     // Handle disconnection
     socket.on("disconnect", () => {
       const user = findUserBySocketId(socket.id);
       if (user) {
         console.log(`User ${user.username} disconnected`);
         removeUser(socket.id);
-        
+
         // Broadcast to all clients that user list has changed
         io.emit("usersUpdated");
       }

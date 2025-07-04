@@ -69,7 +69,7 @@ export default function Home() {
       const filtered = repoData.filter(
         (repo: any) =>
           repo.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          repo.shortdes.toLowerCase().includes(searchTerm.toLowerCase()),
+          repo.shortdes.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredRepos(filtered);
     }
@@ -104,7 +104,11 @@ export default function Home() {
         <div className="flex">
           <Sidebar />
           <div
-            className={` ${isShrunk ? "md:ml-[4rem] md:w-[calc(100%_-_4rem)]" : "md:ml-[16rem] md:w-[calc(100%_-_16rem)]"}`}
+            className={` ${
+              isShrunk
+                ? "md:ml-[4rem] md:w-[calc(100%_-_4rem)]"
+                : "md:ml-[16rem] md:w-[calc(100%_-_16rem)]"
+            }`}
           >
             <Topbar />
 
@@ -153,7 +157,7 @@ export default function Home() {
                       </div>
                     </a>
                   </CardSpotlight>
-                  <CardSpotlight  className="w-full sm:w-1/2">
+                  <CardSpotlight className="w-full sm:w-1/2">
                     <a href="/GitBot">
                       <div className="">
                         <h3 className="text-[14px] flex">
@@ -184,7 +188,7 @@ export default function Home() {
                         </p>
                       </div>
                     </a>
-                  </CardSpotlight >
+                  </CardSpotlight>
                 </div>
               </div>
               <div className="w-full lg:w-1/2 rounded-xl px-4">
@@ -209,17 +213,19 @@ export default function Home() {
                     <>
                       {repoData.map((repo: any) => {
                         if (!repo.image_url?.trim()) return null;
-                        
+
                         return (
                           <div
                             key={repo.projectName}
                             className="hover:scale-[1.02] transition-transform duration-200"
                           >
-                            <Link href={`/projects/${repo.projectName}`}>
+                            <Link href={`/projects/${repo.project_repository}`}>
                               <Issue
                                 image={repo.image_url || "back_2.jpg"}
                                 Project={repo.projectName}
-                                activeUser={session?.user?.username || undefined}
+                                activeUser={
+                                  session?.user?.username || undefined
+                                }
                                 Fork={repo.forks ? repo.forks : 0}
                                 Stars={repo.stars ? repo.stars : 0}
                                 Contributors={
