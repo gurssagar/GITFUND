@@ -196,7 +196,7 @@ const contractAbi = [
 ] as const;
 
 const contractAddress =
-  "0xf213a3ac05EA11Ec4C6fEcAf2614893A84ccb8dD" as `0x${string}`;
+  "0x74e0b7b7b6a27aa1111b26d2b811c5c3e97e2c57" as `0x${string}`;
 
 interface CustomUser {
   name?: string | null;

@@ -7,10 +7,10 @@ import { useSidebarContext } from "@/assets/components/SidebarContext";
 import { useSearchParams } from "next/navigation";
 import { Octokit } from "octokit";
 import { useCompletion } from "@ai-sdk/react";
-import ReactMarkdown from 'react-markdown'; 
+import ReactMarkdown from "react-markdown";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
-import {useParams} from "next/navigation";
+import { useParams } from "next/navigation";
 
 type MergeStatus = {
   mergeable: boolean | null;
@@ -192,7 +192,7 @@ const contractAbi = [
   },
 ] as const; // Example: [{ "inputs": [], "name": "getBalance", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "string", "name": "username", "type": "string" } ], "name": "deposit", "outputs": [], "stateMutability": "payable", "type": "function" }] as const;
 const contractAddress =
-  "0xf213a3ac05EA11Ec4C6fEcAf2614893A84ccb8dD" as `0x${string}`;
+  "0x74e0b7b7b6a27aa1111b26d2b811c5c3e97e2c57" as `0x${string}`;
 
 export default function PullRequestDetails() {
   const {
@@ -202,10 +202,10 @@ export default function PullRequestDetails() {
   } = useCompletion({
     api: "/api/completion",
   });
-  
-  const params= useParams();
+
+  const params = useParams();
   console.log("Params:", params);
-  const [ai,setAi] = useState<boolean>(false);
+  const [ai, setAi] = useState<boolean>(false);
   const { data: session } = useSession();
   const [repoData, setRepoData] = useState<any>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
@@ -220,16 +220,15 @@ export default function PullRequestDetails() {
       new Octokit({
         auth: (session as any)?.accessToken,
       }),
-    [session],
+    [session]
   );
   const { isShrunk } = useSidebarContext();
   const searchParams = useSearchParams();
-const [RewardAmount,setRewardAmount] = useState<string>(); 
+  const [RewardAmount, setRewardAmount] = useState<string>();
   const issueNumber = params.id as string | undefined;
   const pullRequestId = searchParams.get("pullRequestID");
   const project = searchParams?.get("project");
   const owner = searchParams?.get("owner");
-
 
   const [transactionState, setTransactionState] = useState<
     "idle" | "loading" | "success" | "error"
@@ -253,24 +252,27 @@ const [RewardAmount,setRewardAmount] = useState<string>();
       hash: transactionHash,
     });
 
-
   useEffect(() => {
-   const getIssueData= async () => {
-    await fetch(`/api/getissueForPR?project_repository=${project}&issueNumber=${issueNumber}`, {
-      method: "GET",
-    }).then((response) => {
-      if (!response.ok) {
-        throw new Error("Failed to fetch issue data");
-      }
-      return response.json();
-    }
-  ).then((data) => {
-    console.log("Fetched Issue Data:", data);
-    setRewardAmount(data.projects[0].rewardAmount);
-  })
-  }
-  getIssueData();
-  })
+    const getIssueData = async () => {
+      await fetch(
+        `/api/getissueForPR?project_repository=${project}&issueNumber=${issueNumber}`,
+        {
+          method: "GET",
+        }
+      )
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to fetch issue data");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log("Fetched Issue Data:", data);
+          setRewardAmount(data.projects[0].rewardAmount);
+        });
+    };
+    getIssueData();
+  });
 
   useEffect(() => {
     // Don't run if there's no session
@@ -301,7 +303,7 @@ const [RewardAmount,setRewardAmount] = useState<string>();
         if (!Array.isArray(usersArray)) {
           console.warn(
             "/api/signup did not return a valid users array. Data:",
-            fetchedData,
+            fetchedData
           );
           setWalletAddress(null);
           setError("Invalid data format from server.");
@@ -309,7 +311,7 @@ const [RewardAmount,setRewardAmount] = useState<string>();
         }
 
         const currentUser = usersArray.find(
-          (user: any) => user.id == (session?.user as any)?.username,
+          (user: any) => user.id == (session?.user as any)?.username
         );
 
         if (currentUser && currentUser.metaMask) {
@@ -317,7 +319,7 @@ const [RewardAmount,setRewardAmount] = useState<string>();
           setError(null); // Clear any previous error
         } else {
           console.warn(
-            "Logged-in user's wallet address not found in /api/signup response, user ID mismatch, or walletAddress is missing.",
+            "Logged-in user's wallet address not found in /api/signup response, user ID mismatch, or walletAddress is missing."
           );
           setWalletAddress(null); // Explicitly set to null if not found or no walletAddress
           // Optionally set an error message if this is an unexpected state
@@ -340,47 +342,48 @@ const [RewardAmount,setRewardAmount] = useState<string>();
     }
   }, [walletAddress]);
 
+  useEffect(() => {
+    const checkMergeStatus = async () => {
+      try {
+        const { data: pr } = await octokit.request(
+          "GET /repos/{owner}/{repo}/pulls/{pull_number}",
+          {
+            owner: owner as string,
+            repo: project as string,
+            pull_number: parseInt(pullRequestId as string),
+            headers: {
+              "X-GitHub-Api-Version": "2022-11-28",
+            },
+          }
+        );
+
+        setMergeStatus({
+          mergeable: pr.mergeable,
+          state: pr.mergeable_state,
+          has_conflicts: pr.mergeable === false,
+          is_clean: pr.mergeable_state === "clean",
+        });
+
+        console.log("Merge Status:", {
+          mergeable: pr.mergeable,
+          state: pr.mergeable_state,
+          has_conflicts: pr.mergeable === false,
+          is_clean: pr.mergeable_state === "clean",
+        });
+      } catch (err) {
+        console.error("Error checking PR merge status:", err);
+        setError(err instanceof Error ? err.message : "Unknown error occurred");
+      }
+    };
+
+    checkMergeStatus();
+  }, [owner, project, pullRequestId]); // Add all dependencies here
 
   useEffect(() => {
-  const checkMergeStatus = async () => {
-    try {
-      const { data: pr } = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
-        owner: owner as string,
-        repo: project as string,
-        pull_number: parseInt(pullRequestId as string),
-        headers: {
-          'X-GitHub-Api-Version': '2022-11-28'
-        }
-      });
-
-      setMergeStatus({
-        mergeable: pr.mergeable,
-        state: pr.mergeable_state,
-        has_conflicts: pr.mergeable === false,
-        is_clean: pr.mergeable_state === 'clean'
-      });
-
-      console.log("Merge Status:", {
-        mergeable: pr.mergeable,
-        state: pr.mergeable_state,
-        has_conflicts: pr.mergeable === false,
-        is_clean: pr.mergeable_state === 'clean'
-      });
-    } catch (err) {
-      console.error("Error checking PR merge status:", err);
-      setError(err instanceof Error ? err.message : "Unknown error occurred");
-    }
-  };
-
-  checkMergeStatus();
-}, [owner, project, pullRequestId]); // Add all dependencies here
-
-
-  useEffect(() => {
-    if(contractStatus=== true) {
+    if (contractStatus === true) {
       handlePRMerge();
     }
-  },[contractStatus])
+  }, [contractStatus]);
 
   const handlePRMerge = React.useCallback(async () => {
     if (!owner || !project || !pullRequestId) return;
@@ -391,54 +394,52 @@ const [RewardAmount,setRewardAmount] = useState<string>();
         owner: owner as string,
         repo: project as string,
         pull_number: parseInt(pullRequestId as string),
-      },
+      }
     );
-    try{
+    try {
       const reward = async () => {
-            await fetch("/api/rewards", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                projectName: project,
-                Contributor_id: session?.user?.name,
-                issue: repoData?.html_url,
-                rewardAmount: RewardAmount,
-                date: new Date().toISOString(),
-                projectDescription: repoData?.body,
-                projectOwner: owner,
-                project_repository: repoData?.head?.repo?.name,
-                transactionHash: transactionHash,
-              }),
-            }).then(() => {
-              const closeIssue = async () => {
-                await octokit.request(
-                  "PATCH /repos/{owner}/{repo}/issues/{issue_number}",
-                  {
-                    owner: owner as string,
-                    repo: project as string,
-                    issue_number: parseInt(pullRequestId as string),
-                    state: "closed",
-                  },
-                );
+        await fetch("/api/rewards", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            projectName: project,
+            Contributor_id: session?.user?.name,
+            issue: repoData?.html_url,
+            rewardAmount: RewardAmount,
+            date: new Date().toISOString(),
+            projectDescription: repoData?.body,
+            projectOwner: owner,
+            project_repository: repoData?.head?.repo?.name,
+            transactionHash: transactionHash,
+          }),
+        }).then(() => {
+          const closeIssue = async () => {
+            await octokit.request(
+              "PATCH /repos/{owner}/{repo}/issues/{issue_number}",
+              {
+                owner: owner as string,
+                repo: project as string,
+                issue_number: parseInt(pullRequestId as string),
+                state: "closed",
               }
-              closeIssue();
-            });
-          }
+            );
+          };
+          closeIssue();
+        });
+      };
       reward();
-       
     } catch (err) {
       console.error("Error merging PR:", err);
     }
-    
   }, [octokit, owner, project, pullRequestId]);
 
   const handleWithdraw = React.useCallback(async () => {
     if (!walletAddress || !session?.user?.name) return;
 
     const withdrawAmount = RewardAmount ? parseEther(RewardAmount) : undefined;
-    const customGasPrice = parseEther('0.000003'); // 300,000,000,000 Gwei
+    const customGasPrice = parseEther("0.000003"); // 300,000,000,000 Gwei
 
     try {
       setTransactionState("loading");
@@ -465,8 +466,14 @@ const [RewardAmount,setRewardAmount] = useState<string>();
       setError(err.message || "Failed to withdraw");
       setTransactionState("error");
     }
-  }, [walletAddress, RewardAmount, writeContractAsync, session?.user?.name, contractAddress, contractAbi]); // Added contractAddress and contractAbi to dependency array
-
+  }, [
+    walletAddress,
+    RewardAmount,
+    writeContractAsync,
+    session?.user?.name,
+    contractAddress,
+    contractAbi,
+  ]); // Added contractAddress and contractAbi to dependency array
 
   useEffect(() => {
     const fetchPRDetails = async () => {
@@ -480,7 +487,7 @@ const [RewardAmount,setRewardAmount] = useState<string>();
             owner: owner as string,
             repo: project as string,
             pull_number: parseInt(pullRequestId as string),
-          },
+          }
         );
 
         const response = await request;
@@ -592,275 +599,287 @@ const [RewardAmount,setRewardAmount] = useState<string>();
           </div>
         ) : (
           <div className="px-2 sm:px-4 py-4 mt-16 sm:mt-24 w-full mx-auto min-h-screen">
-                    <div className="w-full max-w-7xl mx-auto mt-2 sm:mt-4 md:mt-8">
-                      <div className="mb-2 sm:mb-4 px-0">
-              <a
-                href="/PullRequests"
-                className="text-sm text-neutral-500 dark:text-neutral-400 hover:underline"
-              >
-                &larr; Back to Pull Requests
-              </a>
-            </div>
+            <div className="w-full max-w-7xl mx-auto mt-2 sm:mt-4 md:mt-8">
+              <div className="mb-2 sm:mb-4 px-0">
+                <a
+                  href="/PullRequests"
+                  className="text-sm text-neutral-500 dark:text-neutral-400 hover:underline"
+                >
+                  &larr; Back to Pull Requests
+                </a>
+              </div>
 
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4 mb-2 px-0">
-              <div>
-                <h1 className="text-xl md:text-2xl font-bold text-neutral-900 dark:text-white">
-                  {repoData?.title}
-                </h1>
-                <div className="text-xs md:text-sm text-neutral-500 dark:text-neutral-400 mt-1">
-                  #{repoData?.number} opened by {repoData?.user?.login} on{" "}
-                  {new Date(repoData?.created_at).toLocaleDateString()}{" "}
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4 mb-2 px-0">
+                <div>
+                  <h1 className="text-xl md:text-2xl font-bold text-neutral-900 dark:text-white">
+                    {repoData?.title}
+                  </h1>
+                  <div className="text-xs md:text-sm text-neutral-500 dark:text-neutral-400 mt-1">
+                    #{repoData?.number} opened by {repoData?.user?.login} on{" "}
+                    {new Date(repoData?.created_at).toLocaleDateString()}{" "}
+                  </div>
+                </div>
+                <a
+                  href={repoData?.html_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-950 dark:hover:bg-custom-dark-neutral w-full md:w-auto text-center"
+                >
+                  View on GitHub
+                </a>
+              </div>
+              <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 mt-4 sm:mt-6">
+                {/* Left: PR Details */}
+                <div className="w-full lg:flex-1">
+                  <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-4 md:p-5 mb-6">
+                    <h2 className="font-semibold text-lg mb-2 flex items-center gap-2 dark:text-white">
+                      <svg
+                        width="20"
+                        height="20"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        viewBox="0 0 24 24"
+                        className="text-neutral-400 dark:text-neutral-300"
+                      >
+                        <path d="M16 17v1a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h6a3 3 0 013 3v1" />
+                        <path d="M9 12h12l-3-3m0 6l3-3" />
+                      </svg>
+                      Pull Request Details
+                    </h2>
+                    <div className="text-neutral-700 dark:text-neutral-300 mb-3">
+                      {repoData?.body || "No description provided"}
+                    </div>
+                    <div className="md:flex grid grid-cols-2 items-center gap-6 mb-2">
+                      <div className="flex items-center gap-1">
+                        <span className="font-medium dark:text-white">
+                          Status:
+                        </span>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                            repoData?.state === "open"
+                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                              : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
+                          }`}
+                        >
+                          {repoData?.state === "open" ? "Open" : "Closed"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="font-medium dark:text-white">
+                          Merged:
+                        </span>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                            repoData?.merged
+                              ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
+                              : "bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300"
+                          }`}
+                        >
+                          {repoData?.merged ? "Merged" : "Not Merged"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="font-medium dark:text-white">
+                          Project:
+                        </span>
+                        <span className="text-neutral-800 dark:text-neutral-200">
+                          {repoData?.head?.repo?.name}
+                        </span>
+                      </div>
+                    </div>
+                    <hr className="my-4 border-neutral-200 dark:border-neutral-700" />
+                    <div>
+                      <div className="font-medium mb-2 dark:text-white">
+                        Associated Issue
+                      </div>
+                      <div className="bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-800 rounded-lg p-4">
+                        <div className="font-semibold text-neutral-900 dark:text-white mb-1">
+                          {repoData?.title}
+                        </div>
+                        <div className="text-sm text-neutral-600 dark:text-neutral-300 mb-2">
+                          {repoData?.body || "No description provided"}
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <span className="bg-blue-200 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-0.5 rounded-full text-xs">
+                            Changes: {repoData?.changed_files} files
+                          </span>
+                          <span className="bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-0.5 rounded-full text-xs">
+                            +{repoData?.additions} additions
+                          </span>
+                          <span className="bg-red-200 text-red-800 dark:bg-red-900 dark:text-red-200 px-2 py-0.5 rounded-full text-xs">
+                            -{repoData?.deletions} deletions
+                          </span>
+                          <span className="bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200 px-2 py-0.5 rounded-full text-xs">
+                            Commits: {repoData?.commits}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {/* Right: Review Actions */}
+                <div className="w-full lg:w-80 flex-shrink-0 mt-4 lg:mt-0">
+                  <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-4 md:p-5 mb-4">
+                    <div className="font-semibold mb-3 dark:text-white">
+                      Review Actions
+                    </div>
+                    <div className="flex flex-col gap-2 mb-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleWithdraw().then(() => setContractStatus(true));
+                        }}
+                        disabled={
+                          !walletAddress ||
+                          transactionState === "loading" ||
+                          mergeStatus?.mergeable === false ||
+                          mergeStatus?.mergeable === null
+                        }
+                        className="w-full bg-black text-white py-2 rounded-lg flex items-center justify-center gap-2 font-medium dark:bg-white dark:text-black disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <svg
+                          width="18"
+                          height="18"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M5 13l4 4L19 7" />
+                        </svg>
+                        Approve
+                      </button>
+                      <a
+                        href={`${repoData?.html_url}#submit-review`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full border border-neutral-300 text-neutral-700 py-2 rounded-lg flex items-center justify-center gap-2 font-medium dark:border-neutral-600 dark:text-neutral-300"
+                      >
+                        <svg
+                          width="18"
+                          height="18"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M17 10.5V6a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2v-4.5" />
+                          <path d="M15 12l2-2-2-2" />
+                        </svg>
+                        Request Changes
+                      </a>
+                      <Link
+                        href="/PullRequests"
+                        className="w-full bg-red-500 text-white py-2 rounded-lg flex items-center justify-center gap-2 font-medium hover:bg-red-600"
+                      >
+                        <svg
+                          width="18"
+                          height="18"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Back to List
+                      </Link>
+                    </div>
+                    <div className="bg-neutral-100 dark:bg-neutral-800 rounded-lg p-3 text-sm">
+                      <div className="font-medium dark:text-white">
+                        PR Stats
+                      </div>
+                      <div className="text-neutral-500 dark:text-neutral-400">
+                        Commits: {repoData?.commits}
+                      </div>
+                      <div className="text-neutral-500 dark:text-neutral-400">
+                        Comments: {repoData?.comments}
+                      </div>
+                      <div className="text-neutral-500 dark:text-neutral-400">
+                        Created:{" "}
+                        {new Date(repoData?.created_at).toLocaleDateString()}
+                      </div>
+                      <div className="text-neutral-500 dark:text-neutral-400">
+                        Last Updated:{" "}
+                        {new Date(repoData?.updated_at).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <a
-                href={repoData?.html_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-950 dark:hover:bg-custom-dark-neutral w-full md:w-auto text-center"
-              >
-                View on GitHub
-              </a>
             </div>
-            <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 mt-4 sm:mt-6">
-              {/* Left: PR Details */}
-              <div className="w-full lg:flex-1">
-                <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-4 md:p-5 mb-6">
-                  <h2 className="font-semibold text-lg mb-2 flex items-center gap-2 dark:text-white">
-                    <svg
-                      width="20"
-                      height="20"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      viewBox="0 0 24 24"
-                      className="text-neutral-400 dark:text-neutral-300"
-                    >
-                      <path d="M16 17v1a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h6a3 3 0 013 3v1" />
-                      <path d="M9 12h12l-3-3m0 6l3-3" />
-                    </svg>
-                    Pull Request Details
-                  </h2>
-                  <div className="text-neutral-700 dark:text-neutral-300 mb-3">
-                    {repoData?.body || "No description provided"}
-                  </div>
-                  <div className="md:flex grid grid-cols-2 items-center gap-6 mb-2">
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium dark:text-white">
-                        Status:
-                      </span>
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                          repoData?.state === "open"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                            : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
-                        }`}
-                      >
-                        {repoData?.state === "open" ? "Open" : "Closed"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium dark:text-white">
-                        Merged:
-                      </span>
-                      <span
-                        className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                          repoData?.merged
-                            ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
-                            : "bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300"
-                        }`}
-                      >
-                        {repoData?.merged ? "Merged" : "Not Merged"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium dark:text-white">
-                        Project:
-                      </span>
-                      <span className="text-neutral-800 dark:text-neutral-200">
-                        {repoData?.head?.repo?.name}
-                      </span>
-                    </div>
-                  </div>
-                  <hr className="my-4 border-neutral-200 dark:border-neutral-700" />
-                  <div>
-                    <div className="font-medium mb-2 dark:text-white">
-                      Associated Issue
-                    </div>
-                    <div className="bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-800 rounded-lg p-4">
-                      <div className="font-semibold text-neutral-900 dark:text-white mb-1">
-                        {repoData?.title}
-                      </div>
-                      <div className="text-sm text-neutral-600 dark:text-neutral-300 mb-2">
-                        {repoData?.body || "No description provided"}
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <span className="bg-blue-200 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-0.5 rounded-full text-xs">
-                          Changes: {repoData?.changed_files} files
-                        </span>
-                        <span className="bg-green-200 text-green-800 dark:bg-green-900 dark:text-green-200 px-2 py-0.5 rounded-full text-xs">
-                          +{repoData?.additions} additions
-                        </span>
-                        <span className="bg-red-200 text-red-800 dark:bg-red-900 dark:text-red-200 px-2 py-0.5 rounded-full text-xs">
-                          -{repoData?.deletions} deletions
-                        </span>
-                        <span className="bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200 px-2 py-0.5 rounded-full text-xs">
-                          Commits: {repoData?.commits}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {/* Right: Review Actions */}
-              <div className="w-full lg:w-80 flex-shrink-0 mt-4 lg:mt-0">
-                <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl p-4 md:p-5 mb-4">
-                  <div className="font-semibold mb-3 dark:text-white">
-                    Review Actions
-                  </div>
-                  <div className="flex flex-col gap-2 mb-4">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        handleWithdraw().then(() => setContractStatus(true));
-                      }}
-                      disabled={
-                        !walletAddress ||
-                        transactionState === "loading" ||
-                        (mergeStatus?.mergeable === false || mergeStatus?.mergeable === null)
-                      }
-                      className="w-full bg-black text-white py-2 rounded-lg flex items-center justify-center gap-2 font-medium dark:bg-white dark:text-black disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <svg
-                        width="18"
-                        height="18"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M5 13l4 4L19 7" />
-                      </svg>
-                      Approve
-                    </button>
-                    <a
-                      href={`${repoData?.html_url}#submit-review`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full border border-neutral-300 text-neutral-700 py-2 rounded-lg flex items-center justify-center gap-2 font-medium dark:border-neutral-600 dark:text-neutral-300"
-                    >
-                      <svg
-                        width="18"
-                        height="18"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M17 10.5V6a2 2 0 00-2-2H7a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2v-4.5" />
-                        <path d="M15 12l2-2-2-2" />
-                      </svg>
-                      Request Changes
-                    </a>
-                    <Link
-                      href="/PullRequests"
-                      className="w-full bg-red-500 text-white py-2 rounded-lg flex items-center justify-center gap-2 font-medium hover:bg-red-600"
-                    >
-                      <svg
-                        width="18"
-                        height="18"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                      Back to List
-                    </Link>
-                  </div>
-                  <div className="bg-neutral-100 dark:bg-neutral-800 rounded-lg p-3 text-sm">
-                    <div className="font-medium dark:text-white">PR Stats</div>
-                    <div className="text-neutral-500 dark:text-neutral-400">
-                      Commits: {repoData?.commits}
-                    </div>
-                    <div className="text-neutral-500 dark:text-neutral-400">
-                      Comments: {repoData?.comments}
-                    </div>
-                    <div className="text-neutral-500 dark:text-neutral-400">
-                      Created:{" "}
-                      {new Date(repoData?.created_at).toLocaleDateString()}
-                    </div>
-                    <div className="text-neutral-500 dark:text-neutral-400">
-                      Last Updated:{" "}
-                      {new Date(repoData?.updated_at).toLocaleDateString()}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* Tabs for Files Changed and Comments */}
-          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl mb-4 sm:mb-6">
-            <div className="flex flex-col sm:flex-row border-b border-neutral-200 dark:border-neutral-700">
-              <button onClick={() => {
-                setAi(false)
-              }} className="flex-1 py-2 sm:py-3 text-center font-medium text-neutral-900 dark:text-white bg-neutral-100 dark:bg-neutral-900 rounded-tl-xl sm:rounded-tl-xl focus:outline-none">
-                Files Changed
-              </button>
-              <button
-                onClick={() => {
-                  setAi(true)
-                  if (
-                    !isCompletionLoading &&
-                    owner &&
-                    project &&
-                    pullRequestId &&
-                    !hasRunCompletion
-                  ) {
-                    setHasRunCompletion(true);
-                    const prompt = `Analyze the changes made in a pull request https://github.com/${owner}/${project}/pull/${pullRequestId}. Focus on a technical review: explain the purpose of the changes, evaluate the code quality, identify any potential issues or improvements, and assess if the modifications align with best coding practices. Assume the reader is familiar with programming concepts.`;
+            {/* Tabs for Files Changed and Comments */}
+            <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl mb-4 sm:mb-6">
+              <div className="flex flex-col sm:flex-row border-b border-neutral-200 dark:border-neutral-700">
+                <button
+                  onClick={() => {
+                    setAi(false);
+                  }}
+                  className="flex-1 py-2 sm:py-3 text-center font-medium text-neutral-900 dark:text-white bg-neutral-100 dark:bg-neutral-900 rounded-tl-xl sm:rounded-tl-xl focus:outline-none"
+                >
+                  Files Changed
+                </button>
+                <button
+                  onClick={() => {
+                    setAi(true);
+                    if (
+                      !isCompletionLoading &&
+                      owner &&
+                      project &&
+                      pullRequestId &&
+                      !hasRunCompletion
+                    ) {
+                      setHasRunCompletion(true);
+                      const prompt = `Analyze the changes made in a pull request https://github.com/${owner}/${project}/pull/${pullRequestId}. Focus on a technical review: explain the purpose of the changes, evaluate the code quality, identify any potential issues or improvements, and assess if the modifications align with best coding practices. Assume the reader is familiar with programming concepts.`;
 
-                    // Use setTimeout to prevent React state update cycles
-                    setTimeout(() => {
-                      complete(prompt);
-                    }, 0);
+                      // Use setTimeout to prevent React state update cycles
+                      setTimeout(() => {
+                        complete(prompt);
+                      }, 0);
+                    }
+                  }}
+                  disabled={
+                    isCompletionLoading ||
+                    !owner ||
+                    !project ||
+                    !pullRequestId ||
+                    hasRunCompletion
                   }
-                }}
-                disabled={
-                  isCompletionLoading ||
-                  !owner ||
-                  !project ||
-                  !pullRequestId ||
-                  hasRunCompletion
-                }
-                className="flex-1 py-2 sm:py-3 text-center font-medium text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white focus:outline-none"
-              >
-                {isCompletionLoading
-                  ? "Analyzing..."
-                  : hasRunCompletion
+                  className="flex-1 py-2 sm:py-3 text-center font-medium text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white focus:outline-none"
+                >
+                  {isCompletionLoading
+                    ? "Analyzing..."
+                    : hasRunCompletion
                     ? "Analysis Complete"
                     : "Analyze PR"}
-              </button>
-            </div>
-            {
-              ai ? 
-              <>
-              <div className="min-h-80 p-4 sm:p-6 md:p-8 lg:p-10">
-                {completion && (
-                  <div className="mt-4 prose dark:prose-invert max-w-none overflow-auto">
-                    <ReactMarkdown>{completion}</ReactMarkdown> {/* Use ReactMarkdown here */}
-                  </div>
-                  )}
+                </button>
               </div>
-              </>
-              :
-              <>
-                   <div className="p-6">
+              {ai ? (
+                <>
+                  <div className="min-h-80 p-4 sm:p-6 md:p-8 lg:p-10">
+                    {completion && (
+                      <div className="mt-4 prose dark:prose-invert max-w-none overflow-auto">
+                        <ReactMarkdown>{completion}</ReactMarkdown>{" "}
+                        {/* Use ReactMarkdown here */}
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="p-6">
                     <div className="text-xl font-bold mb-1 dark:text-white">
                       Files Changed
                     </div>
                     <div className="text-neutral-500 dark:text-neutral-400 text-sm mb-6">
-                      {`${repoData?.changed_files} ${repoData?.changed_files === 1 ? "file" : "files"} changed with ${repoData?.additions} addition${repoData?.additions === 1 ? "" : "s"} and ${repoData?.deletions} deletion${repoData?.deletions === 1 ? "" : "s"}`}
+                      {`${repoData?.changed_files} ${
+                        repoData?.changed_files === 1 ? "file" : "files"
+                      } changed with ${repoData?.additions} addition${
+                        repoData?.additions === 1 ? "" : "s"
+                      } and ${repoData?.deletions} deletion${
+                        repoData?.deletions === 1 ? "" : "s"
+                      }`}
                     </div>
                     {/* File Cards */}
                     <div className="space-y-6">
@@ -910,13 +929,10 @@ const [RewardAmount,setRewardAmount] = useState<string>();
                       )}
                     </div>
                   </div>
-              </>
-
-            }
-           
+                </>
+              )}
+            </div>
           </div>
-          
-        </div>
         )}
       </div>
     </div>
