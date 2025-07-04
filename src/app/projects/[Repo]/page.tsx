@@ -13,7 +13,7 @@ import { useSidebarContext } from "@/assets/components/SidebarContext";
 import { Suspense } from "react";
 
 import { Icon } from "@iconify/react";
-import { project } from "@/db/schema";
+import { project } from "@/drizzle/schema";
 // Remove all react-icons imports
 
 interface ProjectData {
@@ -23,8 +23,9 @@ interface ProjectData {
 }
 
 export default function Project() {
+  const { data: session } = useSession();
   const params = useParams();
-  const session = useSession();
+  
   const Repo = params?.Repo as string;
   const { isShrunk } = useSidebarContext();
   // State declarations
@@ -52,8 +53,11 @@ export default function Project() {
     const [liked, setLiked] = useState(false);
   // Create octokit instance with timeout
   const octokit = new Octokit({
-    auth: (session?.data as any)?.accessToken,
+    auth: (session as any)?.accessToken,
   });
+
+
+  console.log("Session Data:", session);
 
   // Fetch repo data
   useEffect(() => {
@@ -80,6 +84,8 @@ export default function Project() {
             signal,
           })
         ]);
+
+        console.log(repoResponse, "repoResponse");
 
         if (!repoResponse.ok) {
           throw new Error(`HTTP error! status: ${repoResponse.status}`);
@@ -275,7 +281,7 @@ export default function Project() {
       // Check if the user has already liked the project
       const fetchLikes = async () => {
         try {
-          const response = await fetch(`/api/likes?userId=${session?.data?.user?.username}&projectName=${Repo}`,
+          const response = await fetch(`/api/likes?userId=${session?.user?.username}&projectName=${Repo}`,
             {
               method: 'GET',
               headers: {
@@ -287,7 +293,7 @@ export default function Project() {
           console.log("Fetched likes data:", data);
           if (data && data.projects) {
             setLikes(data.projects.length);
-            setLiked(data.projects.some((like: any) => like.userId === session?.data?.user?.username));
+            setLiked(data.projects.some((like: any) => like.userId === session?.user?.username));
           }
         } catch (error) {
           console.error("Error fetching likes:", error);
@@ -313,7 +319,7 @@ export default function Project() {
   return (
     <div className="flex">
       <Sidebar />
-      <div className={`{` ${isShrunk ? "md:ml-[4rem] md:w-[calc(100%_-_4rem)]" : "md:ml-[16rem] md:w-[calc(100%_-_16rem)]"}`}>
+      <div className={` ${isShrunk ? "md:ml-[4rem] md:w-[calc(100%_-_4rem)]" : "md:ml-[16rem] md:w-[calc(100%_-_16rem)]"}`}>
         <Topbar />
         <div className="px-4 py-8 flex pt-20">
           {/* Left sidebar skeleton */}
@@ -454,14 +460,14 @@ export default function Project() {
         alert(`Request Details:
 
             • Repository: ${repo}
-            • Username: ${(session?.data?.user as any)?.username}
+            • Username: ${(session?.user as any)?.username}
             • Issue Number: ${isIssueNumber}
             • Status: pending
             • Skills: ${JSON.stringify(skills)}
             • Project Owner: ${repoData?.projectOwner}
-            • Email: ${(session?.data?.user as any)?.email}
+            • Email: ${(session?.user as any)?.email}
             • Request Date: ${new Date().toISOString()}
-            • Avatar: ${(session?.data?.user as any)?.image}
+            • Avatar: ${(session?.user as any)?.image}
             • Project Name: ${repoData.projectName}
             • Comment: ${comment}
             • Test: TESTING`);
@@ -472,14 +478,14 @@ export default function Project() {
           },
           body: JSON.stringify({
             projectName: repo,
-            Contributor_id: (session?.data?.user as any)?.username as string,
+            Contributor_id: (session?.user as any)?.username as string,
             issue: isIssueNumber,
             status: "pending",
             skills: skills,
             projectOwner: repoData?.projectOwner,
-            contributor_email: (session?.data?.user as any)?.email as string, // Assuming email is available in the session data
+            contributor_email: (session?.user as any)?.email as string, // Assuming email is available in the session data
             requestDate: new Date().toISOString(),
-            image_url: (session?.data?.user as any)?.image as string,
+            image_url: (session?.user as any)?.image as string,
             name: repoData.projectName,
             description: comment,
           }),
@@ -516,7 +522,7 @@ export default function Project() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            userId: session?.data?.user?.username,
+            userId: session?.user?.username,
             projectName: Repo,
           }),
         });
@@ -542,7 +548,7 @@ export default function Project() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            userId: session?.data?.user?.username,
+            userId: session?.user?.username,
             projectName: Repo,
           }),
         });

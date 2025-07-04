@@ -41,7 +41,7 @@ export default function Topbar() {
   const { isShrunk, setIsShrunk } = useSidebarContext();
   const [isMobileNavOpen, setMobileNavOpen] = useState(false);
 
-
+  console.log("Session Data:", session);
   const { address, isConnected } = useAccount(); // Added isConnected here
     
     
@@ -156,7 +156,7 @@ export default function Topbar() {
                 </button>
               </div>
 
-              {session?.data?.user?.image ? (
+              {session?.user?.image ? (
                 <>
                   <Image
                     onClick={() => {

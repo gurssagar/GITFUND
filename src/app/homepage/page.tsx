@@ -9,7 +9,7 @@ import Link from "next/link";
 import Sidebar from "@/assets/components/sidebar";
 import Topbar from "@/assets/components/topbar";
 import Issue from "@/assets/components/issue";
-
+import { CardSpotlight } from "@/components/ui/card-spotlight";
 interface Project {
   projectName: string;
   shortdes: string;
@@ -124,9 +124,9 @@ export default function Home() {
                   Didn't find what you're looking for?
                 </h4>
                 <div className="flex flex-col sm:flex-row mt-4 gap-4 sm:gap-5">
-                  <div className="w-full sm:w-1/2">
+                  <CardSpotlight className="w-full sm:w-1/2">
                     <a href="/Browse">
-                      <div className="p-4  rounded-xl border-gray-400 dark:dark:border-custom-dark-gray border-2">
+                      <div className="">
                         <h3 className="text-[14px] flex">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -152,10 +152,10 @@ export default function Home() {
                         </p>
                       </div>
                     </a>
-                  </div>
-                  <div className="w-full sm:w-1/2">
+                  </CardSpotlight>
+                  <CardSpotlight  className="w-full sm:w-1/2">
                     <a href="/GitBot">
-                      <div className="p-4 rounded-xl border-gray-400 dark:dark:border-custom-dark-gray border-2">
+                      <div className="">
                         <h3 className="text-[14px] flex">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -184,7 +184,7 @@ export default function Home() {
                         </p>
                       </div>
                     </a>
-                  </div>
+                  </CardSpotlight >
                 </div>
               </div>
               <div className="w-full lg:w-1/2 rounded-xl px-4">
