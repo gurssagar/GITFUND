@@ -167,9 +167,51 @@ export default function MultiStepSignup() {
     }
   }
 
-  const handleSubmit = () => {
-    console.log("Form submitted:", formData)
-    // Handle form submission here
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [submitSuccess, setSubmitSuccess] = useState(false)
+
+  const handleSubmit = async () => {
+    if (!session?.user) {
+      setSubmitError("User session not available")
+      return
+    }
+
+    setIsSubmitting(true)
+    setSubmitError(null)
+
+    try {
+      const postData = {
+        ...formData,
+        username: session.user.username,
+        name: session.user.name,
+        email: session.user.email
+      }
+
+      const res = await fetch('/api/publicProfile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(postData),
+      })
+
+      if (res.ok) {
+        setSubmitSuccess(true)
+        // Close signup after successful submission
+        setTimeout(() => {
+          setShowSignup(false)
+          setContextShowSignup(false)
+        }, 2000)
+      } else {
+        const errorData = await res.json()
+        setSubmitError(errorData.message || 'Failed to submit form')
+      }
+    } catch (error) {
+      setSubmitError('Network error: ' + (error as Error).message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -445,16 +487,36 @@ export default function MultiStepSignup() {
                     </Button>
 
                     {currentStep < totalSteps ? (
-                      <Button onClick={nextStep} disabled={!canProceed()} className="bg-blue-600 hover:bg-blue-700">
-                        Next
-                        <ChevronRight className="h-4 w-4 ml-2" />
-                      </Button>
-                    ) : (
-                      <Button onClick={handleSubmit} disabled={!canProceed()} className="bg-green-600 hover:bg-green-700">
-                        Complete Signup
-                      </Button>
-                    )}
+                        <Button onClick={nextStep} disabled={!canProceed()} className="bg-blue-600 hover:bg-blue-700">
+                          Next
+                          <ChevronRight className="h-4 w-4 ml-2" />
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={handleSubmit}
+                          disabled={!canProceed() || isSubmitting}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          {isSubmitting ? "Submitting..." : "Complete Signup"}
+                        </Button>
+                      )}
                   </div>
+                  
+                  {submitError && (
+                    <Alert variant="destructive" className="mt-4">
+                      <AlertDescription className="text-red-300">
+                        {submitError}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  
+                  {submitSuccess && (
+                    <Alert variant="success" className="mt-4">
+                      <AlertDescription className="text-green-300">
+                        Profile submitted successfully! Closing in 2 seconds...
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </CardContent>
               </Card>
           </div>

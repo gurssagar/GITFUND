@@ -30,7 +30,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async redirect({ url, baseUrl }) {
       // Redirect to /signup after successful authentication
       if (url === baseUrl+"/Login") {
-        return `${baseUrl}/Signup`;
+        return `${baseUrl}/homepage`;
       }
       return url;
     }
