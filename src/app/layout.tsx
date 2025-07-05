@@ -7,6 +7,7 @@ import { ThemeProvider } from "next-themes";
 import Kbar from "../assets/components/kbar";
 import ContextProvider from "../context";
 import { headers } from 'next/headers'; // Import headers for server-side cookie access
+import SignupVisibility from "@/assets/components/SignupVisibility";
 import { ShowSignupProvider } from "@/context/showSignupContext"; // Import ShowSignupProvider
 import { SearchProvider } from "@/assets/components/SearchContext"; // Import SearchProvider
 import { SignupProvider } from "@/context/SignupContext";
@@ -30,6 +31,7 @@ export default async function RootLayout({
   // Get cookies for Reown AppKit - properly await headers()
   const headersList = await headers();
   const cookies = headersList?.get("cookie") || "";
+  const pathname = headersList.get('x-pathname') || '';
   return (
     <html lang="en" className={`dark`} style={{overflow: 'hidden'}}>
       <body className={`bg-background text-foreground overflow-hidden`}>
@@ -46,7 +48,7 @@ export default async function RootLayout({
                 <SearchProvider>
                   <ChatSidebarProvider>
                     <Kbar />
-                    {!['/', '/Login'].includes(headers().get('x-pathname') || '') && <MultiStepSignup/>}
+                    <SignupVisibility />
                     <ContextProvider cookies={cookies}>                    
                     <KbarBlurWrapper> {/* Wrap children with the new component */}
                     
