@@ -13,6 +13,7 @@ import "./globals.css";
 // import ChatPage from "../assets/components/chatPage"; // Assuming ChatPage is not globally needed here
 import KbarBlurWrapper from "@/assets/components/KbarBlurWrapper"; // Import the new wrapper
 import MultiStepSignup from "@/assets/components/MultiStepSignup"; // Import MultiStepSignup component
+import MultiStepBlurWrapper from "@/assets/components/MultiStepBlurWrapper";
 // Removed direct font constant declarations as GeistSans and GeistMono handle this
 
 export const metadata: Metadata = {
@@ -37,27 +38,37 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-
-          <SidebarProvider>
+          
+          
               <SessionProvider>
+                <ShowSignupProvider>
+                    <SignupProvider >
+                    <div className=" fixed top-0 z-50 w-screen z-50 flex items-center justify-center">
+                      <MultiStepSignup/>
+                    </div>
+                            
+                    </SignupProvider>
+                </ShowSignupProvider>
+                <SidebarProvider>
                 <SearchProvider>
                   <ChatSidebarProvider>
                     <Kbar />
+                   
                     <ContextProvider cookies={cookies}>
+                      <MultiStepBlurWrapper>
                     <KbarBlurWrapper> {/* Wrap children with the new component */}
+                      
                       {children}
-                     <ShowSignupProvider>
-                      <SignupProvider >
-                        <MultiStepSignup/>
-                      </SignupProvider>
-                      </ShowSignupProvider>
                     </KbarBlurWrapper>
+                    </MultiStepBlurWrapper>
+                    
                     </ContextProvider>
                     
                   </ChatSidebarProvider>
                 </SearchProvider>
+                </SidebarProvider>
               </SessionProvider>
-          </SidebarProvider>
+          
           
         </ThemeProvider>
       </body>

@@ -25,7 +25,7 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="hidden md:block">
+    <div className="h-screen hidden md:block">
       <div
         className={
           (isShrunk ? "w-[4rem] mx-auto px-1" : "w-[16rem] px-4") + " " +
@@ -304,7 +304,7 @@ export default function Sidebar() {
             {/* End of wrapper for top content */}
             <div
               onClick={() => open()}
-              className="fixed bottom-10 px-4 py-2 dark:bg-custom-dark-gray bg-gray-200 dark:text-white text-black  rounded-lg cursor-pointer text-center mb-4"
+              className=" px-4 py-2 dark:bg-custom-dark-gray bg-gray-200 dark:text-white text-black  rounded-lg cursor-pointer text-center mb-4"
             >
               {isConnected ? (
                 isShrunk ? (

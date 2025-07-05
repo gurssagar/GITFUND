@@ -1,6 +1,6 @@
 "use client"
 
-import { useState,useEffect,createContext , useContext } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -10,7 +10,19 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { ChevronLeft, ChevronRight, Plus, X, MapPin, MessageCircle, Twitter, Linkedin, Wallet } from "lucide-react"
-import {useSession} from "next-auth/react"
+import { useSession } from "next-auth/react"
+
+interface UserSession {
+  user?: {
+    username?: string
+    email?: string
+    name?: string
+    image?: string
+  }
+}
+import { useSignup } from "../../context/SignupContext"
+import { useShowSignup } from "../../context/showSignupContext"
+
 interface FormData {
   metaMask: string
   location: string
@@ -45,18 +57,26 @@ const PROGRAMMING_SKILLS = [
   "MongoDB",
 ]
 
-import { useSignup } from "../../context/SignupContext"
-import { useShowSignup } from "../../context/showSignupContext"
 export default function MultiStepSignup() {
-  const {data: session} = useSession()
-  console.log("Session:SDASDA", session)
-  const [publicProfile, setPublicProfile] = useState<any>()
-  const {showSignup,setShowSignup} = useSignup()
-  const {showShowSignup} = useShowSignup()
-console.log("showSignup:", showSignup)
-  if (!showSignup) return null
+  const { data: session } = useSession() as { data: UserSession | null }
+  const { showSignup, setShowSignup } = useSignup()
+  const { showShowSignup } = useShowSignup()
+  const [publicProfile, setPublicProfile] = useState<{
+    id: string;
+    fullName: string;
+    image_url: string;
+    metaMask: string;
+    email: string;
+    location: string;
+    bio: string;
+    telegram: string;
+    twitter: string;
+    linkedin: string;
+    rating: number;
+    skills: string[];
+    formFilled: boolean;
+  }>()
   const [currentStep, setCurrentStep] = useState(1)
-  const formfilled = createContext(true);
   const [formData, setFormData] = useState<FormData>({
     metaMask: "",
     location: "",
@@ -68,6 +88,58 @@ console.log("showSignup:", showSignup)
     termsAccepted: false,
   })
   const [customSkill, setCustomSkill] = useState("")
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (!session?.user?.username) return;
+      
+      try {
+        const res = await fetch(
+          `/api/publicProfile?username=${session.user.username}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          const userData = data.user[0];
+          setPublicProfile({
+            id: userData.id,
+            fullName: userData.fullName,
+            image_url: userData.image_url,
+            metaMask: userData.metaMask,
+            email: userData.email,
+            location: userData.Location,
+            bio: userData.Bio,
+            telegram: userData.Telegram,
+            twitter: userData.Twitter,
+            linkedin: userData.Linkedin,
+            rating: userData.rating,
+            skills: userData.skills || [],
+            formFilled: userData.formFilled
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    fetchUsers();
+  }, [session]);
+
+  useEffect(() => {
+    if (publicProfile) {
+      setShowSignup(publicProfile.formFilled);
+    }
+  }, [publicProfile]);
+
+  if (!showShowSignup || showSignup) {
+    return null;
+  }
 
   const totalSteps = 4
   const progress = (currentStep / totalSteps) * 100
@@ -123,361 +195,309 @@ console.log("showSignup:", showSignup)
     }
   }
 
-  useEffect(() => {
-      const fetchUsers = async () => {
-        try {
-          const res = await fetch(
-            `/api/publicProfile?username=${session?.user?.username}`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-              },
-            }
-          );
-  
-          if (res.ok) {
-            const data = await res.json();
-            const userData = data.user[0];
-            console.log(userData, "user data");
-  
-            setPublicProfile({
-              id: userData.id,
-              fullName: userData.fullName,
-              image_url: userData.image_url,
-              metaMask: userData.metaMask,
-              email: userData.email,
-              location: userData.Location,
-              bio: userData.Bio,
-              telegram: userData.Telegram,
-              twitter: userData.Twitter,
-              linkedin: userData.Linkedin,
-              rating: userData.rating,
-              skills: userData.skills || [],
-              formFilled: userData.formFilled
-            });
-
-          } else {
-            console.error("Failed to fetch users:", res.statusText);
-          }
-        } catch (error) {
-          console.error("Error fetching users:", error);
-        }
-      };
-  
-      fetchUsers();
-    }, [session]);
-
-  useEffect(() => {
-    if (publicProfile) {
-      setShowSignup(publicProfile.formFilled);
-      console.log("Public Profile:", publicProfile);
-    }
-  }, [publicProfile]);
   const handleSubmit = () => {
     console.log("Form submitted:", formData)
- 
     // Handle form submission here
   }
 
   return (
     <>
-    {
-      showShowSignup && (
+      {
+        showSignup ? 
         <>
-        {
-      showSignup ? (
-        <>
-        
         </>
-      ) : (
+        :
         <>
-        <div className="z-50 bg-blur-xl fixed inset-0 flex items-center justify-center p-4">
-      <Card className=" mx-auto w-full max-w-2xl bg-neutral-800 border-neutral-700">
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-center mb-4">
-            <div className="text-2xl font-bold text-white">GitFund</div>
-          </div>
-          <CardTitle className="text-2xl text-white">Join the Community</CardTitle>
-          <CardDescription className="text-neutral-400">
-            Step {currentStep} of {totalSteps}
-          </CardDescription>
-          <Progress value={progress} className="mt-4" />
-        </CardHeader>
+        <div className="w-screen h-screen backdrop-blur-xl text-white flex items-center justify-center">
+           <div className="fixed inset-0 backdrop-blur-xl bg-black/30">
+             <div className="z-50 fixed inset-0 flex items-center justify-center p-4">
+              <Card className="mx-auto w-full max-w-2xl bg-neutral-800 border-neutral-700">
+                <CardHeader className="text-center">
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="text-2xl font-bold text-white">GitFund</div>
+                  </div>
+                  <CardTitle className="text-2xl text-white">Join the Community</CardTitle>
+                  <CardDescription className="text-neutral-400">
+                    Step {currentStep} of {totalSteps}
+                  </CardDescription>
+                  <Progress value={progress} className="mt-4" />
+                </CardHeader>
 
-        <CardContent className="space-y-6">
-          {/* Step 1: Terms and Conditions */}
-          {currentStep === 1 && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <h3 className="text-xl font-semibold text-white mb-4">Terms and Conditions</h3>
-              </div>
+                <CardContent className="space-y-6">
+                  {/* Step 1: Terms and Conditions */}
+                  {currentStep === 1 && (
+                    <>
+                    
+                    <div className="space-y-6">
+                      <div className="text-center">
+                        <h3 className="text-xl font-semibold text-white mb-4">Terms and Conditions</h3>
+                      </div>
 
-              <div className="bg-neutral-700 rounded-lg p-6 max-h-64 overflow-y-auto">
-                <div className="text-sm text-neutral-300 space-y-4">
-                  <h4 className="font-semibold text-white">GitFund Platform Agreement</h4>
+                      <div className="bg-neutral-700 rounded-lg p-6 max-h-64 overflow-y-auto">
+                        <div className="text-sm text-neutral-300 space-y-4">
+                          <h4 className="font-semibold text-white">GitFund Platform Agreement</h4>
 
-                  <p>
-                    By joining GitFund, you agree to contribute to open-source projects and earn rewards based on your
-                    contributions. This platform connects developers with meaningful projects and provides fair
-                    compensation for quality work.
-                  </p>
+                          <p>
+                            By joining GitFund, you agree to contribute to open-source projects and earn rewards based on your
+                            contributions. This platform connects developers with meaningful projects and provides fair
+                            compensation for quality work.
+                          </p>
 
-                  <h5 className="font-semibold text-white">Key Terms:</h5>
-                  <ul className="list-disc list-inside space-y-2">
-                    <li>You must provide accurate information in your profile</li>
-                    <li>All contributions must be original work or properly attributed</li>
-                    <li>Rewards are distributed based on contribution quality and impact</li>
-                    <li>You retain ownership of your contributions while granting usage rights</li>
-                    <li>Platform fees may apply to certain transactions</li>
-                    <li>You agree to maintain professional conduct in all interactions</li>
-                  </ul>
+                          <h5 className="font-semibold text-white">Key Terms:</h5>
+                          <ul className="list-disc list-inside space-y-2">
+                            <li>You must provide accurate information in your profile</li>
+                            <li>All contributions must be original work or properly attributed</li>
+                            <li>Rewards are distributed based on contribution quality and impact</li>
+                            <li>You retain ownership of your contributions while granting usage rights</li>
+                            <li>Platform fees may apply to certain transactions</li>
+                            <li>You agree to maintain professional conduct in all interactions</li>
+                          </ul>
 
-                  <h5 className="font-semibold text-white">Privacy:</h5>
-                  <p>
-                    Your personal information will be protected according to our privacy policy. We only collect
-                    necessary information to facilitate project matching and payments.
-                  </p>
+                          <h5 className="font-semibold text-white">Privacy:</h5>
+                          <p>
+                            Your personal information will be protected according to our privacy policy. We only collect
+                            necessary information to facilitate project matching and payments.
+                          </p>
 
-                  <h5 className="font-semibold text-white">Wallet Integration:</h5>
-                  <p>
-                    By connecting your MetaMask wallet, you authorize secure transactions for receiving rewards and
-                    participating in the GitFund ecosystem.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="terms"
-                  checked={formData.termsAccepted}
-                  onCheckedChange={(checked) => updateFormData("termsAccepted", checked)}
-                />
-                <Label htmlFor="terms" className="text-sm text-neutral-300">
-                  I have read and agree to the Terms and Conditions
-                </Label>
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Wallet Information */}
-          {currentStep === 2 && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <Wallet className="mx-auto h-12 w-12 text-blue-400 mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">Connect Your Wallet</h3>
-                <p className="text-neutral-400">We need your MetaMask wallet address to process rewards</p>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="metamask" className="text-white">
-                    MetaMask Wallet Address *
-                  </Label>
-                  <Input
-                    id="metamask"
-                    placeholder="0x..."
-                    value={formData.metaMask}
-                    onChange={(e) => updateFormData("metaMask", e.target.value)}
-                    className="bg-neutral-700 border-neutral-600 text-white placeholder-neutral-400"
-                  />
-                  <p className="text-xs text-neutral-400 mt-1">
-                    This address will be used to receive your contribution rewards
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: Personal Information */}
-          {currentStep === 3 && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <MapPin className="mx-auto h-12 w-12 text-green-400 mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">Personal Information</h3>
-                <p className="text-neutral-400">Tell us about yourself and where you're based</p>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="location" className="text-white">
-                    Location *
-                  </Label>
-                  <Input
-                    id="location"
-                    placeholder="e.g., San Francisco, CA"
-                    value={formData.location}
-                    onChange={(e) => updateFormData("location", e.target.value)}
-                    className="bg-neutral-700 border-neutral-600 text-white placeholder-neutral-400"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="bio" className="text-white">
-                    Bio *
-                  </Label>
-                  <Textarea
-                    id="bio"
-                    placeholder="Tell us about your experience, interests, and what motivates you to contribute to open source..."
-                    value={formData.bio}
-                    onChange={(e) => updateFormData("bio", e.target.value)}
-                    className="bg-neutral-700 border-neutral-600 text-white placeholder-neutral-400 min-h-[100px]"
-                  />
-                  <p className="text-xs text-neutral-400 mt-1">
-                    This helps project maintainers understand your background
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Step 4: Skills and Social Links */}
-          {currentStep === 4 && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <h3 className="text-xl font-semibold text-white mb-2">Skills & Social Links</h3>
-                <p className="text-neutral-400">Add your skills and social profiles (optional)</p>
-              </div>
-
-              <div className="space-y-6">
-                {/* Skills Section */}
-                <div>
-                  <Label className="text-white mb-3 block">Skills *</Label>
-                  <div className="space-y-3">
-                    <div className="flex flex-wrap gap-2">
-                      {PROGRAMMING_SKILLS.map((skill) => (
-                        <Badge
-                          key={skill}
-                          variant={formData.skills.includes(skill) ? "default" : "outline"}
-                          className={`cursor-pointer transition-colors ${
-                            formData.skills.includes(skill)
-                              ? "bg-blue-600 hover:bg-blue-700 text-white"
-                              : "bg-neutral-700 hover:bg-neutral-600 text-neutral-300 border-neutral-600"
-                          }`}
-                          onClick={() => (formData.skills.includes(skill) ? removeSkill(skill) : addSkill(skill))}
-                        >
-                          {skill}
-                        </Badge>
-                      ))}
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Add custom skill..."
-                        value={customSkill}
-                        onChange={(e) => setCustomSkill(e.target.value)}
-                        onKeyPress={(e) => e.key === "Enter" && addCustomSkill()}
-                        className="bg-neutral-700 border-neutral-600 text-white placeholder-neutral-400"
-                      />
-                      <Button
-                        type="button"
-                        onClick={addCustomSkill}
-                        size="sm"
-                        className="bg-blue-600 hover:bg-blue-700"
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </div>
-
-                    {formData.skills.length > 0 && (
-                      <div className="space-y-2">
-                        <p className="text-sm text-neutral-400">Selected skills:</p>
-                        <div className="flex flex-wrap gap-2">
-                          {formData.skills.map((skill) => (
-                            <Badge key={skill} className="bg-blue-600 text-white">
-                              {skill}
-                              <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => removeSkill(skill)} />
-                            </Badge>
-                          ))}
+                          <h5 className="font-semibold text-white">Wallet Integration:</h5>
+                          <p>
+                            By connecting your MetaMask wallet, you authorize secure transactions for receiving rewards and
+                            participating in the GitFund ecosystem.
+                          </p>
+                          </div>
                         </div>
                       </div>
+
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="terms"
+                          checked={formData.termsAccepted}
+                          onCheckedChange={(checked) => updateFormData("termsAccepted", checked)}
+                        />
+                        <Label htmlFor="terms" className="text-sm text-neutral-300">
+                          I have read and agree to the Terms and Conditions
+                        </Label>
+                      </div>
+                    </>
+                  
+                  )}
+
+                  {/* Step 2: Wallet Information */}
+                  {currentStep === 2 && (
+                    <div className="space-y-6">
+                      <div className="text-center">
+                        <Wallet className="mx-auto h-12 w-12 text-blue-400 mb-4" />
+                        <h3 className="text-xl font-semibold text-white mb-2">Connect Your Wallet</h3>
+                        <p className="text-neutral-400">We need your MetaMask wallet address to process rewards</p>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="metamask" className="text-white">
+                            MetaMask Wallet Address *
+                          </Label>
+                          <Input
+                            id="metamask"
+                            placeholder="0x..."
+                            value={formData.metaMask}
+                            onChange={(e) => updateFormData("metaMask", e.target.value)}
+                            className="bg-neutral-700 border-neutral-600 text-white placeholder-neutral-400"
+                          />
+                          <p className="text-xs text-neutral-400 mt-1">
+                            This address will be used to receive your contribution rewards
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Step 3: Personal Information */}
+                  {currentStep === 3 && (
+                    <div className="space-y-6">
+                      <div className="text-center">
+                        <MapPin className="mx-auto h-12 w-12 text-green-400 mb-4" />
+                        <h3 className="text-xl font-semibold text-white mb-2">Personal Information</h3>
+                        <p className="text-neutral-400">Tell us about yourself and where you're based</p>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="location" className="text-white">
+                            Location *
+                          </Label>
+                          <Input
+                            id="location"
+                            placeholder="e.g., San Francisco, CA"
+                            value={formData.location}
+                            onChange={(e) => updateFormData("location", e.target.value)}
+                            className="bg-neutral-700 border-neutral-600 text-white placeholder-neutral-400"
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="bio" className="text-white">
+                            Bio *
+                          </Label>
+                          <Textarea
+                            id="bio"
+                            placeholder="Tell us about your experience, interests, and what motivates you to contribute to open source..."
+                            value={formData.bio}
+                            onChange={(e) => updateFormData("bio", e.target.value)}
+                            className="bg-neutral-700 border-neutral-600 text-white placeholder-neutral-400 min-h-[100px]"
+                          />
+                          <p className="text-xs text-neutral-400 mt-1">
+                            This helps project maintainers understand your background
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Step 4: Skills and Social Links */}
+                  {currentStep === 4 && (
+                    <div className="space-y-6">
+                      <div className="text-center">
+                        <h3 className="text-xl font-semibold text-white mb-2">Skills & Social Links</h3>
+                        <p className="text-neutral-400">Add your skills and social profiles (optional)</p>
+                      </div>
+
+                      <div className="space-y-6">
+                        {/* Skills Section */}
+                        <div>
+                          <Label className="text-white mb-3 block">Skills *</Label>
+                          <div className="space-y-3">
+                            <div className="flex flex-wrap gap-2">
+                              {PROGRAMMING_SKILLS.map((skill) => (
+                                <Badge
+                                  key={skill}
+                                  variant={formData.skills.includes(skill) ? "default" : "outline"}
+                                  className={`cursor-pointer transition-colors ${
+                                    formData.skills.includes(skill)
+                                      ? "bg-blue-600 hover:bg-blue-700 text-white"
+                                      : "bg-neutral-700 hover:bg-neutral-600 text-neutral-300 border-neutral-600"
+                                  }`}
+                                  onClick={() => (formData.skills.includes(skill) ? removeSkill(skill) : addSkill(skill))}
+                                >
+                                  {skill}
+                                </Badge>
+                              ))}
+                            </div>
+
+                            <div className="flex gap-2">
+                              <Input
+                                placeholder="Add custom skill..."
+                                value={customSkill}
+                                onChange={(e) => setCustomSkill(e.target.value)}
+                                onKeyPress={(e) => e.key === "Enter" && addCustomSkill()}
+                                className="bg-neutral-700 border-neutral-600 text-white placeholder-neutral-400"
+                              />
+                              <Button
+                                type="button"
+                                onClick={addCustomSkill}
+                                size="sm"
+                                className="bg-blue-600 hover:bg-blue-700"
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </div>
+
+                            {formData.skills.length > 0 && (
+                              <div className="space-y-2">
+                                <p className="text-sm text-neutral-400">Selected skills:</p>
+                                <div className="flex flex-wrap gap-2">
+                                  {formData.skills.map((skill) => (
+                                    <Badge key={skill} className="bg-blue-600 text-white">
+                                      {skill}
+                                      <X className="h-3 w-3 ml-1 cursor-pointer" onClick={() => removeSkill(skill)} />
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Social Links */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div>
+                            <Label htmlFor="telegram" className="text-white flex items-center gap-2">
+                              <MessageCircle className="h-4 w-4" />
+                              Telegram
+                            </Label>
+                            <Input
+                              id="telegram"
+                              placeholder="@username"
+                              value={formData.telegram}
+                              onChange={(e) => updateFormData("telegram", e.target.value)}
+                              className="bg-neutral-700 border-neutral-600 text-white placeholder-neutral-400"
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="twitter" className="text-white flex items-center gap-2">
+                              <Twitter className="h-4 w-4" />
+                              Twitter
+                            </Label>
+                            <Input
+                              id="twitter"
+                              placeholder="@username"
+                              value={formData.twitter}
+                              onChange={(e) => updateFormData("twitter", e.target.value)}
+                              className="bg-neutral-700 border-neutral-600 text-white placeholder-neutral-400"
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="linkedin" className="text-white flex items-center gap-2">
+                              <Linkedin className="h-4 w-4" />
+                              LinkedIn
+                            </Label>
+                            <Input
+                              id="linkedin"
+                              placeholder="profile-url"
+                              value={formData.linkedin}
+                              onChange={(e) => updateFormData("linkedin", e.target.value)}
+                              className="bg-neutral-700 border-neutral-600 text-white placeholder-neutral-400"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Navigation Buttons */}
+                  <div className="flex justify-between pt-6">
+                    <Button
+                      variant="outline"
+                      onClick={prevStep}
+                      disabled={currentStep === 1}
+                      className="border-neutral-600 text-neutral-300 hover:bg-neutral-700 bg-transparent"
+                    >
+                      <ChevronLeft className="h-4 w-4 mr-2" />
+                      Previous
+                    </Button>
+
+                    {currentStep < totalSteps ? (
+                      <Button onClick={nextStep} disabled={!canProceed()} className="bg-blue-600 hover:bg-blue-700">
+                        Next
+                        <ChevronRight className="h-4 w-4 ml-2" />
+                      </Button>
+                    ) : (
+                      <Button onClick={handleSubmit} disabled={!canProceed()} className="bg-green-600 hover:bg-green-700">
+                        Complete Signup
+                      </Button>
                     )}
                   </div>
-                </div>
-
-                {/* Social Links */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="telegram" className="text-white flex items-center gap-2">
-                      <MessageCircle className="h-4 w-4" />
-                      Telegram
-                    </Label>
-                    <Input
-                      id="telegram"
-                      placeholder="@username"
-                      value={formData.telegram}
-                      onChange={(e) => updateFormData("telegram", e.target.value)}
-                      className="bg-neutral-700 border-neutral-600 text-white placeholder-neutral-400"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="twitter" className="text-white flex items-center gap-2">
-                      <Twitter className="h-4 w-4" />
-                      Twitter
-                    </Label>
-                    <Input
-                      id="twitter"
-                      placeholder="@username"
-                      value={formData.twitter}
-                      onChange={(e) => updateFormData("twitter", e.target.value)}
-                      className="bg-neutral-700 border-neutral-600 text-white placeholder-neutral-400"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="linkedin" className="text-white flex items-center gap-2">
-                      <Linkedin className="h-4 w-4" />
-                      LinkedIn
-                    </Label>
-                    <Input
-                      id="linkedin"
-                      placeholder="profile-url"
-                      value={formData.linkedin}
-                      onChange={(e) => updateFormData("linkedin", e.target.value)}
-                      className="bg-neutral-700 border-neutral-600 text-white placeholder-neutral-400"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Navigation Buttons */}
-          <div className="flex justify-between pt-6">
-            <Button
-              variant="outline"
-              onClick={prevStep}
-              disabled={currentStep === 1}
-              className="border-neutral-600 text-neutral-300 hover:bg-neutral-700 bg-transparent"
-            >
-              <ChevronLeft className="h-4 w-4 mr-2" />
-              Previous
-            </Button>
-
-            {currentStep < totalSteps ? (
-              <Button onClick={nextStep} disabled={!canProceed()} className="bg-blue-600 hover:bg-blue-700">
-                Next
-                <ChevronRight className="h-4 w-4 ml-2" />
-              </Button>
-            ) : (
-              <Button onClick={handleSubmit} disabled={!canProceed()} className="bg-green-600 hover:bg-green-700">
-                Complete Signup
-              </Button>
-            )}
+                </CardContent>
+              </Card>
           </div>
-        </CardContent>
-      </Card>
         </div>
+        </div>
+         
         </>
-      )
-    }
-        </>
-      )
-    }
-    
+      }
+  
     </>
-    
     
   )
 }
