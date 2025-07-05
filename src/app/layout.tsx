@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import MultiStepSignup from "@/assets/components/MultiStepSignup";
 import { SessionProvider } from "next-auth/react";
 import { SidebarProvider } from "@/assets/components/SidebarContext";
 import { ChatSidebarProvider } from "@/assets/components/chats/chatSiderbarContext";
@@ -12,7 +13,7 @@ import { SignupProvider } from "@/context/SignupContext";
 import "./globals.css";
 // import ChatPage from "../assets/components/chatPage"; // Assuming ChatPage is not globally needed here
 import KbarBlurWrapper from "@/assets/components/KbarBlurWrapper"; // Import the new wrapper
-import MultiStepSignup from "@/assets/components/MultiStepSignup"; // Import MultiStepSignup component
+import MultiStepSignupWrapper from "@/assets/components/MultiStepSignupWrapper"; // Import wrapped version
 import MultiStepBlurWrapper from "@/assets/components/MultiStepBlurWrapper";
 // Removed direct font constant declarations as GeistSans and GeistMono handle this
 
@@ -30,8 +31,8 @@ export default async function RootLayout({
   const headersList = await headers();
   const cookies = headersList?.get("cookie") || "";
   return (
-    <html lang="en" className={`dark`}>
-      <body className={`bg-background text-foreground`}>
+    <html lang="en" className={`dark`} style={{overflow: 'hidden'}}>
+      <body className={`bg-background text-foreground overflow-hidden`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -40,35 +41,26 @@ export default async function RootLayout({
         >
           
           
+              <SidebarProvider>
               <SessionProvider>
-                <ShowSignupProvider>
-                    <SignupProvider >
-                    <div className=" fixed top-0 z-50 w-screen z-50 flex items-center justify-center">
-                      <MultiStepSignup/>
-                    </div>
-                            
-                    </SignupProvider>
-                </ShowSignupProvider>
-                <SidebarProvider>
                 <SearchProvider>
                   <ChatSidebarProvider>
                     <Kbar />
-                   
-                    <ContextProvider cookies={cookies}>
-                      <MultiStepBlurWrapper>
+                    {!['/', '/Login'].includes(headers().get('x-pathname') || '') && <MultiStepSignup/>}
+                    <ContextProvider cookies={cookies}>                    
                     <KbarBlurWrapper> {/* Wrap children with the new component */}
+                    
                       
+                    
                       {children}
+                    
                     </KbarBlurWrapper>
-                    </MultiStepBlurWrapper>
-                    
                     </ContextProvider>
-                    
                   </ChatSidebarProvider>
                 </SearchProvider>
-                </SidebarProvider>
               </SessionProvider>
-          
+          </SidebarProvider>
+
           
         </ThemeProvider>
       </body>

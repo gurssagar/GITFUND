@@ -8,8 +8,8 @@ type SignupContextType = {
   setShowSignup: (show: boolean) => void
 }
 
-const SignupContext = createContext<SignupContextType>({
-  showSignup: true,
+export const SignupContext = createContext<SignupContextType>({
+  showSignup: false,
   setShowSignup: () => {},
 })
 
@@ -26,3 +26,4 @@ export function SignupProvider({ children }: { children: ReactNode }) {
 export function useSignup() {
   return useContext(SignupContext)
 }
+

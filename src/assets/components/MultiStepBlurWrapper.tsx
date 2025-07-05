@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React,{useMemo} from 'react'
 import { useSignup } from '../../context/SignupContext'
 
 interface BlurWrapperProps {
@@ -9,9 +9,9 @@ interface BlurWrapperProps {
 
 const MultiStepBlurWrapper = ({ children }: BlurWrapperProps) => {
   const { showSignup } = useSignup()
-  
+  const blurSignupClass = useMemo(() => showSignup ? '' : 'hidden', [showSignup]);
   return (
-    <div className={showSignup ? 'backdrop-blur-sm ' : ''}>
+    <div className={blurSignupClass}>
       {children}
     </div>
   )

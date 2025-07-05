@@ -16,9 +16,23 @@ export async function GET(request: Request) {
       );
     }
 
-    const user = await db.select().from(users).where(eq(users?.id, username));
-    console.log(user);
-    if (!user) {
+    const user = await db.select({
+      id: users.id,
+      fullName: users.fullName,
+      image_url: users.image_url,
+      metaMask: users.metaMask,
+      email: users.email,
+      Location: users.Location,
+      Bio: users.Bio,
+      Telegram: users.Telegram,
+      Twitter: users.Twitter,
+      Linkedin: users.Linkedin,
+      rating: users.rating,
+      skills: users.skills,
+      formFilled: users.formFilled
+    }).from(users).where(eq(users.id, username));
+    
+    if (!user || user.length === 0) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
@@ -59,6 +73,7 @@ export async function PUT(request: Request) {
         Linkedin: body.linkedin || undefined,
         rating: body.rating || undefined,
         skills: body.skills || undefined,
+        formFilled: body.formFilled !== undefined ? body.formFilled : true,
       })
       .where(eq(users.id, username));
     console.log("updated", updatedUser);
