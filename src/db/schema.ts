@@ -34,7 +34,7 @@ export const users = pgTable("users", {
   Linkedin: varchar("Linkedin", { length: 256 }),
   rating: integer("rating").default(5),
   skills: json("skills"),
-  formFilled:boolean("formFilled").default(false),
+  formFilled: boolean("formFilled").default(false),
   termsAccepted: boolean("termsAccepted").default(false),
 });
 

@@ -34,7 +34,8 @@ interface FormData {
   Twitter: string
   Linkedin: string
   skills: string[]
-  termsAccepted: boolean
+  termsAccepted: boolean,
+  formFilled:boolean
 }
 
 const PROGRAMMING_SKILLS = [
@@ -74,7 +75,9 @@ export default function MultiStepSignup() {
     Twitter: "",
     Linkedin: "",
     skills: [],
-    termsAccepted: false
+    formFilled: true,
+    termsAccepted: false,
+    
   })
   const [customSkill, setCustomSkill] = useState("")
   console.log(showSignup, "showSignup")

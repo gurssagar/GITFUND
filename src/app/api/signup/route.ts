@@ -9,7 +9,7 @@ import { IdCard } from 'lucide-react';
 
 export async function POST(request: Request) {
     try {
-        const { id, email, fullName, metaMask, image_url, Location, Bio, Telegram, Twitter, Linkedin, skills, termsAccepted } = await request.json();
+        const { id, email, fullName, metaMask, image_url, Location, Bio, Telegram, Twitter, Linkedin, skills, termsAccepted,formFilled } = await request.json();
         
         // Insert user into database
         await db.insert(users).values({
@@ -18,6 +18,7 @@ export async function POST(request: Request) {
             fullName,
             image_url,
             metaMask,
+            formFilled: formFilled || true, // Default to false if not provided
             Location: Location,
             Bio: Bio,
             Telegram: Telegram,
