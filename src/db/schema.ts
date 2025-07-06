@@ -242,11 +242,16 @@ export const completedIssues = pgTable("completedIssues", {
 });
 
 export const Rewards = pgTable("rewards", {
+  id: varchar("id", { length: 256 })
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  
   projectName: varchar("projectName", { length: 256 }),
   projectDescription: text("projectDescription"),
   projectOwner: varchar("projectOwner", { length: 256 }),
   project_repository: varchar("project_repository", { length: 256 }),
-  Contributor_id: varchar("Contributor", { length: 256 }),
+  Contributor_id: varchar("Contributor Name", { length: 256 }),
+  Contributor: varchar("Contributor_id", { length: 256 }),
   transactionHash: varchar("transactionHash", { length: 256 }),
   rewardAmount: doublePrecision("rewardAmount"),
   issue: varchar("issue", { length: 256 }),

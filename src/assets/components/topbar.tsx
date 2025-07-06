@@ -293,7 +293,7 @@ export default function Topbar() {
                   <div className="z-50 bg-white   dark:bg-black fixed h-[calc(100%-_64px)] w-full">
                     <div>
                       <div className="px-4 mt-16 flex flex-col h-[calc(100%-_64px)] justify-between">
-                                <div className="pb-28">
+                                <div className="">
                                   
                                   <div>
                                     <div className="pt-4">
@@ -523,7 +523,7 @@ export default function Topbar() {
                                   {/* End of wrapper for top content */}
                                   <div
                                     onClick={() => open()}
-                                    className="fixed bottom-10 px-4 py-2 dark:bg-custom-dark-gray bg-gray-200 dark:text-white text-black  rounded-lg cursor-pointer text-center mb-4"
+                                    className=" px-4 py-2 dark:bg-custom-dark-gray bg-gray-200 dark:text-white text-black  rounded-lg cursor-pointer text-center mb-4"
                                   >
                                     {isConnected ? (
                                       <div
