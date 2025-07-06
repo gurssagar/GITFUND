@@ -14,7 +14,7 @@ export const SignupContext = createContext<SignupContextType>({
 })
 
 export function SignupProvider({ children }: { children: ReactNode }) {
-  const [showSignup, setShowSignup] = useState(true)
+  const [showSignup, setShowSignup] = useState(false)
 
   return (
     <SignupContext.Provider value={{ showSignup, setShowSignup }}>

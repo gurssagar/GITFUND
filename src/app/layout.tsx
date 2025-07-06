@@ -33,8 +33,8 @@ export default async function RootLayout({
   const cookies = headersList?.get("cookie") || "";
   const pathname = headersList.get('x-pathname') || '';
   return (
-    <html lang="en" className={`dark`} style={{overflow: 'hidden'}}>
-      <body className={`bg-background text-foreground overflow-hidden`}>
+    <html lang="en" className={`dark`}>
+      <body className={`bg-background text-foreground`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

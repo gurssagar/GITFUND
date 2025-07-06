@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+
 
 import { ChevronLeft, ChevronRight, Plus, X, MapPin, MessageCircle, Twitter, Linkedin, Wallet } from "lucide-react"
 import { useSession } from "next-auth/react"
@@ -62,7 +62,7 @@ const PROGRAMMING_SKILLS = [
 
 export default function MultiStepSignup() {
   const { data: session } = useSession() as { data: UserSession | null }
-  const [showSignup, setShowSignup] = useState(true)
+  const [showSignup, setSShowSignup] = useState(false)
   const { setShowSignup: setContextShowSignup } = useSignup()
   const [publicProfile, setPublicProfile] = useState()
   const [currentStep, setCurrentStep] = useState(1)
@@ -92,26 +92,22 @@ export default function MultiStepSignup() {
             },
           }
         );
-
-        if (res.ok) {
           const data = await res.json();
           const userData = data.user[0];
           setPublicProfile(userData);
-          setShowSignup(!userData?.formFilled);
-          setContextShowSignup(!userData?.formFilled);
-        }
+          console.log(userData, "userData")
+          setSShowSignup(!userData?.formFilled);
+          setContextShowSignup(userData?.formFilled);
+        
       } catch (error) {
         console.error("Error fetching users:", error);
       }
     };
 
     fetchUsers();
-  }, [session]);
+  });
 
 
-  if (!showSignup) {
-    return null;
-  }
 
   const totalSteps = 4
   const progress = (currentStep / totalSteps) * 100
@@ -200,7 +196,7 @@ export default function MultiStepSignup() {
         setSubmitSuccess(true)
         // Close signup after successful submission
         setTimeout(() => {
-          setShowSignup(false)
+          setSShowSignup(false)
           setContextShowSignup(false)
         }, 2000)
       } else {
@@ -216,23 +212,31 @@ export default function MultiStepSignup() {
 
   return (
     <>
-      {
+    {showSignup && (
         <div className="z-50 fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center pt-[10vh]">
-           <div className="fixed inset-0 backdrop-blur-xl bg-black/30">
-             <div className="z-50 fixed inset-0 flex items-center justify-center p-4">
-              <Card className="mx-auto w-full max-w-2xl bg-neutral-800 border-neutral-700">
-                <CardHeader className="text-center">
-                  <div className="flex items-center justify-center mb-4">
-                    <div className="text-2xl font-bold text-white">GitFund</div>
+        <div className="fixed inset-0 backdrop-blur-xl bg-black/30">
+          <div className="z-50 fixed inset-0 flex items-center justify-center p-4">
+              <div className="mx-auto w-full max-w-2xl ">
+                <div className="text-center">
+                  
+                  <div className="flex justify-between  mb-4">
+                    <div>
+                      <h2 className="text-2xl font-bold text-white">
+                       Personal Info
+                      </h2>
+                      <p className="text-neutral-400 mt-1">
+                       Tell us about yourself
+                      </p>
+                    </div>
+                    <div className="text-neutral-400">
+                      Step {currentStep} of {totalSteps}
+                    </div>
                   </div>
-                  <CardTitle className="text-2xl text-white">Join the Community</CardTitle>
-                  <CardDescription className="text-neutral-400">
-                    Step {currentStep} of {totalSteps}
-                  </CardDescription>
-                  <Progress value={progress} className="mt-4" />
-                </CardHeader>
+                  
+                  <Progress value={progress} className="my-4" />
+                </div>
 
-                <CardContent className="space-y-6">
+                <div className="space-y-6">
                   {/* Step 1: Terms and Conditions */}
                   {currentStep === 1 && (
                     <>
@@ -511,22 +515,22 @@ export default function MultiStepSignup() {
                   )}
                   
                   {submitSuccess && (
-                    <Alert variant="success" className="mt-4">
+                    <Alert variant="default" className="mt-4 bg-green-600/20 border-green-600">
                       <AlertDescription className="text-green-300">
                         Profile submitted successfully! Closing in 2 seconds...
                       </AlertDescription>
                     </Alert>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
           </div>
         </div>
-        </div>
-      }
-    
-      
-  
-    </>
-    
+    </div>
   )
 }
+    
+        </>
+      )
+    }
+      
+      
