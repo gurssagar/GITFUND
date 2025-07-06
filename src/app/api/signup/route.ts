@@ -18,7 +18,7 @@ const transporter = nodemailer.createTransport({
 
 export async function POST(request: Request) {
     try {
-        const { id, email, name, walletAddress,image_url } = await request.json();
+        const { id, email, name, walletAddress,image_url,Location ,Bio,Telegram,Twitter,Linkedin,skills,formFilled} = await request.json();
         
         // Insert user into database
         await db.insert(users).values({
@@ -89,7 +89,7 @@ export async function GET() {
 
 export async function PUT(request: Request) {
     try {
-        const { id, fullName, metaMask, bio, linkedin, twitter, location, telegram } = await request.json();
+        const { id, fullName, metaMask, Bio, Location, Telegram, Twitter, Linkedin, skills } = await request.json();
         
         if (!id) {
             return NextResponse.json({ 
@@ -103,11 +103,12 @@ export async function PUT(request: Request) {
         
         if (fullName !== undefined) updateData.fullName = fullName;
         if (metaMask !== undefined) updateData.metaMask = metaMask;
-        if (bio !== undefined) updateData.Bio = bio;
-        if (linkedin !== undefined) updateData.Linkedin = linkedin;
-        if (twitter !== undefined) updateData.Twitter = twitter;
-        if (location !== undefined) updateData.Location = location;
-        if (telegram !== undefined) updateData.Telegram = telegram;
+        if (Bio !== undefined) updateData.Bio = Bio;
+        if (Location !== undefined) updateData.Location = Location;
+        if (Telegram !== undefined) updateData.Telegram = Telegram;
+        if (Twitter !== undefined) updateData.Twitter = Twitter;
+        if (Linkedin !== undefined) updateData.Linkedin = Linkedin;
+        if (skills !== undefined) updateData.skills = skills;
         console.log('Update data:', updateData);
         console.log(id)
         // If no fields to update, return early

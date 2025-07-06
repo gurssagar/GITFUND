@@ -28,13 +28,13 @@ import { useShowSignup } from "../../context/showSignupContext"
 
 interface FormData {
   metaMask: string
-  location: string
-  bio: string
-  telegram: string
-  twitter: string
-  linkedin: string
+  Location: string
+  Bio: string
+  Telegram: string
+  Twitter: string
+  Linkedin: string
   skills: string[]
-  termsAccepted: boolean
+  formFilled: boolean
 }
 
 const PROGRAMMING_SKILLS = [
@@ -68,13 +68,13 @@ export default function MultiStepSignup() {
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState<FormData>({
     metaMask: "",
-    location: "",
-    bio: "",
-    telegram: "",
-    twitter: "",
-    linkedin: "",
+    Location: "",
+    Bio: "",
+    Telegram: "",
+    Twitter: "",
+    Linkedin: "",
     skills: [],
-    termsAccepted: false,
+    formFilled:true
   })
   const [customSkill, setCustomSkill] = useState("")
   console.log(showSignup, "showSignup")
@@ -92,20 +92,34 @@ export default function MultiStepSignup() {
             },
           }
         );
+        if (res.ok) {
           const data = await res.json();
-          const userData = data.user[0];
+          const userData = data.user?.[0];
           setPublicProfile(userData);
-          console.log(userData, "userData")
-          setSShowSignup(!userData?.formFilled);
-          setContextShowSignup(userData?.formFilled);
-        
+          
+          if (userData) {
+            setSShowSignup(!userData.formFilled);
+            setContextShowSignup(!userData.formFilled);
+          } else {
+            // If no user data, show signup form
+            setSShowSignup(true);
+            setContextShowSignup(true);
+          }
+        } else {
+          // If API error, show signup form
+          setSShowSignup(true);
+          setContextShowSignup(true);
+        }
       } catch (error) {
         console.error("Error fetching users:", error);
+        // If network error, show signup form
+        setSShowSignup(true);
+        setContextShowSignup(true);
       }
     };
 
     fetchUsers();
-  });
+  },[session?.user?.username]);
 
 
 
@@ -151,11 +165,11 @@ export default function MultiStepSignup() {
   const canProceed = () => {
     switch (currentStep) {
       case 1:
-        return formData.termsAccepted
+        return formData.formFilled
       case 2:
         return formData.metaMask.trim() !== ""
       case 3:
-        return formData.location.trim() !== "" && formData.bio.trim() !== ""
+        return formData.Location.trim() !== "" && formData.Bio.trim() !== ""
       case 4:
         return formData.skills.length > 0
       default:
@@ -179,12 +193,13 @@ export default function MultiStepSignup() {
     try {
       const postData = {
         ...formData,
-        username: session.user.username,
-        name: session.user.name,
+        image_url: session.user.image || "",
+        id: session.user.username,
+        fullName: session.user.name || "",
         email: session.user.email
       }
 
-      const res = await fetch('/api/publicProfile', {
+      const res = await fetch('/api/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -284,8 +299,8 @@ export default function MultiStepSignup() {
                       <div className="flex items-center space-x-2">
                         <Checkbox
                           id="terms"
-                          checked={formData.termsAccepted}
-                          onCheckedChange={(checked) => updateFormData("termsAccepted", checked)}
+                          checked={formData.formFilled}
+                          onCheckedChange={(checked) => updateFormData("formFilled", checked)}
                         />
                         <Label htmlFor="terms" className="text-sm text-neutral-300">
                           I have read and agree to the Terms and Conditions
@@ -341,8 +356,8 @@ export default function MultiStepSignup() {
                           <Input
                             id="location"
                             placeholder="e.g., San Francisco, CA"
-                            value={formData.location}
-                            onChange={(e) => updateFormData("location", e.target.value)}
+                            value={formData.Location}
+                            onChange={(e) => updateFormData("Location", e.target.value)}
                             className="bg-neutral-700 border-neutral-600 text-white placeholder-neutral-400"
                           />
                         </div>
@@ -354,8 +369,8 @@ export default function MultiStepSignup() {
                           <Textarea
                             id="bio"
                             placeholder="Tell us about your experience, interests, and what motivates you to contribute to open source..."
-                            value={formData.bio}
-                            onChange={(e) => updateFormData("bio", e.target.value)}
+                            value={formData.Bio}
+                            onChange={(e) => updateFormData("Bio", e.target.value)}
                             className="bg-neutral-700 border-neutral-600 text-white placeholder-neutral-400 min-h-[100px]"
                           />
                           <p className="text-xs text-neutral-400 mt-1">
@@ -440,8 +455,8 @@ export default function MultiStepSignup() {
                             <Input
                               id="telegram"
                               placeholder="@username"
-                              value={formData.telegram}
-                              onChange={(e) => updateFormData("telegram", e.target.value)}
+                              value={formData.Telegram}
+                              onChange={(e) => updateFormData("Telegram", e.target.value)}
                               className="bg-neutral-700 border-neutral-600 text-white placeholder-neutral-400"
                             />
                           </div>
@@ -454,8 +469,8 @@ export default function MultiStepSignup() {
                             <Input
                               id="twitter"
                               placeholder="@username"
-                              value={formData.twitter}
-                              onChange={(e) => updateFormData("twitter", e.target.value)}
+                              value={formData.Twitter}
+                              onChange={(e) => updateFormData("Twitter", e.target.value)}
                               className="bg-neutral-700 border-neutral-600 text-white placeholder-neutral-400"
                             />
                           </div>
@@ -468,8 +483,8 @@ export default function MultiStepSignup() {
                             <Input
                               id="linkedin"
                               placeholder="profile-url"
-                              value={formData.linkedin}
-                              onChange={(e) => updateFormData("linkedin", e.target.value)}
+                              value={formData.Linkedin}
+                              onChange={(e) => updateFormData("Linkedin", e.target.value)}
                               className="bg-neutral-700 border-neutral-600 text-white placeholder-neutral-400"
                             />
                           </div>
