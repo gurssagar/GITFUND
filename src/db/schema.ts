@@ -35,6 +35,7 @@ export const users = pgTable("users", {
   rating: integer("rating").default(5),
   skills: json("skills"),
   formFilled:boolean("formFilled").default(false),
+  termsAccepted: boolean("termsAccepted").default(false),
 });
 
 

@@ -34,7 +34,7 @@ interface FormData {
   Twitter: string
   Linkedin: string
   skills: string[]
-  formFilled: boolean
+  termsAccepted: boolean
 }
 
 const PROGRAMMING_SKILLS = [
@@ -74,7 +74,7 @@ export default function MultiStepSignup() {
     Twitter: "",
     Linkedin: "",
     skills: [],
-    formFilled:true
+    termsAccepted: false
   })
   const [customSkill, setCustomSkill] = useState("")
   console.log(showSignup, "showSignup")
@@ -165,7 +165,7 @@ export default function MultiStepSignup() {
   const canProceed = () => {
     switch (currentStep) {
       case 1:
-        return formData.formFilled
+        return formData.termsAccepted
       case 2:
         return formData.metaMask.trim() !== ""
       case 3:
@@ -193,11 +193,14 @@ export default function MultiStepSignup() {
     try {
       const postData = {
         ...formData,
+        skills: JSON.stringify(formData.skills),
         image_url: session.user.image || "",
         id: session.user.username,
         fullName: session.user.name || "",
         email: session.user.email
       }
+
+      console.log("Submitting data:", postData)
 
       const res = await fetch('/api/signup', {
         method: 'POST',
@@ -299,8 +302,8 @@ export default function MultiStepSignup() {
                       <div className="flex items-center space-x-2">
                         <Checkbox
                           id="terms"
-                          checked={formData.formFilled}
-                          onCheckedChange={(checked) => updateFormData("formFilled", checked)}
+                          checked={formData.termsAccepted}
+                          onCheckedChange={(checked) => updateFormData("termsAccepted", checked)}
                         />
                         <Label htmlFor="terms" className="text-sm text-neutral-300">
                           I have read and agree to the Terms and Conditions
