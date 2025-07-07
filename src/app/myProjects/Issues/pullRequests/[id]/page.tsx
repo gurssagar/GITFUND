@@ -11,7 +11,7 @@ import ReactMarkdown from "react-markdown";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-
+import {TextShimmer} from "@/components/ui/text-shimmer";
 type MergeStatus = {
   mergeable: boolean | null;
   state: string;
@@ -514,7 +514,7 @@ export default function PullRequestDetails() {
       >
         <Topbar />
         {!repoData ? (
-          <div className="z-10 p-4 mt-24 w-full md:w-[90%] lg:w-[80%] mx-auto min-h-screen animate-pulse">
+          <div className=" p-4 mt-24 w-full md:w-[90%] lg:w-[80%] mx-auto min-h-screen animate-pulse">
             {/* Header Skeleton */}
             <div className="max-w-7xl mx-auto mt-8">
               <div className="mb-4">
@@ -736,7 +736,7 @@ export default function PullRequestDetails() {
                           mergeStatus?.mergeable === false ||
                           mergeStatus?.mergeable === null
                         }
-                        className="w-full bg-black text-white py-2 rounded-lg flex items-center justify-center gap-2 font-medium dark:bg-white dark:text-black disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="z-0 w-full bg-black text-white py-2 rounded-lg flex items-center justify-center gap-2 font-medium dark:bg-white dark:text-black disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <svg
                           width="18"
@@ -855,6 +855,17 @@ export default function PullRequestDetails() {
                     : "Analyze PR"}
                 </button>
               </div>
+
+              {isCompletionLoading ? (
+                <>
+                <div className="mx-auto text-center">
+                
+                <TextShimmer className='mx-auto text-center pt-20 font-mono text-lg md:text-xl' duration={1}>
+                  Generating code...
+                </TextShimmer>
+                </div>
+                </>
+              ) : null}
               {ai ? (
                 <>
                   <div className="min-h-80 p-4 sm:p-6 md:p-8 lg:p-10">

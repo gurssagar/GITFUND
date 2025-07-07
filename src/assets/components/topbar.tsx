@@ -67,7 +67,7 @@ export default function Topbar() {
   return (
     <>
       <Suspense fallback={<div>Loading...</div>}>
-      <div className="hidden md:block">
+      <div className="z-50 hidden md:block">
         <div
           className={`dark:bg-[#0a0a0a] bg-white border-b-2 fixed top-0 px-5 py-4 border-b-[1px] border-custom-gray dark:border-custom-dark-gray ${isShrunk ? "w-[calc(100%_-_4rem)]" : "w-[calc(100%_-_16rem)]"} transition-all duration-400 ease-in-out`}
           style={{ transitionProperty: "width, padding" }}
@@ -290,7 +290,7 @@ export default function Topbar() {
               {
                 isMobileNavOpen?
                 <>
-                  <div className="z-50 bg-white   dark:bg-black fixed h-[calc(100%-_64px)] w-full">
+                  <div className="z-50 bg-white   dark:bg-black fixed h-[calc(100%-_64px)] wull">
                     <div>
                       <div className="px-4 flex flex-col h-[calc(100%-_64px)] justify-between">
                                 <div className="">
