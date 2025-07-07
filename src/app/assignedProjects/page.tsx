@@ -719,7 +719,7 @@ export default function Component() {
                               </div>
 
                               {/* Reward Amount */}
-                              <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950 rounded-lg">
+                              <div className="flex items-center gap-2 p-3 bg-neutral-50 dark:bg-neutral-950 rounded-lg">
                                 <Image
                                   src="/pharos_small.png"
                                   width={24}
@@ -728,10 +728,10 @@ export default function Component() {
                                   className="h-5 w-5 lg:h-6 lg:w-6"
                                 />
                                 <div className="min-w-0 flex-1">
-                                  <p className="text-xs lg:text-sm font-medium text-green-800 dark:text-green-200">
+                                  <p className="text-xs lg:text-sm font-medium text-neutral-800 dark:text-neutral-200">
                                     Reward
                                   </p>
-                                  <p className="text-sm lg:text-lg font-bold text-green-900 dark:text-green-100 truncate">
+                                  <p className="text-sm lg:text-lg font-bold text-neutral-900 dark:text-neutral-100 truncate">
                                     {issue.rewardAmount} PHAROS
                                   </p>
                                 </div>

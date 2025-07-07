@@ -11,6 +11,7 @@ import { format } from "date-fns";
 import { useSidebarContext } from "@/assets/components/SidebarContext";
 import { Suspense } from "react";
 import { Icon } from "@iconify/react";
+import Image from "next/image";
 
 interface ProjectData {
   projectOwner: string;
@@ -895,8 +896,8 @@ export default function Project() {
                     <div className="flex gap-2 my-auto">
                       <Icon
                         icon="mdi:alert-circle-outline"
-                        width={16}
-                        height={16}
+                        width={24}
+                        height={24}
                       />
                       <h1 className="text-xl font-bold">Issues</h1>
                     </div>
@@ -909,33 +910,8 @@ export default function Project() {
                           >
                             <div className="flex flex-col lg:flex-row lg:justify-between gap-4">
                               <div className="flex-1">
-                                <div className="flex flex-col sm:flex-row sm:justify-between gap-2">
-                                  <h1 className="text-[18px] font-bold break-words">
-                                    {issue.issue_name}
-                                  </h1>
-                                  <div className="flex gap-2 flex-wrap">
-                                    {issue.priority && (
-                                      <span
-                                        className={` h-fit px-2 py-1 rounded-full text-xs font-medium ${
-                                          issue.priority.toLowerCase() ===
-                                          "hard"
-                                            ? "bg-red-100 text-red-800"
-                                            : issue.priority.toLowerCase() ===
-                                              "medium"
-                                            ? "bg-yellow-100 text-yellow-800"
-                                            : "bg-green-100 text-green-800"
-                                        }`}
-                                      >
-                                        {issue.priority}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-
-                                <div className="flex flex-wrap items-center gap-2 mt-2">
-                                  {projects && issues ? (
-                                    <>
-                                      <a
+                                <div className="flex   gap-2">
+                                  <a
                                         href={`https://github.com/${projects[0]?.projectOwner}/${projects[0]?.project_repository}/issues/${issue.project_issues}`}
                                         className="bg-gray-100 dark:bg-custom-dark-gray rounded-full px-2 py-1 inline-flex items-center"
                                         target="_blank"
@@ -957,6 +933,62 @@ export default function Project() {
                                           />
                                         </svg>
                                       </a>
+                                  <h1 className="text-[18px] font-bold break-words">
+                                    {issue.issue_name}
+                                  </h1>
+                                  {issue.priority && (
+                                      <span
+                                        className={` h-fit px-2 py-1 rounded-full text-xs font-medium ${
+                                          issue.priority.toLowerCase() ===
+                                          "hard"
+                                            ? "bg-red-100 text-red-800"
+                                            : issue.priority.toLowerCase() ===
+                                              "medium"
+                                            ? "bg-yellow-100 text-yellow-800"
+                                            : "bg-green-100 text-green-800"
+                                        }`}
+                                      >
+                                        {issue.priority}
+                                      </span>
+                                    )}
+                                  <div className="flex gap-2 flex-wrap">
+                                    
+                                  </div>
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-2 mt-2">
+                                  {projects && issues ? (
+                                    <>
+                                    <div className="text-neutral-700 dark:text-neutral-300">
+                                    {Math.floor(
+                                      (new Date().getTime() -
+                                        new Date(issue.issue_date).getTime()) /
+                                        (1000 * 60 * 60 * 24)
+                                    )}{" "}
+                                    days ago
+                                    <p className="text-neutral-700 dark:text-neutral-300">
+                                    Assigned to{" "}
+                                    {issue.assignees &&
+                                    issue.assignees.length > 0
+                                      ? issue.assignees
+                                          .slice(0, 2)
+                                          .map(
+                                            (assignee: any, index: number) => (
+                                              <span key={assignee.id}>
+                                                {index > 0 && ", "}
+                                                <span className="px-[3px]">
+                                                  {assignee.login}
+                                                </span>
+                                              </span>
+                                            )
+                                          )
+                                      : "no one"}
+                                    {issue.assignees &&
+                                      issue.assignees.length > 2 &&
+                                      "..."}
+                                  </p>
+                                  </div>
+                                     
                                     </>
                                   ) : (
                                     <></>
@@ -980,38 +1012,19 @@ export default function Project() {
 
                               <div className="flex flex-col gap-2">
                                 <div className="flex flex-col sm:flex-row sm:justify-between gap-2 text-sm">
-                                  <p className="text-neutral-700 dark:text-neutral-300">
-                                    {Math.floor(
-                                      (new Date().getTime() -
-                                        new Date(issue.issue_date).getTime()) /
-                                        (1000 * 60 * 60 * 24)
-                                    )}{" "}
-                                    days ago
-                                  </p>
-                                  <p className="text-neutral-700 dark:text-neutral-300">
-                                    Assigned to{" "}
-                                    {issue.assignees &&
-                                    issue.assignees.length > 0
-                                      ? issue.assignees
-                                          .slice(0, 2)
-                                          .map(
-                                            (assignee: any, index: number) => (
-                                              <span key={assignee.id}>
-                                                {index > 0 && ", "}
-                                                <span className="px-[3px]">
-                                                  {assignee.login}
-                                                </span>
-                                              </span>
-                                            )
-                                          )
-                                      : "no one"}
-                                    {issue.assignees &&
-                                      issue.assignees.length > 2 &&
-                                      "..."}
-                                  </p>
+                                  
+                                  <div className="text-center sm:text-right flex">
+                                    <Image src="/pharos_small.png" alt="Pharos Logo" width={24} height={24} className="mr-2" />
+                                    <div className="dark:text-gray-300 text-xl text-gray-900 font-bold">
+                                      {issue.rewardAmount} 
+                                    </div>
+                                     
+                                  </div>
+                                  
                                 </div>
 
                                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                                  
                                   <div
                                     onClick={() => {
                                       setIssue(true);
@@ -1022,11 +1035,7 @@ export default function Project() {
                                       Contribute Now
                                     </button>
                                   </div>
-                                  <div className="text-center sm:text-right">
-                                    <div className="dark:text-gray-300 text-gray-900 font-bold">
-                                      {issue.rewardAmount} Pharos
-                                    </div>
-                                  </div>
+                                  
                                 </div>
                               </div>
                             </div>
