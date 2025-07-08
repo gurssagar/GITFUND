@@ -38,6 +38,7 @@ interface SignupApiResponse {
     name: string;
     email: string;
     // Add other user properties as needed
+    // Add other user properties as needed
   }>;
   error?: ApiError;
 }
@@ -69,38 +70,97 @@ export default function Login() {
     }, []);
 
 
+    const testimonials =[
+  {
+    key: "1",
+    repoName: "gitfund-web",
+    repoTitle: "GitFund Platform",
+    personName: "alice",
+    date: "2025-07-01"
+  },
+  {
+    key: "2",
+    key: "2",
+    repoName: "api-gateway",
+    repoTitle: "API Gateway Service",
+    personName: "bob-engineer",
+    date: "2025-07-05"
+  },
+  {
+    key: "3",
+    repoName: "auth-service",
+    repoTitle: "Authentication Service",
+    personName: "carol-security",
+    date: "2025-07-07"
+  },
+  {
+    key: "4",
+    repoName: "database-migrator",
+    repoTitle: "Database Migration Tool",
+    personName: "dave-dba",
+    date: "2025-07-09"
+  }
+]
+  const testimonials1=[
+    {
+    key: "4",
+    repoName: "data-visualizer",
+    repoTitle: "Data Visualization Toolkit",
+    personName: "dana-analyst",
+    date: "2025-07-10"
+  },
+  {
+    key: "5",
+    repoName: "mobile-app",
+    repoTitle: "Mobile Application",
+    personName: "emma-dev",
+    date: "2025-07-12"
+  },
+  {
+  key: "6",
+  repoName: "ai-assistant",
+  repoTitle: "AI Coding Assistant",
+  personName: "frank-ai",
+  date: "2025-07-15"
+},
+{
+  key: "8",
+  repoName: "ui-library",
+  repoTitle: "Component UI Library",
+  personName: "henry-designer",
+  date: "2025-07-20"
+}
 
-    const testimonials = [
-  {
-    quote:
-      "It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief, it was the epoch of incredulity, it was the season of Light, it was the season of Darkness, it was the spring of hope, it was the winter of despair.",
-    name: "Charles Dickens",
-    title: "A Tale of Two Cities",
+
+  
+  ]
+  const testiomials2=[
+    {
+    key: "3",
+    repoName: "perf-optimizer",
+    repoTitle: "Performance Optimizer",
+    personName: "charlie-ops",
+    date: "2025-07-08"
   },
   {
-    quote:
-      "To be, or not to be, that is the question: Whether 'tis nobler in the mind to suffer The slings and arrows of outrageous fortune, Or to take Arms against a Sea of troubles, And by opposing end them: to die, to sleep.",
-    name: "William Shakespeare",
-    title: "Hamlet",
-  },
-  {
-    quote: "All that we see or seem is but a dream within a dream.",
-    name: "Edgar Allan Poe",
-    title: "A Dream Within a Dream",
-  },
-  {
-    quote:
-      "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
-    name: "Jane Austen",
-    title: "Pride and Prejudice",
-  },
-  {
-    quote:
-      "Call me Ishmael. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would sail about a little and see the watery part of the world.",
-    name: "Herman Melville",
-    title: "Moby-Dick",
-  },
-];
+  key: "10",
+  repoName: "test-automation",
+  repoTitle: "Test Automation Framework",
+  personName: "jack-qa",
+  date: "2025-07-25"
+},
+{
+  key: "9",
+  repoName: "api-docs",
+  repoTitle: "API Documentation Generator",
+  personName: "ivy-techwriter",
+  date: "2025-07-22"
+}
+
+
+
+  
+  ]
 
     return (
        <>
@@ -108,15 +168,25 @@ export default function Login() {
 
        
         <div>
-            <div className='block lg:flex'>
-                <div className='lg:w-1/2 lg:block hidden bg-black'>
+            <div className='block lg:flex bg-black'>
+                <div className='my-auto lg:flex hidden bg-black'>
                      <InfiniteMovingCards
                       items={testimonials}
                       direction="top"
                       speed="slow"
                     />
+                     <InfiniteMovingCards
+                      items={testimonials1}
+                      direction="top"
+                      speed="slow"
+                    />
+                     <InfiniteMovingCards
+                      items={testiomials2}
+                      direction="top"
+                      speed="slow"
+                    />
                 </div>
-                <div className='lg:w-1/2 my-auto '>
+                <div className='lg:w-[50%] my-auto '>
                     <SignInPage />
                 </div>
                 

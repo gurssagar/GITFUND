@@ -1,0 +1,23 @@
+[
+  {
+    "key": "1",
+    "personName": "alice-dev",
+    "date": "2025-07-01",
+    "repoName": "gitfund-web",
+    "repoTitle": "GitFund Platform"
+  },
+  {
+    "key": "2",
+    "personName": "bob-security",
+    "date": "2025-07-05",
+    "repoName": "security-toolkit",
+    "repoTitle": "Security Scanner"
+  },
+  {
+    "key": "3",
+    "personName": "charlie-ops",
+    "date": "2025-07-08",
+    "repoName": "perf-optimizer",
+    "repoTitle": "Performance Optimizer"
+  }
+]
