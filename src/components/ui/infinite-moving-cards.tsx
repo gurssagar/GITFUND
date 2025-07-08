@@ -2,10 +2,11 @@
 
 import { cn } from "@/lib/utils";
 import React, { useEffect, useState } from "react";
+import "./infinite-moving-cards.css";
 
 export const InfiniteMovingCards = ({
   items,
-  direction = "left",
+  direction = "up",
   speed = "fast",
   pauseOnHover = true,
   className,
@@ -13,10 +14,9 @@ export const InfiniteMovingCards = ({
   items: {
     quote: string;
     name: string;
-    src: string;
-    designation: string;
+    title: string;
   }[];
-  direction?: "left" | "right";
+  direction?: "up" | "down";
   speed?: "fast" | "normal" | "slow";
   pauseOnHover?: boolean;
   className?: string;
@@ -46,7 +46,7 @@ export const InfiniteMovingCards = ({
   }
   const getDirection = () => {
     if (containerRef.current) {
-      if (direction === "left") {
+      if (direction === "down") {
         containerRef.current.style.setProperty(
           "--animation-direction",
           "forwards",
@@ -59,6 +59,7 @@ export const InfiniteMovingCards = ({
       }
     }
   };
+  
   const getSpeed = () => {
     if (containerRef.current) {
       if (speed === "fast") {
@@ -74,21 +75,20 @@ export const InfiniteMovingCards = ({
     <div
       ref={containerRef}
       className={cn(
-        "scroller relative z-20 max-w-7xl overflow-hidden [mask-image:linear-gradient(to_right,transparent,white_20%,white_80%,transparent)]",
+        "scroller relative z-20 max-h-[80vh] overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,white_20%,white_80%,transparent)]",
         className,
       )}
     >
       <ul
         ref={scrollerRef}
         className={cn(
-          "flex w-max min-w-full shrink-0 flex-nowrap gap-4 py-4",
-          start && "animate-scroll",
-          pauseOnHover && "hover:[animation-play-state:paused]",
+          "flex flex-col h-max min-h-full shrink-0 flex-nowrap gap-4 px-4",
+          start && "animate-scroll-vertical",
         )}
       >
         {items.map((item, idx) => (
           <li
-            className="relative w-[350px] max-w-full shrink-0 rounded-2xl border border-b-0 border-zinc-200 bg-[linear-gradient(180deg,#fafafa,#f5f5f5)] px-8 py-6 md:w-[450px] dark:border-zinc-700 dark:bg-[linear-gradient(180deg,#27272a,#18181b)]"
+            className="relative w-[15%] max-w-hello shrink-0 rounded-2xl border border-b-0 border-zinc-200 backdrop-blur-xs px-8 py-6 md:w-[450px] dark:border-zinc-700 dark:bg-[linear-gradient(180deg,#27272a,#18181b)]"
             key={item.name}
           >
             <blockquote>
@@ -105,7 +105,7 @@ export const InfiniteMovingCards = ({
                     {item.name}
                   </span>
                   <span className="text-sm leading-[1.6] font-normal text-neutral-500 dark:text-gray-400">
-                    {item.designation}
+                    {item.title}
                   </span>
                 </span>
               </div>

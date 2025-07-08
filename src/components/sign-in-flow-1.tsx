@@ -8,6 +8,39 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 
 import * as THREE from "three";
 
+import { signIn } from "next-auth/react"
+import { Icon } from '@iconify/react'
+
+interface User {
+  username?: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+}
+
+interface SessionData {
+  user?: User;
+}
+
+interface Session {
+  data?: SessionData | null;
+  status: 'authenticated' | 'unauthenticated' | 'loading';
+}
+
+interface ApiError {
+  message: string;
+  status?: number;
+}
+
+interface SignupApiResponse {
+  users?: Array<{
+    id: string;
+    name: string;
+    email: string;
+    // Add other user properties as needed
+  }>;
+  error?: ApiError;
+}
 type Uniforms = {
   [key: string]: {
     value: number[] | number[][] | number;
@@ -563,7 +596,7 @@ export const SignInPage = ({ className }: SignInPageProps) => {
 
   return (
     <div className={cn("flex w-[100%] flex-col min-h-screen bg-black relative", className)}>
-      <div className="absolute inset-0 z-0">
+      <div className="absolute z-50 inset-0 z-0">
         {/* Initial canvas (forward animation) */}
         {initialCanvasVisible && (
           <div className="absolute inset-0">
@@ -601,7 +634,7 @@ export const SignInPage = ({ className }: SignInPageProps) => {
       </div>
       
       {/* Content Layer */}
-      <div className="relative z-10 flex flex-col flex-1">
+      <div className="relative z-50 flex flex-col flex-1">
         {/* Top navigation */}
         <MiniNavbar />
 
@@ -621,48 +654,25 @@ export const SignInPage = ({ className }: SignInPageProps) => {
                     className="space-y-6 text-center"
                   >
                     <div className="space-y-1">
-                      <h1 className="text-[2.5rem] font-bold leading-[1.1] tracking-tight text-white">Welcome Developer</h1>
-                      <p className="text-[1.8rem] text-white/70 font-light">Your sign in component</p>
+                      <h1 className="text-[2.5rem] font-bold leading-[1.1] tracking-tight text-white">Welcome to GitFund</h1>
+                      <p className="text-lg text-white/70 font-light">Create your account or Login to collaborate on cutting-edge projects, join thriving ecosystems, and bring your ideas to life.</p>
                     </div>
                     
                     
                     <div className="space-y-4">
-                      <button className="backdrop-blur-[2px] w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-full py-3 px-4 transition-colors">
+                      <button onClick={
+                                                  () => {
+                                                      signIn("github")
+                                                      
+                                                  }
+                                                  } className="backdrop-blur-[2px] w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-full py-3 px-4 transition-colors">
                         <span className="text-lg">G</span>
-                        <span>Sign in with Google</span>
+                        <span>Sign in with GitHub</span>
                       </button>
                       
-                      <div className="flex items-center gap-4">
-                        <div className="h-px bg-white/10 flex-1" />
-                        <span className="text-white/40 text-sm">or</span>
-                        <div className="h-px bg-white/10 flex-1" />
-                      </div>
+                
                       
-                      <form onSubmit={handleEmailSubmit}>
-                        <div className="relative">
-                          <input 
-                            type="email" 
-                            placeholder="info@gmail.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full backdrop-blur-[1px] text-white border-1 border-white/10 rounded-full py-3 px-4 focus:outline-none focus:border focus:border-white/30 text-center"
-                            required
-                          />
-                          <button 
-                            type="submit"
-                            className="absolute right-1.5 top-1.5 text-white w-9 h-9 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors group overflow-hidden"
-                          >
-                            <span className="relative w-full h-full block overflow-hidden">
-                              <span className="absolute inset-0 flex items-center justify-center transition-transform duration-300 group-hover:translate-x-full">
-                                →
-                              </span>
-                              <span className="absolute inset-0 flex items-center justify-center transition-transform duration-300 -translate-x-full group-hover:translate-x-0">
-                                →
-                              </span>
-                            </span>
-                          </button>
-                        </div>
-                      </form>
+                      
                     </div>
                     
                     <p className="text-xs text-white/40 pt-10">
