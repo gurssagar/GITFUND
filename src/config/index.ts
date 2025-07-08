@@ -1,9 +1,8 @@
 import { cookieStorage, createStorage } from 'wagmi'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import { sepolia } from '@reown/appkit/networks'
 
 // Get projectId from environment variables with fallback
-export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID || 'demo-project-id';
+export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID ;
 
 // Define the custom Pharos Devnet chain
 const pharosDevnet = {
@@ -19,18 +18,7 @@ const pharosDevnet = {
   },
 };
 
-const PharosTestnet = {
-  id: 97,
-  name: 'Pharos Smart Chain Testnet',
-  nativeCurrency: { name: 'tPharos', symbol: 'tPharos', decimals: 18 },
-  rpcUrls: {
-    default: { http: ['https://bsc-testnet.Pharoschain.org/'] },
-    public: { http: ['https://bsc-testnet.Pharoschain.org/'] },
-  },
-  blockExplorers: {
-    default: { name: 'Binance Smart Chain Testnet', url: 'https://testnet.bscscan.com' },
-  },
-};
+
 
 const pharosTestnet = {
   id: 688688,
@@ -45,7 +33,7 @@ const pharosTestnet = {
   }
 };
 
-export const networks = [sepolia, pharosDevnet, pharosTestnet, PharosTestnet];
+export const networks = [pharosDevnet, pharosTestnet];
 
 // Set up the Wagmi Adapter (Config)
 export const wagmiAdapter = new WagmiAdapter({

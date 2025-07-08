@@ -444,9 +444,10 @@ function MiniNavbar() {
   );
 
   const navLinksData = [
-    { label: 'Manifesto', href: '#1' },
-    { label: 'Careers', href: '#2' },
-    { label: 'Discover', href: '#3' },
+    { label: 'Home', href: '/' },
+    { label: 'Projects', href: '/Browse' },
+    { label: 'Dashboard', href: '/homepage' },
+    { label: 'Create Project', href: '/create-project' }
   ];
 
   const loginButtonElement = (
